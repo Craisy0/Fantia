@@ -1,0 +1,115 @@
+{
+  "lega": {
+    "nome": "Mantra A 10",
+    "partecipanti": 10,
+    "budget_iniziale": 500,
+    "modalita_asta": "random",
+    "utenti_app": ["MN STELVIO", "420 smoke"],
+    "_nota_utenti_app": "Solo queste squadre compaiono come scelta nella schermata 'Chi sei?' — le altre 8 partecipano all'asta (tracciate come al solito) ma nessuno le gestisce da questa app. Aggiungi un nome qui se una terza persona inizia a usarla."
+  },
+  "regole_punteggio": {
+    "gol_fatto": 3,
+    "assist": 1,
+    "ammonizione": -0.5,
+    "espulsione": -1,
+    "rigore_segnato": 3,
+    "rigore_sbagliato": -3,
+    "rigore_parato": 3,
+    "gol_subito_portiere": -1,
+    "autogol": -2,
+    "imbattibilita_portiere": 0.5,
+    "modificatore_difesa": {
+      "soglia_media": 7.0,
+      "bonus_min": 1,
+      "bonus_max": 3,
+      "note": "Bonus di reparto quando la media voto della difesa schierata (i difensori mandati in campo della STESSA squadra Serie A, non i tuoi) supera 7 in una giornata: scala da +1 a +3 in base a quanto la supera. Le soglie esatte delle fasce intermedie vanno confermate sul regolamento ufficiale della lega: modifica questo blocco quando le hai."
+    },
+    "_nota": "Valori standard Mantra per gol/assist/ammonizioni/rigori: confermali col regolamento della lega, sono precompilati sui default piu' comuni."
+  },
+  "rosa": {
+    "slot_liberi": true,
+    "totale_giocatori": 25,
+    "target_per_reparto": { "POR": 3, "DIF": 8, "CEN": 8, "ATT": 6 },
+    "_nota": "Struttura standard Mantra 3-8-8-6. Con gli slot liberi la squadra puo' schierare moduli diversi a ogni giornata, ma servono abbastanza giocatori per ogni ruolo lettera (Por/Dc/B/Ds/Dd/E/M/C/W/T/A/Pc) per coprire i moduli che vuoi usare."
+  },
+  "budget_strategy": {
+    "target_pct": { "POR": 8, "DIF": 24, "CEN": 30, "ATT": 38 },
+    "_nota": "Aggiornato con la chiusura del mercato (3 settembre 2026): split ricalcolato sui prezzi mediani di 534 giocatori, aggregati da 17 fonti/listoni diversi (18 file forniti, uno escluso perche' senza prezzi). Mercato puro: POR 8.9%, DIF 20.4%, CEN 33.4%, ATT 37.3% (somma dei 534 prezzi mediani: 5092 crediti, molto vicina a 10 squadre x 500 = 5000, buona calibrazione). Tenuta la quota DIF alzata (20.4% -> 24%) rispetto al mercato puro perche' il modificatore difesa (fino a +3 a giornata) premia chi ha una linea difensiva forte e coerente, cosa che il prezzo di mercato da solo non cattura."
+  },
+  "moduli": [
+    { "nome": "3-4-3", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Dc"], ["Dc"], ["Dc", "B"]] },
+      { "top": 48, "slot": [["E"], ["M", "C"], ["C"], ["E"]] },
+      { "top": 16, "slot": [["W", "A"], ["A", "Pc"], ["W", "A"]] }
+    ]},
+    { "nome": "3-4-1-2", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Dc"], ["Dc"], ["Dc", "B"]] },
+      { "top": 50, "slot": [["E"], ["M", "C"], ["C"], ["E"]] },
+      { "top": 30, "slot": [["T"]] },
+      { "top": 12, "slot": [["A", "Pc"], ["A", "Pc"]] }
+    ]},
+    { "nome": "3-4-2-1", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Dc"], ["Dc"], ["Dc", "B"]] },
+      { "top": 50, "slot": [["E"], ["M"], ["M", "C"], ["E", "W"]] },
+      { "top": 30, "slot": [["T"], ["T", "A"]] },
+      { "top": 12, "slot": [["A", "Pc"]] }
+    ]},
+    { "nome": "3-5-2", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Dc"], ["Dc"], ["Dc", "B"]] },
+      { "top": 46, "slot": [["E"], ["M"], ["M", "C"], ["C"], ["E", "W"]] },
+      { "top": 16, "slot": [["A", "Pc"], ["A", "Pc"]] }
+    ]},
+    { "nome": "3-5-1-1", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Dc"], ["Dc"], ["Dc", "B"]] },
+      { "top": 48, "slot": [["E", "W"], ["M"], ["M"], ["C"], ["E", "W"]] },
+      { "top": 28, "slot": [["T", "A"]] },
+      { "top": 12, "slot": [["A", "Pc"]] }
+    ]},
+    { "nome": "4-3-3", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Ds"], ["Dc"], ["Dc"], ["Dd"]] },
+      { "top": 48, "slot": [["M"], ["M", "C"], ["C"]] },
+      { "top": 16, "slot": [["W", "A"], ["A", "Pc"], ["W", "A"]] }
+    ]},
+    { "nome": "4-3-1-2", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Ds"], ["Dc"], ["Dc"], ["Dd"]] },
+      { "top": 50, "slot": [["M"], ["M", "C"], ["C"]] },
+      { "top": 30, "slot": [["T"]] },
+      { "top": 12, "slot": [["T", "A", "Pc"], ["A", "Pc"]] }
+    ]},
+    { "nome": "4-4-2", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Ds"], ["Dc"], ["Dc"], ["Dd"]] },
+      { "top": 46, "slot": [["E"], ["M", "C"], ["C"], ["E", "W"]] },
+      { "top": 16, "slot": [["A", "Pc"], ["A", "Pc"]] }
+    ]},
+    { "nome": "4-1-4-1", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Ds"], ["Dc"], ["Dc"], ["Dd"]] },
+      { "top": 54, "slot": [["M"]] },
+      { "top": 36, "slot": [["C", "T"], ["T"], ["E", "W"], ["W"]] },
+      { "top": 14, "slot": [["A", "Pc"]] }
+    ]},
+    { "nome": "4-4-1-1", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Ds"], ["Dc"], ["Dc"], ["Dd"]] },
+      { "top": 48, "slot": [["E", "W"], ["M"], ["C"], ["E", "W"]] },
+      { "top": 28, "slot": [["T", "A"]] },
+      { "top": 12, "slot": [["A", "Pc"]] }
+    ]},
+    { "nome": "4-2-3-1", "linee": [
+      { "top": 90, "slot": [["Por"]] },
+      { "top": 72, "slot": [["Ds"], ["Dc"], ["Dc"], ["Dd"]] },
+      { "top": 54, "slot": [["M"], ["M", "C"]] },
+      { "top": 34, "slot": [["W", "T"], ["T"], ["W", "A"]] },
+      { "top": 14, "slot": [["A", "Pc"]] }
+    ]}
+  ],
+  "_nota_moduli": "Gli 11 moduli ufficiali del regolamento Mantra (nessuna difesa a 5), ruoli slot-per-slot presi ESATTAMENTE dal PDF ufficiale fantacalcio.it 'Tabella sostituzioni per schema' (content.fantacalcio.it/web/risorse/Tabella-sostituzioni-per-schema-2024-2025.pdf) — le colonne di quella tabella sono i ruoli titolari richiesti da ogni schema, corretti qui rispetto a una prima versione derivata per coerenza che aveva alcuni slot imprecisi (es. il terzo difensore nei moduli a 3 accetta anche B, non solo Dc; diversi slot centrocampo/trequarti avevano flessibilita' diversa dall'originale). Ogni slot elenca i ruoli letterali ammessi (es. ['W','A'] = W o A titolare in quello slot, senza malus)."
+}

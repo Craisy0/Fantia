@@ -1,0 +1,34 @@
+{
+ "squadre": [
+  "MN STELVIO",
+  "420 smoke",
+  "Team 3",
+  "Team 4",
+  "Team 5",
+  "Team 6",
+  "Team 7",
+  "Team 8",
+  "Team 9",
+  "Team 10"
+ ],
+ "picks": {},
+ "log": [],
+ "per_squadra": {
+  "MN STELVIO": {
+   "obiettivi": {},
+   "note_giocatore": {},
+   "formazione": {
+    "modulo": "3-5-2",
+    "slot": {}
+   }
+  },
+  "420 smoke": {
+   "obiettivi": {},
+   "note_giocatore": {},
+   "formazione": {
+    "modulo": "4-3-3",
+    "slot": {}
+   }
+  }
+ }
+}

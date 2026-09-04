@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Asta Mantra — Regia Live</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <h1><span class="dot"></span> Asta Mantra</h1>
+    <div class="budget-stats" id="budgetStats"></div>
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Cerca giocatore… ( / )" autocomplete="off" />
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <button class="identity-badge" id="identityBadge" title="Cambia identità"></button>
+  </header>
+
+  <div class="last-move" id="lastMove"></div>
+
+  <nav class="tabs">
+    <button data-tab="players" class="active">Giocatori</button>
+    <button data-tab="roster">La mia squadra</button>
+    <button data-tab="teams">Tutte le squadre</button>
+    <button data-tab="log">Log asta</button>
+    <button data-tab="settings">Impostazioni</button>
+  </nav>
+
+  <main>
+    <div class="sidebar" id="sidebar">
+      <h3>Reparto</h3>
+      <div class="chip-group" id="filterReparto"></div>
+
+      <h3>Ruolo</h3>
+      <div class="chip-group" id="filterRuolo"></div>
+
+      <h3>Stato</h3>
+      <div class="chip-group" id="filterStato"></div>
+
+      <h3>Fascia</h3>
+      <select id="filterTier"></select>
+
+      <h3>Ordina per</h3>
+      <select id="sortBy">
+        <option value="prezzo_stimato">Prezzo stimato</option>
+        <option value="fmv">FMV (voto atteso)</option>
+        <option value="nome">Nome</option>
+      </select>
+
+      <h3>&nbsp;</h3>
+      <button class="btn small" id="resetFiltersBtn">Azzera filtri</button>
+    </div>
+
+    <div class="content" id="content">
+      <!-- tab views injected here -->
+    </div>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<div class="player-popup" id="playerPopup"></div>
+<div class="slot-picker" id="slotPicker"></div>
+<div class="identity-overlay" id="identityOverlay">
+  <div class="identity-box">
+    <h2>Chi sei?</h2>
+    <p class="small-muted">Ogni squadra ha la propria rosa, obiettivi e formazione — se condividi questa app con qualcun altro sulla stessa asta, scegliete identità diverse così non vi sovrascrivete a vicenda.</p>
+    <div id="identityList" class="identity-list"></div>
+    <div class="identity-new">
+      <input type="text" id="identityNewInput" placeholder="Oppure scrivi il nome della tua squadra…" />
+      <button class="btn primary" id="identityNewBtn">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
