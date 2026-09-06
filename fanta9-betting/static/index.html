@@ -73,6 +73,20 @@ Squadra 2; 58
 
         <hr>
 
+        <h2>Inserisci proiezioni FantaLab (pre-giornata)</h2>
+        <p class="hint">Prima che inizi la giornata, apri su FantaLab la formazione consigliata di ogni squadra e incolla una riga per squadra con la <b>Fanta Media Proiettata Titolari</b> (e, se vuoi tenerne traccia, l'Indice di Schierabilità Medio): <code>Nome Squadra; Fanta Media Proiettata; Indice Schierabilità</code>. Se per una squadra c'è una proiezione per questa giornata, viene usata al posto della media storica per calcolare le quote del testa a testa qui sotto.</p>
+        <input type="number" id="proiezioni-giornata" placeholder="Numero giornata" min="1">
+        <textarea id="proiezioni-testo" rows="9" placeholder="Davide; 64.3; 8.0
+Cucca; 58.1; 6.4
+..."></textarea>
+        <div class="riga-bottoni">
+          <button id="btn-anteprima-proiezioni">Controlla</button>
+          <button id="btn-conferma-proiezioni" disabled>Salva proiezioni</button>
+        </div>
+        <div id="proiezioni-risultato"></div>
+
+        <hr>
+
         <h2>Crea scommessa testa a testa (1X2 + Over/Under)</h2>
         <div class="riga-form">
           <select id="h2h-squadra-a"></select>

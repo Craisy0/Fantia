@@ -335,6 +335,37 @@
     });
   }
 
+  const FONTE_LABEL = {
+    proiezione_fantalab: 'proiezione FantaLab di questa giornata',
+    media_storica: 'media delle giornate storiche importate',
+    default: 'valore di default (nessun dato disponibile)',
+  };
+
+  function initProiezioni() {
+    el('#btn-anteprima-proiezioni').addEventListener('click', async () => {
+      const testo = el('#proiezioni-testo').value;
+      const r = await post('/api/admin/anteprima-import-proiezioni', { admin_password: adminPassword(), testo });
+      const cont = el('#proiezioni-risultato');
+      if (r.errore) { cont.innerHTML = `<p class="errore">${escapeHtml(r.errore)}</p>`; return; }
+      const tuttoOk = r.righe.every(x => x.ok);
+      cont.innerHTML = r.righe.map(x => x.ok
+        ? `<div>✅ ${escapeHtml(x.squadra)}: ${x.punti_proiettati} punti proiettati${x.indice_schierabilita != null ? ' (I.S. ' + x.indice_schierabilita + ')' : ''}</div>`
+        : `<div class="errore">❌ "${escapeHtml(x.riga)}" — ${escapeHtml(x.errore)}</div>`).join('');
+      el('#btn-conferma-proiezioni').disabled = !tuttoOk || !r.righe.length;
+    });
+    el('#btn-conferma-proiezioni').addEventListener('click', async () => {
+      const giornata = Number(el('#proiezioni-giornata').value);
+      const testo = el('#proiezioni-testo').value;
+      if (!giornata) { alert('Indica il numero di giornata.'); return; }
+      const r = await post('/api/admin/importa-proiezioni', { admin_password: adminPassword(), giornata, testo });
+      if (r.errore) { alert(r.errore); return; }
+      alert('Proiezioni salvate: verranno usate per calcolare le quote dei testa a testa di questa giornata.');
+      el('#proiezioni-testo').value = '';
+      el('#proiezioni-risultato').innerHTML = '';
+      el('#btn-conferma-proiezioni').disabled = true;
+    });
+  }
+
   function initH2H() {
     let ultimaAnteprima = null;
     el('#btn-anteprima-h2h').addEventListener('click', async () => {
@@ -349,7 +380,10 @@
       if (r.errore) { cont.innerHTML = `<p class="errore">${escapeHtml(r.errore)}</p>`; el('#btn-pubblica-h2h').classList.add('hidden'); return; }
       ultimaAnteprima = r;
       cont.innerHTML = `
-        <p class="hint">Media gol equivalenti stimata: ${escapeHtml(squadra_a)} = ${r.lambda_a}, ${escapeHtml(squadra_b)} = ${r.lambda_b}</p>
+        <p class="hint">
+          ${escapeHtml(squadra_a)}: ${r.lambda_a} gol attesi (fonte: ${FONTE_LABEL[r.fonte_a] || r.fonte_a})<br>
+          ${escapeHtml(squadra_b)}: ${r.lambda_b} gol attesi (fonte: ${FONTE_LABEL[r.fonte_b] || r.fonte_b})
+        </p>
         <p><b>1X2</b>: 1 → ${r['1x2'].quota_1.toFixed(2)} · X → ${r['1x2'].quota_x.toFixed(2)} · 2 → ${r['1x2'].quota_2.toFixed(2)}</p>
         <p><b>Over/Under</b>: ${r.over_under.map(o => `linea ${o.linea} (Over ${o.quota_over.toFixed(2)} / Under ${o.quota_under.toFixed(2)})`).join(' · ')}</p>`;
       el('#btn-pubblica-h2h').classList.remove('hidden');
@@ -421,6 +455,7 @@
     initIdentita();
     initAdminLogin();
     initImportPunti();
+    initProiezioni();
     initH2H();
     initCustom();
     initCorrezioneSaldo();

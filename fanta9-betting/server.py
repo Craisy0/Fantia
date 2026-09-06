@@ -55,11 +55,24 @@ def now_str():
 # ---------------------------------------------------------------------------
 
 def punti_a_gol(punti, formula):
+    """Conversione 'ufficiale' punti->gol usata per liquidare le scommesse a fine giornata
+    (deve restare un numero intero: il risultato reale e' un numero intero di gol equivalenti)."""
     soglia = formula['soglia']
     ogni = formula['ogni_punti']
     if punti is None or punti < soglia:
         return 0
     return 1 + int((punti - soglia) // ogni)
+
+
+def punti_a_gol_continuo(punti, formula):
+    """Stessa formula ma senza lo scalino (retta continua), usata solo per stimare il lambda
+    di Poisson pre-partita da una proiezione: evita un salto brusco delle quote attorno alla soglia
+    (es. 65.9 proiettati non deve valere 'zero gol attesi' contro 66.0 che ne vale uno pieno)."""
+    soglia = formula['soglia']
+    ogni = formula['ogni_punti']
+    if punti is None:
+        return None
+    return max(0.0, (punti - soglia) / ogni + 1.0)
 
 
 def poisson_pmf(k, lam):
@@ -132,6 +145,7 @@ class Store:
         for sq in squadre:
             self.state['saldi'].setdefault(sq, saldo_iniziale)
             self.state['storico_punti'].setdefault(sq, [])
+            self.state.setdefault('proiezioni', {}).setdefault(sq, [])
 
     def _log(self, testo):
         self.state.setdefault('log', []).append({'ts': now_str(), 'testo': testo})
@@ -215,21 +229,98 @@ class Store:
                 return voce['punti']
         return None
 
+    # -- proiezioni pre-giornata (da FantaLab: formazione consigliata / fanta media proiettata titolari) --
+
+    @staticmethod
+    def _parse_riga_proiezione(riga):
+        """'Nome; punti_proiettati[; indice_schierabilita opzionale]'."""
+        riga = riga.strip()
+        if not riga:
+            return None
+        parti = re.split(r'\t|;|,(?!\d)|\s{2,}', riga)
+        parti = [p.strip() for p in parti if p.strip()]
+        if len(parti) < 2:
+            return None
+        nome = parti[0]
+        numeri = []
+        for token in parti[1:]:
+            m = re.search(r'-?\d+([.,]\d+)?', token)
+            if m:
+                numeri.append(float(m.group().replace(',', '.')))
+        if not numeri:
+            return None
+        punti_proiettati = numeri[0]
+        indice_schierabilita = numeri[1] if len(numeri) > 1 else None
+        return nome, punti_proiettati, indice_schierabilita
+
+    def anteprima_import_proiezioni(self, testo):
+        righe = [r for r in testo.splitlines() if r.strip()]
+        risultati = []
+        for riga in righe:
+            parsed = self._parse_riga_proiezione(riga)
+            if not parsed:
+                risultati.append({'riga': riga, 'ok': False, 'errore': 'formato non riconosciuto'})
+                continue
+            nome_raw, punti_proiettati, indice_schierabilita = parsed
+            squadra = self._match_squadra(nome_raw)
+            if not squadra:
+                risultati.append({'riga': riga, 'ok': False, 'errore': f'squadra non riconosciuta: "{nome_raw}"'})
+                continue
+            risultati.append({'riga': riga, 'ok': True, 'squadra': squadra,
+                               'punti_proiettati': punti_proiettati, 'indice_schierabilita': indice_schierabilita})
+        return risultati
+
+    def importa_proiezioni(self, giornata, testo):
+        risultati = self.anteprima_import_proiezioni(testo)
+        non_ok = [r for r in risultati if not r['ok']]
+        if non_ok:
+            return {'errore': 'alcune righe non sono state riconosciute, correggi il testo prima di confermare',
+                    'dettagli': non_ok}
+        for r in risultati:
+            proiezioni = self.state.setdefault('proiezioni', {}).setdefault(r['squadra'], [])
+            proiezioni[:] = [voce for voce in proiezioni if voce['giornata'] != giornata]
+            proiezioni.append({'giornata': giornata, 'punti_proiettati': r['punti_proiettati'],
+                                'indice_schierabilita': r['indice_schierabilita']})
+            proiezioni.sort(key=lambda v: v['giornata'])
+        self._log(f"Importate proiezioni FantaLab giornata {giornata}: " +
+                   ", ".join(f"{r['squadra']}={r['punti_proiettati']}" for r in risultati))
+        self.save()
+        return {'ok': True, 'importati': risultati}
+
+    def proiezione_giornata(self, squadra, giornata):
+        for voce in self.state.get('proiezioni', {}).get(squadra, []):
+            if voce['giornata'] == giornata:
+                return voce['punti_proiettati']
+        return None
+
     # -- motore quote --------------------------------------------------------
 
-    def stima_lambda(self, squadra, escludi_giornata=None):
+    def stima_lambda_storico(self, squadra, escludi_giornata=None):
         formula = self.config['formula_gol']
         storico = self.state['storico_punti'].get(squadra, [])
         gol = [punti_a_gol(v['punti'], formula) for v in storico if v['giornata'] != escludi_giornata]
         gol = gol[-8:]
         if not gol:
-            return self.config['quote']['lambda_default']
+            return None
         m = sum(gol) / len(gol)
         return max(m, 0.15)
 
+    def stima_lambda_con_fonte(self, squadra, giornata):
+        """Preferisce la proiezione FantaLab della giornata (specifica, aggiornata su formazione/forma/
+        infortuni); se manca usa la media storica delle giornate gia' importate; se manca anche quella,
+        il default di config. Ritorna (lambda, fonte) cosi' l'admin vede da dove viene la stima."""
+        formula = self.config['formula_gol']
+        proiezione = self.proiezione_giornata(squadra, giornata)
+        if proiezione is not None:
+            return max(punti_a_gol_continuo(proiezione, formula), 0.15), 'proiezione_fantalab'
+        lam_storico = self.stima_lambda_storico(squadra, escludi_giornata=giornata)
+        if lam_storico is not None:
+            return lam_storico, 'media_storica'
+        return self.config['quote']['lambda_default'], 'default'
+
     def anteprima_h2h(self, squadra_a, squadra_b, giornata):
-        lam_a = self.stima_lambda(squadra_a, escludi_giornata=giornata)
-        lam_b = self.stima_lambda(squadra_b, escludi_giornata=giornata)
+        lam_a, fonte_a = self.stima_lambda_con_fonte(squadra_a, giornata)
+        lam_b, fonte_b = self.stima_lambda_con_fonte(squadra_b, giornata)
         margine = self.config['quote']['margine_bookmaker']
         max_gol = self.config['quote']['max_gol_simulati']
         p1, px, p2 = calcola_probabilita_1x2(lam_a, lam_b, max_gol)
@@ -245,6 +336,7 @@ class Store:
         return {
             'squadra_a': squadra_a, 'squadra_b': squadra_b, 'giornata': giornata,
             'lambda_a': round(lam_a, 2), 'lambda_b': round(lam_b, 2),
+            'fonte_a': fonte_a, 'fonte_b': fonte_b,
             '1x2': {
                 'quota_1': quota_da_probabilita(p1, margine),
                 'quota_x': quota_da_probabilita(px, margine),
@@ -477,12 +569,16 @@ class Store:
             return {'errore': f'il numero di squadre non puo\' cambiare (deve restare {len(self.squadre())})'}
         nuovi_saldi = {}
         nuovo_storico = {}
+        nuove_proiezioni = {}
         for vecchio, saldo in self.state['saldi'].items():
             nuovo_nome = rename_map.get(vecchio, vecchio)
             nuovi_saldi[nuovo_nome] = saldo
         for vecchio, storico in self.state['storico_punti'].items():
             nuovo_nome = rename_map.get(vecchio, vecchio)
             nuovo_storico[nuovo_nome] = storico
+        for vecchio, proiezioni in self.state.get('proiezioni', {}).items():
+            nuovo_nome = rename_map.get(vecchio, vecchio)
+            nuove_proiezioni[nuovo_nome] = proiezioni
         for m in self.state['mercati']:
             if m.get('squadra_a') in rename_map:
                 m['squadra_a'] = rename_map[m['squadra_a']]
@@ -493,6 +589,7 @@ class Store:
                 s['squadra'] = rename_map[s['squadra']]
         self.state['saldi'] = nuovi_saldi
         self.state['storico_punti'] = nuovo_storico
+        self.state['proiezioni'] = nuove_proiezioni
         self.config['lega']['squadre'] = nuove_squadre
         save_json_atomic(CONFIG_PATH, self.config)
         self._log(f"Squadre rinominate: {rename_map}")
@@ -651,6 +748,13 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/importa-punti':
                     r = STORE.importa_punti(body.get('giornata'), body.get('testo', ''))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/anteprima-import-proiezioni':
+                    self._send_json({'righe': STORE.anteprima_import_proiezioni(body.get('testo', ''))})
+                    return
+                if path == '/api/admin/importa-proiezioni':
+                    r = STORE.importa_proiezioni(body.get('giornata'), body.get('testo', ''))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/crea-mercato-h2h':

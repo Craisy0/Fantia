@@ -19,7 +19,21 @@ Modificabile in `config.json` → `formula_gol`.
 
 ### Quote automatiche
 
-Per ogni testa a testa, il sistema stima quanti "gol equivalenti" fa in media ciascuna squadra (media degli ultimi 8 turni disponibili, o un valore di default se non c'è storico), poi calcola le probabilità di 1/X/2 e di Over/Under con un modello di Poisson (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), e infila un margine da bookmaker (7% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali. Più storico importi giornata per giornata, più le quote diventano rappresentative.
+Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, poi calcola le probabilità di 1/X/2 e di Over/Under con un modello di Poisson (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), e infila un margine da bookmaker (7% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali.
+
+La stima dei gol attesi di una squadra per una giornata, in ordine di priorità:
+
+1. **Proiezione FantaLab di quella giornata specifica**, se l'hai importata (vedi sotto) — la fonte più affidabile perché tiene già conto di formazione, forma recente, infortuni/squalifiche.
+2. Altrimenti, **la media delle giornate storiche** già importate (fino alle ultime 8).
+3. Altrimenti (nessun dato, es. inizio stagione), **un valore di default** (`config.json` → `quote.lambda_default`).
+
+Il tab Admin ti dice sempre da quale delle tre fonti provengono le quote proposte, prima che tu le pubblichi.
+
+#### Proiezioni pre-giornata da FantaLab (semi-automatico)
+
+Prima della chiusura di ogni giornata, apri la formazione consigliata di ciascuna squadra su FantaLab e leggi il riquadro "recap": ti interessa la **Fanta Media Proiettata Titolari** (es. 64.3) — è già una proiezione del punteggio fantacalcio che quella squadra farà con la formazione ottimale suggerita, tenendo conto di tutto quello che FantaLab sa (indice di schierabilità dei singoli giocatori, forma, calendario). Incolla questi numeri nel tab Admin → "Inserisci proiezioni FantaLab" (una riga per squadra: `Nome; Fanta Media Proiettata; Indice Schierabilità` — il terzo valore è opzionale, solo per tenerne traccia). Da lì in poi, quando crei un testa a testa per quella giornata, le quote vengono calcolate direttamente sulla differenza tra le due proiezioni — è la versione automatizzata di quello che facevi a mano confrontando i due numeri e ricavando una quota "a occhio": qui il modello di Poisson traduce la differenza di forza in probabilità precise invece di una stima soggettiva.
+
+Non serve più aspettare che si accumuli storico per avere quote sensate: fin dalla prima giornata, se importi le proiezioni, le quote si basano su dati reali di quella settimana.
 
 Le scommesse "libere" (outright, prop bet custom) non hanno una formula automatica valida in generale: tu inserisci titolo, esiti e quote a mano nel tab Admin.
 
@@ -73,7 +87,9 @@ Consigliato **Render** (piano free):
 | `GET /api/mercati` | tutti i mercati (aperti/chiusi/risolti) |
 | `GET /api/classifica` | classifica fantamilioni |
 | `POST /api/scommessa {squadra, mercato_id, esito, importo}` | piazza una giocata |
-| `GET /api/admin/anteprima-h2h?admin_password=&squadra_a=&squadra_b=&giornata=` | calcola le quote di un testa a testa senza pubblicarlo |
+| `GET /api/admin/anteprima-h2h?admin_password=&squadra_a=&squadra_b=&giornata=` | calcola le quote di un testa a testa senza pubblicarlo (indica anche la fonte del lambda usato) |
+| `POST /api/admin/anteprima-import-proiezioni {admin_password, testo}` | controlla il parsing delle proiezioni FantaLab senza salvare |
+| `POST /api/admin/importa-proiezioni {admin_password, giornata, testo}` | salva le proiezioni pre-giornata usate per calcolare le quote |
 | `POST /api/admin/crea-mercato-h2h {admin_password, squadra_a, squadra_b, giornata}` | pubblica 1X2 + Over/Under per un incontro |
 | `POST /api/admin/crea-mercato-custom {admin_password, titolo, esiti:[{label,quota}], giornata}` | pubblica una scommessa libera |
 | `POST /api/admin/anteprima-import-punti {admin_password, testo}` | controlla il parsing dei punteggi senza salvare |
