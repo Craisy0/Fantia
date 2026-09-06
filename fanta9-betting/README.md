@@ -1,6 +1,6 @@
 # Fanta 9 — Scommesse
 
-Pagina web per scommesse virtuali in fantamilioni tra le 9 squadre della tua lega, con quote calcolate automaticamente (modello Poisson, come i bookmaker reali) e scommesse libere gestite da te come admin.
+Pagina web per scommesse virtuali in fantamilioni tra le 10 squadre della tua lega (Davide, Giammi, Nando, Luca, Cucca, Ale, Fili, Cri, Rota, Giorgio), con quote calcolate automaticamente (modello Poisson, come i bookmaker reali) e scommesse libere gestite da te come admin.
 
 ## Come funziona
 
@@ -54,7 +54,7 @@ Consigliato **Render** (piano free):
 
 ## Prima di condividere il link con i compagni
 
-1. Rinomina le 9 squadre con i nomi reali (tab Admin, o modifica `config.json` → `lega.squadre` prima del deploy).
+1. Le 10 squadre sono già impostate con i nomi reali (Davide, Giammi, Nando, Luca, Cucca, Ale, Fili, Cri, Rota, Giorgio); se qualcuno cambia, rinomina dal tab Admin o modificando `config.json` → `lega.squadre`.
 2. Cambia la password admin di default (`cambiami123`).
 3. Decidi il saldo iniziale di fantamilioni se 1000 non ti convince.
 
@@ -82,6 +82,6 @@ Consigliato **Render** (piano free):
 | `POST /api/admin/risolvi-mercato {admin_password, mercato_id, esito_vincente}` | liquidazione manuale (per le scommesse libere) |
 | `POST /api/admin/elimina-mercato {admin_password, mercato_id}` | elimina un mercato senza giocate |
 | `POST /api/admin/correggi-saldo {admin_password, squadra, delta, motivo}` | aggiustamento manuale di un saldo |
-| `POST /api/admin/rinomina-squadre {admin_password, squadre:[...], rename_map:{vecchio:nuovo}}` | rinomina le 9 squadre |
+| `POST /api/admin/rinomina-squadre {admin_password, squadre:[...], rename_map:{vecchio:nuovo}}` | rinomina le squadre |
 | `POST /api/admin/cambia-password {admin_password, nuova_password}` | cambia la password admin |
 | `GET /api/export` | backup completo di stato + configurazione |

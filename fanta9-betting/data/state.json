@@ -1,13 +1,11 @@
 {
   "saldi": {
-    "Squadra 1": 1000, "Squadra 2": 1000, "Squadra 3": 1000, "Squadra 4": 1000,
-    "Squadra 5": 1000, "Squadra 6": 1000, "Squadra 7": 1000, "Squadra 8": 1000,
-    "Squadra 9": 1000
+    "Davide": 1000, "Giammi": 1000, "Nando": 1000, "Luca": 1000, "Cucca": 1000,
+    "Ale": 1000, "Fili": 1000, "Cri": 1000, "Rota": 1000, "Giorgio": 1000
   },
   "storico_punti": {
-    "Squadra 1": [], "Squadra 2": [], "Squadra 3": [], "Squadra 4": [],
-    "Squadra 5": [], "Squadra 6": [], "Squadra 7": [], "Squadra 8": [],
-    "Squadra 9": []
+    "Davide": [], "Giammi": [], "Nando": [], "Luca": [], "Cucca": [],
+    "Ale": [], "Fili": [], "Cri": [], "Rota": [], "Giorgio": []
   },
   "mercati": [],
   "scommesse": [],

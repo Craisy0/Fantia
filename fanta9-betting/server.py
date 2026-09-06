@@ -474,7 +474,7 @@ class Store:
 
     def rinomina_squadre(self, nuove_squadre, rename_map):
         if len(nuove_squadre) != len(self.squadre()):
-            return {'errore': 'il numero di squadre non puo\' cambiare (deve restare 9)'}
+            return {'errore': f'il numero di squadre non puo\' cambiare (deve restare {len(self.squadre())})'}
         nuovi_saldi = {}
         nuovo_storico = {}
         for vecchio, saldo in self.state['saldi'].items():
