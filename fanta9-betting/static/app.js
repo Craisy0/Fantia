@@ -42,7 +42,7 @@
   }
 
   function renderTutto() {
-    el('#nome-lega').textContent = stato.lega || 'Fanta 9';
+    el('#nome-lega').textContent = stato.lega || 'Gottabet';
     renderIdentita();
     renderSquadreOptions();
     renderMercati();

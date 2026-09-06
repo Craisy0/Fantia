@@ -1,5 +1,5 @@
 """
-Fanta 9 - Scommesse tra amici
+Gottabet - Scommesse tra amici della lega GOTTA
 Solo libreria standard: nessuna dipendenza da installare.
 
 Avvio:  python server.py [porta]   (default porta 8765, o $PORT se impostata dall'hosting)
@@ -620,7 +620,7 @@ STORE = Store()
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "Fanta9Betting/1.0"
+    server_version = "Gottabet/1.0"
 
     def log_message(self, fmt, *args):
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
@@ -803,7 +803,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get('PORT', 8765))
     server = ThreadingHTTPServer(('0.0.0.0', port), Handler)
-    print(f"Fanta 9 Scommesse in ascolto su http://0.0.0.0:{port}")
+    print(f"Gottabet in ascolto su http://0.0.0.0:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

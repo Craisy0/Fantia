@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: fanta9-scommesse
+    name: gottabet
     runtime: python
     plan: free
     rootDir: fanta9-betting

@@ -1,6 +1,6 @@
-# Fanta 9 — Scommesse
+# Gottabet — Scommesse della lega GOTTA
 
-Pagina web per scommesse virtuali in fantamilioni tra le 10 squadre della tua lega (Davide, Giammi, Nando, Luca, Cucca, Ale, Fili, Cri, Rota, Giorgio), con quote calcolate automaticamente (modello Poisson, come i bookmaker reali) e scommesse libere gestite da te come admin.
+Pagina web per scommesse virtuali in fantamilioni tra le 10 squadre della lega GOTTA (Davide, Giammi, Nando, Luca, Cucca, Ale, Fili, Cri, Rota, Giorgio), con quote calcolate automaticamente (modello Poisson, come i bookmaker reali) e scommesse libere gestite da te come admin.
 
 ## Come funziona
 
@@ -59,7 +59,7 @@ Consigliato **Render** (piano free):
 4. **Runtime**: Python 3
 5. **Build Command**: (lascialo vuoto, non ci sono dipendenze)
 6. **Start Command**: `python server.py`
-7. Deploy. Render ti darà un URL pubblico tipo `https://fanta9-scommesse.onrender.com` da condividere con i compagni.
+7. Deploy. Render ti darà un URL pubblico tipo `https://gottabet.onrender.com` da condividere con i compagni.
 
 **Attenzione — limite del piano gratuito**: i Web Service gratuiti di Render non hanno un disco persistente garantito: i dati (`data/state.json`) possono azzerarsi a un nuovo deploy o dopo lunga inattività. Per una lega tra amici che gioca per una stagione, il rischio più concreto è perdere storico/saldi se rifai un deploy — per sicurezza:
 - Non serve un deploy ogni giornata (basta il primo), quindi in pratica i dati restano stabili finché non tocchi il codice.
