@@ -1,19 +1,108 @@
 {
-  "saldi": {
-    "Davide": 1000, "Giammi": 1000, "Nando": 1000, "Luca": 1000, "Cucca": 1000,
-    "Ale": 1000, "Fili": 1000, "Cri": 1000, "Rota": 1000, "Giorgio": 1000
-  },
-  "storico_punti": {
-    "Davide": [], "Giammi": [], "Nando": [], "Luca": [], "Cucca": [],
-    "Ale": [], "Fili": [], "Cri": [], "Rota": [], "Giorgio": []
-  },
-  "proiezioni": {
-    "Davide": [], "Giammi": [], "Nando": [], "Luca": [], "Cucca": [],
-    "Ale": [], "Fili": [], "Cri": [], "Rota": [], "Giorgio": []
-  },
-  "mercati": [],
-  "scommesse": [],
-  "log": [],
-  "prossimo_id_mercato": 1,
-  "prossimo_id_scommessa": 1
+ "saldi": {
+  "Davide": 1000,
+  "Giammi": 1000,
+  "Nando": 1000,
+  "Luca": 1000,
+  "Cucca": 1000,
+  "Ale": 1000,
+  "Fili": 1000,
+  "Cri": 1000,
+  "Rota": 1000,
+  "Giorgio": 1000
+ },
+ "storico_punti": {
+  "Davide": [],
+  "Giammi": [],
+  "Nando": [],
+  "Luca": [],
+  "Cucca": [],
+  "Ale": [],
+  "Fili": [],
+  "Cri": [],
+  "Rota": [],
+  "Giorgio": []
+ },
+ "proiezioni": {
+  "Davide": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 50.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Giammi": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 52.4,
+    "indice_schierabilita": null
+   }
+  ],
+  "Nando": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 42.8,
+    "indice_schierabilita": null
+   }
+  ],
+  "Luca": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 42.9,
+    "indice_schierabilita": null
+   }
+  ],
+  "Cucca": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 54.0,
+    "indice_schierabilita": null
+   }
+  ],
+  "Ale": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 57.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Fili": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 52.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Cri": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 64.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Rota": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 60.2,
+    "indice_schierabilita": null
+   }
+  ],
+  "Giorgio": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 65.2,
+    "indice_schierabilita": null
+   }
+  ]
+ },
+ "mercati": [],
+ "scommesse": [],
+ "log": [
+  {
+   "ts": "2026-09-06 16:17:31",
+   "testo": "Importate proiezioni FantaLab giornata 1: Davide=50.5, Giammi=52.4, Nando=42.8, Luca=42.9, Cucca=54.0, Ale=57.5, Fili=52.5, Cri=64.5, Rota=60.2, Giorgio=65.2"
+  }
+ ],
+ "prossimo_id_mercato": 1,
+ "prossimo_id_scommessa": 1
 }
