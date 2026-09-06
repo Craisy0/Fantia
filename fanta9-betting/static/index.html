@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fanta 9 - Scommesse</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">⚽ <span id="nome-lega">Fanta 9</span> <small>Scommesse</small></div>
+    <div class="identita">
+      <span id="badge-squadra" class="badge">Chi sei?</span>
+      <span id="badge-saldo" class="badge saldo"></span>
+      <button id="btn-cambia-identita" class="link-btn">cambia</button>
+    </div>
+  </header>
+
+  <div id="modal-identita" class="modal">
+    <div class="modal-box">
+      <h2>Chi sei?</h2>
+      <p>Scegli la squadra che rappresenti. Verrà ricordata su questo dispositivo.</p>
+      <select id="select-squadra"></select>
+      <button id="btn-conferma-identita">Continua</button>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="scommesse">Scommesse aperte</button>
+    <button class="tab-btn" data-tab="giocate">Le mie giocate</button>
+    <button class="tab-btn" data-tab="classifica">Classifica</button>
+    <button class="tab-btn" data-tab="admin">Admin</button>
+  </nav>
+
+  <main>
+    <section id="tab-scommesse" class="tab-pane active">
+      <div id="lista-mercati" class="mercati-lista"></div>
+    </section>
+
+    <section id="tab-giocate" class="tab-pane">
+      <div id="lista-giocate" class="giocate-lista"></div>
+    </section>
+
+    <section id="tab-classifica" class="tab-pane">
+      <table class="classifica-tab">
+        <thead><tr><th>#</th><th>Squadra</th><th>Fantamilioni</th></tr></thead>
+        <tbody id="classifica-body"></tbody>
+      </table>
+    </section>
+
+    <section id="tab-admin" class="tab-pane">
+      <div id="admin-login">
+        <h2>Accesso amministratore</h2>
+        <input type="password" id="admin-password" placeholder="Password admin">
+        <button id="btn-admin-login">Entra</button>
+        <p id="admin-login-errore" class="errore"></p>
+      </div>
+
+      <div id="admin-panel" class="hidden">
+        <h2>Importa punteggi giornata</h2>
+        <p class="hint">Incolla una riga per squadra: <code>Nome Squadra; Punti</code> (va bene anche uno spazio/tab/virgola come separatore). Le squadre verranno riconosciute automaticamente.</p>
+        <input type="number" id="import-giornata" placeholder="Numero giornata" min="1">
+        <textarea id="import-testo" rows="9" placeholder="Squadra 1; 72
+Squadra 2; 58
+..."></textarea>
+        <div class="riga-bottoni">
+          <button id="btn-anteprima-import">Controlla</button>
+          <button id="btn-conferma-import" disabled>Confirma e importa</button>
+        </div>
+        <div id="import-risultato"></div>
+
+        <hr>
+
+        <h2>Crea scommessa testa a testa (1X2 + Over/Under)</h2>
+        <div class="riga-form">
+          <select id="h2h-squadra-a"></select>
+          <span>vs</span>
+          <select id="h2h-squadra-b"></select>
+          <input type="number" id="h2h-giornata" placeholder="Giornata" min="1" style="width:8em">
+          <button id="btn-anteprima-h2h">Calcola quote</button>
+        </div>
+        <div id="h2h-anteprima"></div>
+        <button id="btn-pubblica-h2h" class="hidden">Pubblica scommessa</button>
+
+        <hr>
+
+        <h2>Crea scommessa libera / personalizzata</h2>
+        <input type="text" id="custom-titolo" placeholder="Es. Chi vincerà il girone di ritorno?">
+        <input type="number" id="custom-giornata" placeholder="Giornata di riferimento (opzionale)" min="1">
+        <div id="custom-esiti"></div>
+        <button id="btn-aggiungi-esito">+ Aggiungi esito</button>
+        <button id="btn-pubblica-custom">Pubblica scommessa libera</button>
+
+        <hr>
+
+        <h2>Gestisci mercati esistenti</h2>
+        <div id="admin-mercati-lista"></div>
+
+        <hr>
+
+        <h2>Correggi saldo squadra</h2>
+        <div class="riga-form">
+          <select id="correzione-squadra"></select>
+          <input type="number" id="correzione-delta" placeholder="Delta (es. +50 o -20)" style="width:10em">
+          <input type="text" id="correzione-motivo" placeholder="Motivo">
+          <button id="btn-correggi-saldo">Applica</button>
+        </div>
+
+        <hr>
+
+        <h2>Cambia password admin</h2>
+        <div class="riga-form">
+          <input type="password" id="nuova-password" placeholder="Nuova password">
+          <button id="btn-cambia-password">Cambia</button>
+        </div>
+
+        <hr>
+        <h2>Log attività</h2>
+        <div id="admin-log" class="log-box"></div>
+      </div>
+    </section>
+  </main>
+
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

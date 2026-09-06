@@ -1,0 +1,23 @@
+{
+  "lega": {
+    "nome": "Fanta 9",
+    "squadre": [
+      "Squadra 1", "Squadra 2", "Squadra 3", "Squadra 4", "Squadra 5",
+      "Squadra 6", "Squadra 7", "Squadra 8", "Squadra 9"
+    ],
+    "saldo_iniziale": 1000
+  },
+  "admin": {
+    "password": "cambiami123"
+  },
+  "quote": {
+    "margine_bookmaker": 1.07,
+    "lambda_default": 1.3,
+    "max_gol_simulati": 12
+  },
+  "formula_gol": {
+    "_descrizione": "Punti fantacalcio -> gol equivalenti: sotto soglia = 0 gol, alla soglia = 1 gol, poi +1 gol ogni 'ogni_punti' punti aggiuntivi.",
+    "soglia": 66,
+    "ogni_punti": 4
+  }
+}

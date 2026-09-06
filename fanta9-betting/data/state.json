@@ -1,0 +1,17 @@
+{
+  "saldi": {
+    "Squadra 1": 1000, "Squadra 2": 1000, "Squadra 3": 1000, "Squadra 4": 1000,
+    "Squadra 5": 1000, "Squadra 6": 1000, "Squadra 7": 1000, "Squadra 8": 1000,
+    "Squadra 9": 1000
+  },
+  "storico_punti": {
+    "Squadra 1": [], "Squadra 2": [], "Squadra 3": [], "Squadra 4": [],
+    "Squadra 5": [], "Squadra 6": [], "Squadra 7": [], "Squadra 8": [],
+    "Squadra 9": []
+  },
+  "mercati": [],
+  "scommesse": [],
+  "log": [],
+  "prossimo_id_mercato": 1,
+  "prossimo_id_scommessa": 1
+}
