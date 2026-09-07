@@ -16,7 +16,10 @@
     "max_gol_simulati": 12,
     "pareggio_base": 0.35,
     "pareggio_decadimento": 1.5,
-    "vincita_massima_per_scommessa": 30
+    "vincita_massima_per_scommessa": 30,
+    "quota_soglia_tassa": 2.99,
+    "quota_massima": 3.2,
+    "quota_tassa_scala": 8.0
   },
   "formula_gol": {
     "_descrizione": "Punti fantacalcio -> gol equivalenti: sotto soglia = 0 gol, alla soglia = 1 gol, poi +1 gol ogni 'ogni_punti' punti aggiuntivi.",

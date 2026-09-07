@@ -79,8 +79,6 @@
     const squadre = stato.squadre || [];
     const opts = squadre.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
     el('#select-squadra').innerHTML = opts;
-    el('#h2h-squadra-a').innerHTML = opts;
-    el('#h2h-squadra-b').innerHTML = opts;
     el('#correzione-squadra').innerHTML = opts;
   }
 
@@ -415,12 +413,6 @@
     });
   }
 
-  const FONTE_LABEL = {
-    proiezione_fantalab: 'proiezione FantaLab di questa giornata',
-    media_storica: 'media delle giornate storiche importate',
-    default: 'valore di default (nessun dato disponibile)',
-  };
-
   function initProiezioni() {
     el('#btn-anteprima-proiezioni').addEventListener('click', async () => {
       const testo = el('#proiezioni-testo').value;
@@ -468,41 +460,6 @@
       alert(msg);
       el('#calendario-anteprima').innerHTML = '';
       el('#btn-pubblica-calendario').classList.add('hidden');
-      await ricarica();
-    });
-  }
-
-  function initH2H() {
-    let ultimaAnteprima = null;
-    el('#btn-anteprima-h2h').addEventListener('click', async () => {
-      const squadra_a = el('#h2h-squadra-a').value;
-      const squadra_b = el('#h2h-squadra-b').value;
-      const giornata = Number(el('#h2h-giornata').value);
-      if (!giornata) { alert('Indica il numero di giornata.'); return; }
-      if (squadra_a === squadra_b) { alert('Scegli due squadre diverse.'); return; }
-      const params = new URLSearchParams({ admin_password: adminPassword(), squadra_a, squadra_b, giornata });
-      const r = await get('/api/admin/anteprima-h2h?' + params.toString());
-      const cont = el('#h2h-anteprima');
-      if (r.errore) { cont.innerHTML = `<p class="errore">${escapeHtml(r.errore)}</p>`; el('#btn-pubblica-h2h').classList.add('hidden'); return; }
-      ultimaAnteprima = r;
-      cont.innerHTML = `
-        <p class="hint">
-          ${escapeHtml(squadra_a)}: ${r.lambda_a} gol attesi (fonte: ${FONTE_LABEL[r.fonte_a] || r.fonte_a})<br>
-          ${escapeHtml(squadra_b)}: ${r.lambda_b} gol attesi (fonte: ${FONTE_LABEL[r.fonte_b] || r.fonte_b})
-        </p>
-        <p><b>1X2</b>: 1 → ${r['1x2'].quota_1.toFixed(2)} · X → ${r['1x2'].quota_x.toFixed(2)} · 2 → ${r['1x2'].quota_2.toFixed(2)}</p>`;
-      el('#btn-pubblica-h2h').classList.remove('hidden');
-    });
-    el('#btn-pubblica-h2h').addEventListener('click', async () => {
-      if (!ultimaAnteprima) return;
-      const r = await post('/api/admin/crea-mercato-h2h', {
-        admin_password: adminPassword(),
-        squadra_a: ultimaAnteprima.squadra_a, squadra_b: ultimaAnteprima.squadra_b, giornata: ultimaAnteprima.giornata,
-      });
-      if (r.errore) { alert(r.errore); return; }
-      alert('Mercato pubblicato.');
-      el('#h2h-anteprima').innerHTML = '';
-      el('#btn-pubblica-h2h').classList.add('hidden');
       await ricarica();
     });
   }
@@ -597,7 +554,6 @@
     initImportPunti();
     initProiezioni();
     initCalendario();
-    initH2H();
     initCustom();
     initCorrezioneSaldo();
     initCambiaPassword();

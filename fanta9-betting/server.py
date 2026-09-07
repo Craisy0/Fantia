@@ -125,10 +125,21 @@ def combina_pareggio(p1_raw, p2_raw, px):
     return resto * (p1_raw / somma_12), px, resto * (p2_raw / somma_12)
 
 
-def quota_da_probabilita(p, margine):
+def quota_da_probabilita(p, margine, soglia_tassa=None, quota_massima=None, tassa_scala=None):
+    """Converte una probabilita' in quota. Sopra 'soglia_tassa' (partite molto sbilanciate)
+    comprime la quota verso 'quota_massima' con una funzione asintotica: piu' lo scarto tra le
+    squadre e' grande, piu' la 'tassa' e' aggressiva, ma la quota resta sempre sotto quota_massima
+    invece di crescere linearmente (es. 8.00, 17.00...) come farebbe il Poisson puro. 'tassa_scala'
+    regola quanto in fretta la curva si avvicina al tetto (piu' alto = compressione piu' graduale)."""
     p = max(p, 0.005)
     quota = (1.0 / p) / margine
-    return round(max(quota, 1.01), 2)
+    quota = max(quota, 1.01)
+    if soglia_tassa is not None and quota_massima is not None and quota > soglia_tassa:
+        ampiezza = quota_massima - soglia_tassa
+        scala = tassa_scala or ampiezza
+        eccesso = quota - soglia_tassa
+        quota = soglia_tassa + ampiezza * (1 - math.exp(-eccesso / scala))
+    return round(quota, 2)
 
 
 class Store:
@@ -337,14 +348,17 @@ class Store:
         px = stima_probabilita_pareggio(lam_a, lam_b, self.config['quote']['pareggio_base'],
                                          self.config['quote']['pareggio_decadimento'])
         p1, px, p2 = combina_pareggio(p1_raw, p2_raw, px)
+        soglia_tassa = self.config['quote'].get('quota_soglia_tassa')
+        quota_massima = self.config['quote'].get('quota_massima')
+        tassa_scala = self.config['quote'].get('quota_tassa_scala')
         return {
             'squadra_a': squadra_a, 'squadra_b': squadra_b, 'giornata': giornata,
             'lambda_a': round(lam_a, 2), 'lambda_b': round(lam_b, 2),
             'fonte_a': fonte_a, 'fonte_b': fonte_b,
             '1x2': {
-                'quota_1': quota_da_probabilita(p1, margine),
-                'quota_x': quota_da_probabilita(px, margine),
-                'quota_2': quota_da_probabilita(p2, margine),
+                'quota_1': quota_da_probabilita(p1, margine, soglia_tassa, quota_massima, tassa_scala),
+                'quota_x': quota_da_probabilita(px, margine, soglia_tassa, quota_massima, tassa_scala),
+                'quota_2': quota_da_probabilita(p2, margine, soglia_tassa, quota_massima, tassa_scala),
             },
         }
 

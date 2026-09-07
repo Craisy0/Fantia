@@ -33,6 +33,7 @@ Il tab Admin ti dice sempre da quale delle tre fonti provengono le quote propost
 
 - **Pareggio stimato dalla differenza di forza, non dal Poisson grezzo** (`quote.pareggio_base` e `quote.pareggio_decadimento`, default 35% e 1.5): i "gol equivalenti" raggruppano punteggi fantacalcio diversi nello stesso numero di gol (es. 50 e 61 punti fanno entrambi 0 gol), quindi la probabilità di pareggio calcolata direttamente dal Poisson risulta artificialmente gonfiata — a volte perfino il favorito, il che non ha senso. Al suo posto, il pareggio è stimato come `pareggio_base × e^(-pareggio_decadimento × |differenza tra i due gol attesi|)`: più le due squadre sono vicine come forza, più il pareggio è probabile (fino a `pareggio_base`, un incontro perfettamente equilibrato — quota indicativa intorno a 2.5), e scende man mano che una delle due è nettamente più forte. Il resto della probabilità va a 1 e 2, mantenendo le proporzioni del modello di Poisson tra chi è più favorito.
 - **Quota minima 1.01**: nessuna quota (nemmeno un esito fortissimo favorito) può scendere sotto 1.01, altrimenti si vincerebbe meno di quanto puntato.
+- **"Tassa" sulle quote troppo alte** (`quote.quota_soglia_tassa` = 2.99, `quote.quota_massima` = 3.2, `quote.quota_tassa_scala` = 8.0): nei testa a testa molto sbilanciati il Poisson grezzo farebbe salire la quota dello sfavorito/pareggio anche a 8, 15 o oltre. Sopra 2.99 la quota viene compressa verso `quota_massima` con una curva che si appiattisce sempre di più (più lo squilibrio è grande, più la compressione è aggressiva), così le quote restano sempre nell'intorno di 3 invece di esplodere. Si applica solo alle quote calcolate in automatico (1X2 dei testa a testa); le scommesse libere che inserisci a mano non hanno questo limite.
 - **Tetto massimo di vincita per schedina** (`quote.vincita_massima_per_scommessa`, default 30 FM): indipendentemente da puntata e quota totale, una singola schedina non può pagare più di questo importo — evita che una combinazione fortunata con poche giornate di dati faccia guadagnare troppo in un colpo solo. Il sito mostra la vincita potenziale (già limitata dal tetto) prima di confermare la puntata.
 
 #### Proiezioni pre-giornata da FantaLab (semi-automatico)
@@ -41,7 +42,7 @@ Prima della chiusura di ogni giornata, apri la formazione consigliata di ciascun
 
 Non serve più aspettare che si accumuli storico per avere quote sensate: fin dalla prima giornata, se importi le proiezioni, le quote si basano su dati reali di quella settimana.
 
-Le scommesse "libere" (outright, prop bet custom) non hanno una formula automatica valida in generale: tu inserisci titolo, esiti e quote a mano nel tab Admin.
+Le scommesse "libere" (outright, prop bet custom) non hanno una formula automatica valida in generale: tu inserisci titolo, esiti e quote a mano nel tab Admin — è l'unico tipo di mercato che crei manualmente, dato che i testa a testa vengono pubblicati in automatico dal calendario (vedi sotto).
 
 ### La schedina
 
@@ -56,7 +57,7 @@ La schedina vince solo se **tutte** le selezioni sono corrette; basta che una sb
 
 ### Calendario ufficiale e pubblicazione automatica
 
-`data/calendario.json` contiene gli scontri delle giornate 1-16 del girone all'italiana della lega GOTTA, già tradotti dai nomi fantasia del calendario ai nomi reali delle 10 squadre. Nel tab Admin → "Pubblica una giornata dal calendario" scrivi il numero di giornata, controlli gli scontri e pubblichi con un click tutti e 5 i mercati 1X2 con le quote calcolate dal sistema — salta in automatico gli incontri già pubblicati, quindi puoi richiamarlo senza creare doppioni. Mancano le giornate 17-20 (non ancora fornite); per quelle, o per correggere un accoppiamento, resta disponibile la creazione manuale singola qui sotto.
+`data/calendario.json` contiene gli scontri delle giornate 1-16 del girone all'italiana della lega GOTTA, già tradotti dai nomi fantasia del calendario ai nomi reali delle 10 squadre. Nel tab Admin → "Pubblica una giornata dal calendario" scrivi il numero di giornata, controlli gli scontri e pubblichi con un click tutti e 5 i mercati 1X2 con le quote calcolate dal sistema — salta in automatico gli incontri già pubblicati, quindi puoi richiamarlo senza creare doppioni. È l'unico modo per creare un testa a testa: non c'è più una creazione manuale singola. Mancano le giornate 17-20 (non ancora fornite) — appena arrivano gli screenshot mancanti si possono aggiungere a `calendario.json`.
 
 ### Dati delle giornate (rose/punteggi)
 
