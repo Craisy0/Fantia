@@ -97,6 +97,20 @@
     }
     cont.innerHTML = mercati.map(renderMercatoCard).join('');
 
+    function aggiornaVincitaPotenziale(box) {
+      const quota = Number(box.dataset.quota || 0);
+      const importo = Number(box.querySelector('.bet-importo').value) || 0;
+      const div = box.querySelector('.vincita-potenziale');
+      if (!quota || !importo) { div.textContent = ''; return; }
+      const tetto = stato.vincita_massima_per_scommessa;
+      let vincita = Math.round(importo * quota * 100) / 100;
+      let testo = `Vincita potenziale: ${vincita.toFixed(2)} FM`;
+      if (tetto != null && vincita > tetto) {
+        testo = `Vincita potenziale: ${tetto.toFixed(2)} FM (tetto massimo per scommessa, sarebbe ${vincita.toFixed(2)})`;
+      }
+      div.textContent = testo;
+    }
+
     all('.esito-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const mercatoId = Number(btn.dataset.mercatoId);
@@ -105,9 +119,15 @@
         all(`.esito-btn[data-mercato-id="${mercatoId}"]`).forEach(b => b.classList.remove('selezionato'));
         btn.classList.add('selezionato');
         box.dataset.esito = btn.dataset.esito;
+        box.dataset.quota = btn.dataset.quota;
         box.querySelector('.bet-esito-label').textContent = btn.querySelector('.label').textContent;
         box.classList.add('open');
+        aggiornaVincitaPotenziale(box);
       });
+    });
+
+    all('.bet-importo').forEach(input => {
+      input.addEventListener('input', () => aggiornaVincitaPotenziale(input.closest('.bet-box')));
     });
 
     all('.btn-piazza').forEach(btn => {
@@ -132,7 +152,7 @@
     const esitiHtml = m.esiti.map(e => {
       let classi = 'esito-btn';
       if (m.stato === 'risolto') classi += (e.chiave === m.esito_vincente ? ' vincente' : ' perdente');
-      return `<button class="${classi}" data-mercato-id="${m.id}" data-esito="${escapeHtml(e.chiave)}" ${m.stato !== 'aperto' ? 'disabled' : ''}>
+      return `<button class="${classi}" data-mercato-id="${m.id}" data-esito="${escapeHtml(e.chiave)}" data-quota="${e.quota}" ${m.stato !== 'aperto' ? 'disabled' : ''}>
         <span class="label">${escapeHtml(e.label)}</span>
         <span class="quota">${e.quota.toFixed(2)}</span>
       </button>`;
@@ -143,6 +163,7 @@
         <span>Punta su <b class="bet-esito-label"></b>:</span>
         <input type="number" class="bet-importo" min="1" step="1" placeholder="Fantamilioni">
         <button class="btn-piazza primario" data-mercato-id="${m.id}">Piazza scommessa</button>
+        <div class="hint vincita-potenziale"></div>
       </div>` : '';
 
     const mieBetsHtml = mieBets.length ? `<div class="hint">Tue giocate su questo mercato: ${

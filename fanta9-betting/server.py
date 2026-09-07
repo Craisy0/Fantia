@@ -112,9 +112,27 @@ def calcola_probabilita_over_under(lam_a, lam_b, linea, max_gol):
     return p_over, p_under
 
 
+def applica_tetto_pareggio(p1, px, p2, tetto):
+    """Il pareggio va confrontato sui 'gol equivalenti', che raggruppano molti punteggi
+    fantacalcio diversi nello stesso numero di gol (es. 50 e 61 punti fanno entrambi 0 gol):
+    questo gonfia artificialmente la probabilita' di pareggio quando le medie sono entrambe
+    basse (vicine o sotto soglia), al punto da renderlo il favorito. Limitiamo il pareggio a
+    una probabilita' massima realistica e ridistribuiamo l'eccedenza sulle altre due,
+    mantenendo le proporzioni originali tra 1 e 2."""
+    if px <= tetto:
+        return p1, px, p2
+    eccedenza = px - tetto
+    somma_12 = p1 + p2
+    if somma_12 <= 0:
+        meta = (1.0 - tetto) / 2
+        return meta, tetto, meta
+    return p1 + eccedenza * (p1 / somma_12), tetto, p2 + eccedenza * (p2 / somma_12)
+
+
 def quota_da_probabilita(p, margine):
     p = max(p, 0.005)
-    return round((1.0 / p) / margine, 2)
+    quota = (1.0 / p) / margine
+    return round(max(quota, 1.01), 2)
 
 
 def linee_over_under(lam_a, lam_b):
@@ -324,6 +342,7 @@ class Store:
         margine = self.config['quote']['margine_bookmaker']
         max_gol = self.config['quote']['max_gol_simulati']
         p1, px, p2 = calcola_probabilita_1x2(lam_a, lam_b, max_gol)
+        p1, px, p2 = applica_tetto_pareggio(p1, px, p2, self.config['quote']['probabilita_pareggio_max'])
         linee = linee_over_under(lam_a, lam_b)
         ou = []
         for linea in linee:
@@ -475,7 +494,10 @@ class Store:
             if s['mercato_id'] != mercato['id'] or s['stato'] != 'in_corso':
                 continue
             if s['esito'] == esito_vincente:
+                tetto = self.config['quote'].get('vincita_massima_per_scommessa')
                 vincita = round(s['importo'] * s['quota'], 2)
+                if tetto is not None:
+                    vincita = min(vincita, tetto)
                 s['stato'] = 'vinta'
                 s['vincita'] = vincita
                 self.state['saldi'][s['squadra']] = round(self.state['saldi'].get(s['squadra'], 0) + vincita, 2)
@@ -553,9 +575,14 @@ class Store:
             'piazzata_il': now_str(),
         }
         self.state['scommesse'].append(scommessa)
-        self._log(f"{squadra} punta {importo} FM su '{esito_info['label']}' (mercato #{mercato_id}, quota {esito_info['quota']})")
+        tetto = self.config['quote'].get('vincita_massima_per_scommessa')
+        vincita_potenziale = round(importo * esito_info['quota'], 2)
+        if tetto is not None:
+            vincita_potenziale = min(vincita_potenziale, tetto)
+        self._log(f"{squadra} punta {importo} FM su '{esito_info['label']}' (mercato #{mercato_id}, quota {esito_info['quota']}, vincita potenziale {vincita_potenziale})")
         self.save()
-        return {'ok': True, 'scommessa': scommessa, 'saldo': self.state['saldi'][squadra]}
+        return {'ok': True, 'scommessa': scommessa, 'saldo': self.state['saldi'][squadra],
+                'vincita_potenziale': vincita_potenziale}
 
     def classifica(self):
         righe = [{'squadra': sq, 'saldo': self.state['saldi'].get(sq, 0)} for sq in self.squadre()]
@@ -693,6 +720,7 @@ class Handler(BaseHTTPRequestHandler):
                     'mie_scommesse': mie_scommesse,
                     'mercati': STORE.state['mercati'],
                     'classifica': STORE.classifica(),
+                    'vincita_massima_per_scommessa': STORE.config['quote'].get('vincita_massima_per_scommessa'),
                 })
                 return
             if path == '/api/mercati':

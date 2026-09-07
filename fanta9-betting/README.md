@@ -19,7 +19,7 @@ Modificabile in `config.json` → `formula_gol`.
 
 ### Quote automatiche
 
-Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, poi calcola le probabilità di 1/X/2 e di Over/Under con un modello di Poisson (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), e infila un margine da bookmaker (7% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali.
+Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, poi calcola le probabilità di 1/X/2 e di Over/Under con un modello di Poisson (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), e infila un margine da bookmaker (15% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali. Un margine più alto abbassa tutte le quote in blocco — utile finché ci sono poche giornate di dati e le stime sono meno affidabili.
 
 La stima dei gol attesi di una squadra per una giornata, in ordine di priorità:
 
@@ -28,6 +28,12 @@ La stima dei gol attesi di una squadra per una giornata, in ordine di priorità:
 3. Altrimenti (nessun dato, es. inizio stagione), **un valore di default** (`config.json` → `quote.lambda_default`).
 
 Il tab Admin ti dice sempre da quale delle tre fonti provengono le quote proposte, prima che tu le pubblichi.
+
+**Correzioni al modello** (emerse testando le prime quote reali):
+
+- **Tetto al pareggio** (`quote.probabilita_pareggio_max`, default 15%): i "gol equivalenti" raggruppano punteggi fantacalcio diversi nello stesso numero di gol (es. 50 e 61 punti fanno entrambi 0 gol), quindi quando le proiezioni di entrambe le squadre sono basse la probabilità di pareggio calcolata dal modello risulta artificialmente gonfiata, al punto da renderlo l'esito favorito. Il sistema limita la probabilità di pareggio a questo massimo e redistribuisce l'eccedenza sulle altre due quote, mantenendo le proporzioni tra 1 e 2.
+- **Quota minima 1.01**: nessuna quota (nemmeno un Under fortissimo favorito) può scendere sotto 1.01, altrimenti si vincerebbe meno di quanto puntato.
+- **Tetto massimo di vincita per scommessa** (`quote.vincita_massima_per_scommessa`, default 30 FM): indipendentemente da puntata e quota, una singola scommessa non può pagare più di questo importo — evita che un long shot fortunato con poche giornate di dati faccia guadagnare troppo in un colpo solo. Il sito mostra la vincita potenziale (già limitata dal tetto) prima di confermare la puntata.
 
 #### Proiezioni pre-giornata da FantaLab (semi-automatico)
 
