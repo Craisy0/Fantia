@@ -137,3 +137,25 @@ table.classifica-tab td:last-child, table.classifica-tab th:last-child { text-al
   .brand { font-size: 1em; }
   .esito-btn { min-width: 80px; }
 }
+
+/* Schedina (betslip) */
+.barra-schedina {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 1em; z-index: 15;
+  background: var(--accent-dim); color: #06210f; font-weight: 700; border: none;
+  border-radius: 999px; padding: 0.8em 1.4em; box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  cursor: pointer; font-size: 0.95em;
+}
+.barra-schedina:hover { background: var(--accent); }
+
+.modal-schedina-box { max-width: 460px; text-align: left; }
+.modal-schedina-box h2 { font-size: 1.1em; }
+.schedina-riga {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.5em;
+  background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.5em 0.7em; margin-bottom: 0.5em;
+}
+.schedina-riga .info { font-size: 0.85em; }
+.schedina-riga .info b { display: block; font-size: 0.95em; color: var(--text); }
+.schedina-riga .quota { color: var(--gold); font-weight: 700; margin-right: 0.4em; }
+.schedina-riga .btn-rimuovi-sel { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1em; }
+#modal-schedina input { width: 100%; margin: 0.6em 0; }

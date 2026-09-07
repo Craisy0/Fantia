@@ -14,7 +14,8 @@
     "margine_bookmaker": 1.15,
     "lambda_default": 1.3,
     "max_gol_simulati": 12,
-    "probabilita_pareggio_max": 0.15,
+    "pareggio_base": 0.35,
+    "pareggio_decadimento": 1.5,
     "vincita_massima_per_scommessa": 30
   },
   "formula_gol": {

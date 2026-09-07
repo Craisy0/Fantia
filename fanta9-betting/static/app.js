@@ -5,6 +5,7 @@
   const SS_ADMIN_PW = 'fanta9_admin_pw';
 
   let stato = null; // ultima risposta di /api/state
+  let carrelloSchedina = []; // selezioni non ancora confermate: {mercato_id, esito, quota, label, titolo_mercato, giornata}
 
   function squadraAttuale() {
     return localStorage.getItem(LS_SQUADRA) || null;
@@ -30,6 +31,10 @@
   function el(sel) { return document.querySelector(sel); }
   function all(sel) { return Array.from(document.querySelectorAll(sel)); }
 
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   // ---------------------------------------------------------------------
   // Caricamento stato + render
   // ---------------------------------------------------------------------
@@ -46,10 +51,12 @@
     renderIdentita();
     renderSquadreOptions();
     renderMercati();
+    renderSchedinaBarra();
     renderGiocate();
     renderClassifica();
     if (adminPassword()) {
       renderAdminMercati();
+      renderAdminSchedine();
       renderAdminLog();
     }
   }
@@ -77,12 +84,12 @@
     el('#correzione-squadra').innerHTML = opts;
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function giornateGiaGiocate() {
+    return new Set((stato.mie_schedine || []).map(s => s.giornata));
   }
 
   // ---------------------------------------------------------------------
-  // Tab "Scommesse aperte"
+  // Tab "Scommesse aperte" + schedina
   // ---------------------------------------------------------------------
 
   function renderMercati() {
@@ -95,87 +102,111 @@
       cont.innerHTML = '<p class="hint">Nessuna scommessa ancora creata. Chiedi all\'admin di pubblicarne una.</p>';
       return;
     }
-    cont.innerHTML = mercati.map(renderMercatoCard).join('');
-
-    function aggiornaVincitaPotenziale(box) {
-      const quota = Number(box.dataset.quota || 0);
-      const importo = Number(box.querySelector('.bet-importo').value) || 0;
-      const div = box.querySelector('.vincita-potenziale');
-      if (!quota || !importo) { div.textContent = ''; return; }
-      const tetto = stato.vincita_massima_per_scommessa;
-      let vincita = Math.round(importo * quota * 100) / 100;
-      let testo = `Vincita potenziale: ${vincita.toFixed(2)} FM`;
-      if (tetto != null && vincita > tetto) {
-        testo = `Vincita potenziale: ${tetto.toFixed(2)} FM (tetto massimo per scommessa, sarebbe ${vincita.toFixed(2)})`;
-      }
-      div.textContent = testo;
-    }
+    const giocate = giornateGiaGiocate();
+    cont.innerHTML = mercati.map(m => renderMercatoCard(m, giocate)).join('');
 
     all('.esito-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const mercatoId = Number(btn.dataset.mercatoId);
-        const box = el(`#bet-box-${mercatoId}`);
-        if (!box) return;
-        all(`.esito-btn[data-mercato-id="${mercatoId}"]`).forEach(b => b.classList.remove('selezionato'));
-        btn.classList.add('selezionato');
-        box.dataset.esito = btn.dataset.esito;
-        box.dataset.quota = btn.dataset.quota;
-        box.querySelector('.bet-esito-label').textContent = btn.querySelector('.label').textContent;
-        box.classList.add('open');
-        aggiornaVincitaPotenziale(box);
-      });
-    });
-
-    all('.bet-importo').forEach(input => {
-      input.addEventListener('input', () => aggiornaVincitaPotenziale(input.closest('.bet-box')));
-    });
-
-    all('.btn-piazza').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const mercatoId = Number(btn.dataset.mercatoId);
-        const box = el(`#bet-box-${mercatoId}`);
-        const esito = box.dataset.esito;
-        const importo = Number(box.querySelector('.bet-importo').value);
-        const squadra = squadraAttuale();
-        if (!squadra) { alert('Scegli prima la tua squadra.'); return; }
-        if (!esito) { alert('Scegli un esito.'); return; }
-        const r = await post('/api/scommessa', { squadra, mercato_id: mercatoId, esito, importo });
-        if (r.errore) { alert(r.errore); return; }
-        await ricarica();
-      });
+      if (btn.disabled) return;
+      btn.addEventListener('click', () => toggleSelezione(btn));
     });
   }
 
-  function renderMercatoCard(m) {
-    const mia = squadraAttuale();
-    const mieBets = (stato.mie_scommesse || []).filter(s => s.mercato_id === m.id);
+  function renderMercatoCard(m, giocate) {
+    const giaGiocata = giocate.has(m.giornata);
     const esitiHtml = m.esiti.map(e => {
       let classi = 'esito-btn';
       if (m.stato === 'risolto') classi += (e.chiave === m.esito_vincente ? ' vincente' : ' perdente');
-      return `<button class="${classi}" data-mercato-id="${m.id}" data-esito="${escapeHtml(e.chiave)}" data-quota="${e.quota}" ${m.stato !== 'aperto' ? 'disabled' : ''}>
+      const inCarrello = carrelloSchedina.some(s => s.mercato_id === m.id && s.esito === e.chiave);
+      if (inCarrello) classi += ' selezionato';
+      const disabilitato = m.stato !== 'aperto' || giaGiocata;
+      return `<button class="${classi}" data-mercato-id="${m.id}" data-esito="${escapeHtml(e.chiave)}"
+                data-quota="${e.quota}" data-label="${escapeHtml(e.label)}" ${disabilitato ? 'disabled' : ''}>
         <span class="label">${escapeHtml(e.label)}</span>
         <span class="quota">${e.quota.toFixed(2)}</span>
       </button>`;
     }).join('');
 
-    const betBox = m.stato === 'aperto' ? `
-      <div class="bet-box" id="bet-box-${m.id}">
-        <span>Punta su <b class="bet-esito-label"></b>:</span>
-        <input type="number" class="bet-importo" min="1" step="1" placeholder="Fantamilioni">
-        <button class="btn-piazza primario" data-mercato-id="${m.id}">Piazza scommessa</button>
-        <div class="hint vincita-potenziale"></div>
-      </div>` : '';
+    const nota = giaGiocata
+      ? `<div class="hint">Hai gia' giocato la schedina della giornata ${m.giornata}.</div>`
+      : '';
 
-    const mieBetsHtml = mieBets.length ? `<div class="hint">Tue giocate su questo mercato: ${
-      mieBets.map(s => `${s.importo} FM su "${s.esito}" (${s.stato})`).join(', ')
-    }</div>` : '';
-
-    return `<div class="mercato-card">
+    return `<div class="mercato-card" data-giornata="${m.giornata}">
       <h3>${escapeHtml(m.titolo)} <span class="mercato-stato ${m.stato}">${m.stato}</span></h3>
       <div class="esiti-riga">${esitiHtml}</div>
-      ${betBox}
-      ${mieBetsHtml}
+      ${nota}
     </div>`;
+  }
+
+  function toggleSelezione(btn) {
+    const mercatoId = Number(btn.dataset.mercatoId);
+    const esito = btn.dataset.esito;
+    const quota = Number(btn.dataset.quota);
+    const label = btn.dataset.label;
+    const card = btn.closest('.mercato-card');
+    const giornata = Number(card.dataset.giornata);
+    const titoloMercato = card.querySelector('h3').firstChild.textContent.trim();
+
+    const giaInCarrello = carrelloSchedina.find(s => s.mercato_id === mercatoId && s.esito === esito);
+    if (giaInCarrello) {
+      carrelloSchedina = carrelloSchedina.filter(s => !(s.mercato_id === mercatoId && s.esito === esito));
+    } else {
+      if (carrelloSchedina.length && carrelloSchedina[0].giornata !== giornata) {
+        alert(`La schedina puo' contenere solo selezioni della stessa giornata. Hai gia' selezioni per la giornata ${carrelloSchedina[0].giornata}: svuota la schedina prima di sceglierne una diversa.`);
+        return;
+      }
+      carrelloSchedina = carrelloSchedina.filter(s => s.mercato_id !== mercatoId); // un solo esito per mercato
+      carrelloSchedina.push({ mercato_id: mercatoId, esito, quota, label, titolo_mercato: titoloMercato, giornata });
+    }
+    renderMercati();
+    renderSchedinaBarra();
+  }
+
+  function quotaTotaleCarrello() {
+    return carrelloSchedina.reduce((tot, s) => tot * s.quota, 1);
+  }
+
+  function renderSchedinaBarra() {
+    const barra = el('#barra-schedina');
+    if (!carrelloSchedina.length) { barra.classList.add('hidden'); return; }
+    barra.classList.remove('hidden');
+    el('#schedina-conteggio').textContent = carrelloSchedina.length;
+    el('#schedina-quota-mini').textContent = quotaTotaleCarrello().toFixed(2);
+  }
+
+  function renderModalSchedina() {
+    const cont = el('#schedina-selezioni');
+    if (!carrelloSchedina.length) {
+      cont.innerHTML = '<p class="hint">Nessuna selezione. Torna alle scommesse aperte e tocca una quota.</p>';
+    } else {
+      cont.innerHTML = carrelloSchedina.map((s, i) => `
+        <div class="schedina-riga">
+          <div class="info"><b>${escapeHtml(s.label)}</b>${escapeHtml(s.titolo_mercato)}</div>
+          <div><span class="quota">${s.quota.toFixed(2)}</span><button class="btn-rimuovi-sel" data-i="${i}">✕</button></div>
+        </div>`).join('');
+      all('.btn-rimuovi-sel').forEach(btn => btn.addEventListener('click', () => {
+        carrelloSchedina.splice(Number(btn.dataset.i), 1);
+        renderModalSchedina();
+        renderMercati();
+        renderSchedinaBarra();
+      }));
+    }
+    el('#schedina-giornata').textContent = carrelloSchedina.length ? carrelloSchedina[0].giornata : '-';
+    el('#schedina-quota-totale').textContent = quotaTotaleCarrello().toFixed(2);
+    aggiornaVincitaPotenzialeSchedina();
+  }
+
+  function aggiornaVincitaPotenzialeSchedina() {
+    const importo = Number(el('#schedina-importo').value) || 0;
+    const div = el('#schedina-vincita-potenziale');
+    if (!importo || !carrelloSchedina.length) { div.textContent = ''; return; }
+    const quota = quotaTotaleCarrello();
+    const tetto = stato.vincita_massima_per_scommessa;
+    let vincita = Math.round(importo * quota * 100) / 100;
+    if (tetto != null && vincita > tetto) {
+      div.textContent = `Vincita potenziale: ${tetto.toFixed(2)} FM (tetto massimo per scommessa, sarebbe ${vincita.toFixed(2)})`;
+    } else {
+      div.textContent = `Vincita potenziale: ${vincita.toFixed(2)} FM`;
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -186,20 +217,16 @@
     const cont = el('#lista-giocate');
     const squadra = squadraAttuale();
     if (!squadra) { cont.innerHTML = '<p class="hint">Scegli prima la tua squadra.</p>'; return; }
-    const bets = (stato.mie_scommesse || []).slice().sort((a, b) => b.id - a.id);
-    if (!bets.length) { cont.innerHTML = '<p class="hint">Non hai ancora piazzato nessuna scommessa.</p>'; return; }
-    const mercatiById = {};
-    (stato.mercati || []).forEach(m => { mercatiById[m.id] = m; });
-    cont.innerHTML = bets.map(b => {
-      const m = mercatiById[b.mercato_id];
-      const titolo = m ? m.titolo : `Mercato #${b.mercato_id}`;
-      const esitoLabel = m ? (m.esiti.find(e => e.chiave === b.esito) || {}).label || b.esito : b.esito;
-      let dettaglio = `${b.importo} FM @ ${b.quota.toFixed(2)}`;
-      if (b.stato === 'vinta') dettaglio += ` → vinti ${b.vincita} FM`;
-      if (b.stato === 'persa') dettaglio += ' → persi';
+    const schedine = (stato.mie_schedine || []).slice().sort((a, b) => b.id - a.id);
+    if (!schedine.length) { cont.innerHTML = '<p class="hint">Non hai ancora giocato nessuna schedina.</p>'; return; }
+    cont.innerHTML = schedine.map(s => {
+      const legs = s.selezioni.map(sel => `${escapeHtml(sel.label_esito)} — ${escapeHtml(sel.titolo_mercato)} @ ${sel.quota.toFixed(2)}`).join('<br>');
+      let dettaglio = `${s.importo} FM @ quota totale ${s.quota_totale.toFixed(2)}`;
+      if (s.stato === 'vinta') dettaglio += ` → vinti ${s.vincita} FM`;
+      if (s.stato === 'persa') dettaglio += ' → persi';
       return `<div class="giocata-card">
-        <div><b>${escapeHtml(titolo)}</b><br><span class="hint">${escapeHtml(esitoLabel)} — ${dettaglio}</span></div>
-        <div class="giocata-stato ${b.stato}">${b.stato}</div>
+        <div><b>Schedina giornata ${s.giornata}</b><br><span class="hint">${legs}</span><br><span class="hint">${dettaglio}</span></div>
+        <div class="giocata-stato ${s.stato}">${s.stato}</div>
       </div>`;
     }).join('');
   }
@@ -223,6 +250,7 @@
       el('#admin-login').classList.add('hidden');
       el('#admin-panel').classList.remove('hidden');
       renderAdminMercati();
+      renderAdminSchedine();
       renderAdminLog();
     } else {
       el('#admin-login').classList.remove('hidden');
@@ -230,7 +258,7 @@
     }
   }
 
-  async function renderAdminMercati() {
+  function renderAdminMercati() {
     const cont = el('#admin-mercati-lista');
     const mercati = (stato.mercati || []).slice().sort((a, b) => b.id - a.id);
     if (!mercati.length) { cont.innerHTML = '<p class="hint">Nessun mercato creato.</p>'; return; }
@@ -265,8 +293,39 @@
     all('.btn-risolvi').forEach(btn => btn.addEventListener('click', async () => {
       const id = Number(btn.dataset.id);
       const select = document.querySelector(`.risolvi-select[data-id="${id}"]`);
-      if (!confirm(`Risolvere il mercato #${id} con esito "${select.value}"? Pagherà subito le vincite.`)) return;
+      if (!confirm(`Risolvere il mercato #${id} con esito "${select.value}"? Pagherà subito le schedine vincenti.`)) return;
       const r = await post('/api/admin/risolvi-mercato', { admin_password: adminPassword(), mercato_id: id, esito_vincente: select.value });
+      if (r.errore) { alert(r.errore); return; }
+      await ricarica();
+    }));
+  }
+
+  async function renderAdminSchedine() {
+    const cont = el('#admin-schedine-lista');
+    const params = new URLSearchParams({ admin_password: adminPassword() });
+    const schedine = await get('/api/admin/schedine?' + params.toString());
+    if (!Array.isArray(schedine)) { cont.innerHTML = `<p class="errore">${escapeHtml(schedine.errore || 'errore')}</p>`; return; }
+    disegnaAdminSchedine(schedine);
+  }
+
+  function disegnaAdminSchedine(schedine) {
+    const cont = el('#admin-schedine-lista');
+    schedine = schedine.slice().sort((a, b) => b.id - a.id);
+    if (!schedine.length) { cont.innerHTML = '<p class="hint">Nessuna schedina giocata.</p>'; return; }
+    cont.innerHTML = schedine.map(s => {
+      const legs = s.selezioni.map(sel => `${escapeHtml(sel.label_esito)} @ ${sel.quota.toFixed(2)}`).join(' + ');
+      const azione = s.stato === 'in_corso'
+        ? `<button class="mini-btn btn-elimina-schedina" data-id="${s.id}">Elimina (rimborsa)</button>`
+        : `<span class="hint">${s.stato}${s.vincita ? ' — vinti ' + s.vincita + ' FM' : ''}</span>`;
+      return `<div class="mercato-card">
+        <h3>#${s.id} ${escapeHtml(s.squadra)} — giornata ${s.giornata}</h3>
+        <div class="mercato-meta">${legs} = quota ${s.quota_totale.toFixed(2)} · puntati ${s.importo} FM</div>
+        <div>${azione}</div>
+      </div>`;
+    }).join('');
+    all('.btn-elimina-schedina').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('Eliminare questa schedina e rimborsare la puntata?')) return;
+      const r = await post('/api/admin/elimina-schedina', { admin_password: adminPassword(), schedina_id: Number(btn.dataset.id) });
       if (r.errore) { alert(r.errore); return; }
       await ricarica();
     }));
@@ -405,8 +464,7 @@
           ${escapeHtml(squadra_a)}: ${r.lambda_a} gol attesi (fonte: ${FONTE_LABEL[r.fonte_a] || r.fonte_a})<br>
           ${escapeHtml(squadra_b)}: ${r.lambda_b} gol attesi (fonte: ${FONTE_LABEL[r.fonte_b] || r.fonte_b})
         </p>
-        <p><b>1X2</b>: 1 → ${r['1x2'].quota_1.toFixed(2)} · X → ${r['1x2'].quota_x.toFixed(2)} · 2 → ${r['1x2'].quota_2.toFixed(2)}</p>
-        <p><b>Over/Under</b>: ${r.over_under.map(o => `linea ${o.linea} (Over ${o.quota_over.toFixed(2)} / Under ${o.quota_under.toFixed(2)})`).join(' · ')}</p>`;
+        <p><b>1X2</b>: 1 → ${r['1x2'].quota_1.toFixed(2)} · X → ${r['1x2'].quota_x.toFixed(2)} · 2 → ${r['1x2'].quota_2.toFixed(2)}</p>`;
       el('#btn-pubblica-h2h').classList.remove('hidden');
     });
     el('#btn-pubblica-h2h').addEventListener('click', async () => {
@@ -416,7 +474,7 @@
         squadra_a: ultimaAnteprima.squadra_a, squadra_b: ultimaAnteprima.squadra_b, giornata: ultimaAnteprima.giornata,
       });
       if (r.errore) { alert(r.errore); return; }
-      alert(`Pubblicati ${r.mercati.length} mercati.`);
+      alert('Mercato pubblicato.');
       el('#h2h-anteprima').innerHTML = '';
       el('#btn-pubblica-h2h').classList.add('hidden');
       await ricarica();
@@ -471,6 +529,41 @@
     });
   }
 
+  function initSchedina() {
+    el('#barra-schedina').addEventListener('click', () => {
+      renderModalSchedina();
+      el('#modal-schedina').classList.add('open');
+    });
+    el('#btn-chiudi-schedina').addEventListener('click', () => {
+      el('#modal-schedina').classList.remove('open');
+    });
+    el('#btn-svuota-schedina').addEventListener('click', () => {
+      carrelloSchedina = [];
+      renderModalSchedina();
+      renderMercati();
+      renderSchedinaBarra();
+    });
+    el('#schedina-importo').addEventListener('input', aggiornaVincitaPotenzialeSchedina);
+    el('#btn-conferma-schedina').addEventListener('click', async () => {
+      const squadra = squadraAttuale();
+      const importo = Number(el('#schedina-importo').value);
+      const erroreEl = el('#schedina-errore');
+      erroreEl.textContent = '';
+      if (!squadra) { erroreEl.textContent = 'Scegli prima la tua squadra.'; return; }
+      if (!carrelloSchedina.length) { erroreEl.textContent = 'Aggiungi almeno una selezione.'; return; }
+      if (!importo || importo <= 0) { erroreEl.textContent = 'Indica quanti fantamilioni puntare.'; return; }
+      const giornata = carrelloSchedina[0].giornata;
+      const selezioni = carrelloSchedina.map(s => ({ mercato_id: s.mercato_id, esito: s.esito }));
+      const r = await post('/api/schedina', { squadra, giornata, selezioni, importo });
+      if (r.errore) { erroreEl.textContent = r.errore; return; }
+      carrelloSchedina = [];
+      el('#modal-schedina').classList.remove('open');
+      el('#schedina-importo').value = '';
+      await ricarica();
+      alert(`Schedina giocata! Vincita potenziale: ${r.vincita_potenziale} FM.`);
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initIdentita();
@@ -481,6 +574,7 @@
     initCustom();
     initCorrezioneSaldo();
     initCambiaPassword();
+    initSchedina();
     ricarica();
   });
 })();

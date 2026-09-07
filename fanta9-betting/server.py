@@ -102,44 +102,32 @@ def calcola_probabilita_1x2(lam_a, lam_b, max_gol):
     return p1 / tot, px / tot, p2 / tot
 
 
-def calcola_probabilita_over_under(lam_a, lam_b, linea, max_gol):
-    lam_tot = lam_a + lam_b
-    d = distribuzione(lam_tot, max_gol * 2)
-    p_under = sum(p for k, p in enumerate(d) if k < linea)
-    tot = sum(d) or 1.0
-    p_under = p_under / tot
-    p_over = 1.0 - p_under
-    return p_over, p_under
+def stima_probabilita_pareggio(lam_a, lam_b, base, decadimento):
+    """Il pareggio sui 'gol equivalenti' non e' affidabile calcolato dal Poisson grezzo: la
+    conversione punti->gol raggruppa punteggi fantacalcio diversi nello stesso numero di gol
+    (es. 50 e 61 punti fanno entrambi 0 gol), gonfiando artificialmente la probabilita' di
+    pareggio quando le medie sono entrambe basse. Stimiamo invece il pareggio direttamente
+    dalla differenza di forza tra le due squadre: piu' sono vicine, piu' e' plausibile un
+    pareggio (fino a 'base', un incontro perfettamente equilibrato), e decade man mano che
+    una delle due e' nettamente piu' forte."""
+    return base * math.exp(-decadimento * abs(lam_a - lam_b))
 
 
-def applica_tetto_pareggio(p1, px, p2, tetto):
-    """Il pareggio va confrontato sui 'gol equivalenti', che raggruppano molti punteggi
-    fantacalcio diversi nello stesso numero di gol (es. 50 e 61 punti fanno entrambi 0 gol):
-    questo gonfia artificialmente la probabilita' di pareggio quando le medie sono entrambe
-    basse (vicine o sotto soglia), al punto da renderlo il favorito. Limitiamo il pareggio a
-    una probabilita' massima realistica e ridistribuiamo l'eccedenza sulle altre due,
-    mantenendo le proporzioni originali tra 1 e 2."""
-    if px <= tetto:
-        return p1, px, p2
-    eccedenza = px - tetto
-    somma_12 = p1 + p2
+def combina_pareggio(p1_raw, p2_raw, px):
+    """Fissata la probabilita' di pareggio, ridistribuisce il resto tra 1 e 2 mantenendo le
+    proporzioni relative del modello di Poisson (chi ha lambda piu' alto resta piu' favorito)."""
+    somma_12 = p1_raw + p2_raw
     if somma_12 <= 0:
-        meta = (1.0 - tetto) / 2
-        return meta, tetto, meta
-    return p1 + eccedenza * (p1 / somma_12), tetto, p2 + eccedenza * (p2 / somma_12)
+        meta = (1.0 - px) / 2
+        return meta, px, meta
+    resto = 1.0 - px
+    return resto * (p1_raw / somma_12), px, resto * (p2_raw / somma_12)
 
 
 def quota_da_probabilita(p, margine):
     p = max(p, 0.005)
     quota = (1.0 / p) / margine
     return round(max(quota, 1.01), 2)
-
-
-def linee_over_under(lam_a, lam_b):
-    lam_tot = lam_a + lam_b
-    base = math.floor(lam_tot)
-    linee = sorted(set([max(0.5, base - 0.5), base + 0.5, base + 1.5]))
-    return linee
 
 
 class Store:
@@ -160,6 +148,8 @@ class Store:
         """Se config.json ha squadre nuove/rimosse rispetto allo stato, sincronizza saldi/storico."""
         squadre = self.config['lega']['squadre']
         saldo_iniziale = self.config['lega']['saldo_iniziale']
+        self.state.setdefault('schedine', [])
+        self.state.setdefault('prossimo_id_schedina', 1)
         for sq in squadre:
             self.state['saldi'].setdefault(sq, saldo_iniziale)
             self.state['storico_punti'].setdefault(sq, [])
@@ -341,17 +331,10 @@ class Store:
         lam_b, fonte_b = self.stima_lambda_con_fonte(squadra_b, giornata)
         margine = self.config['quote']['margine_bookmaker']
         max_gol = self.config['quote']['max_gol_simulati']
-        p1, px, p2 = calcola_probabilita_1x2(lam_a, lam_b, max_gol)
-        p1, px, p2 = applica_tetto_pareggio(p1, px, p2, self.config['quote']['probabilita_pareggio_max'])
-        linee = linee_over_under(lam_a, lam_b)
-        ou = []
-        for linea in linee:
-            p_over, p_under = calcola_probabilita_over_under(lam_a, lam_b, linea, max_gol)
-            ou.append({
-                'linea': linea,
-                'quota_over': quota_da_probabilita(p_over, margine),
-                'quota_under': quota_da_probabilita(p_under, margine),
-            })
+        p1_raw, _, p2_raw = calcola_probabilita_1x2(lam_a, lam_b, max_gol)
+        px = stima_probabilita_pareggio(lam_a, lam_b, self.config['quote']['pareggio_base'],
+                                         self.config['quote']['pareggio_decadimento'])
+        p1, px, p2 = combina_pareggio(p1_raw, p2_raw, px)
         return {
             'squadra_a': squadra_a, 'squadra_b': squadra_b, 'giornata': giornata,
             'lambda_a': round(lam_a, 2), 'lambda_b': round(lam_b, 2),
@@ -361,7 +344,6 @@ class Store:
                 'quota_x': quota_da_probabilita(px, margine),
                 'quota_2': quota_da_probabilita(p2, margine),
             },
-            'over_under': ou,
         }
 
     # -- mercati ---------------------------------------------------------
@@ -371,11 +353,6 @@ class Store:
         self.state['prossimo_id_mercato'] = i + 1
         return i
 
-    def _nuovo_id_scommessa(self):
-        i = self.state['prossimo_id_scommessa']
-        self.state['prossimo_id_scommessa'] = i + 1
-        return i
-
     def crea_mercato_h2h(self, squadra_a, squadra_b, giornata):
         if squadra_a not in self.squadre() or squadra_b not in self.squadre():
             return {'errore': 'squadra non valida'}
@@ -383,9 +360,8 @@ class Store:
             return {'errore': 'le due squadre devono essere diverse'}
         anteprima = self.anteprima_h2h(squadra_a, squadra_b, giornata)
         incontro_id = f"g{giornata}-{normalize(squadra_a)}-vs-{normalize(squadra_b)}-{int(time.time())}"
-        creati = []
 
-        m_1x2 = {
+        mercato = {
             'id': self._nuovo_id_mercato(),
             'incontro_id': incontro_id,
             'tipo': '1x2',
@@ -399,30 +375,10 @@ class Store:
             'stato': 'aperto', 'esito_vincente': None,
             'creato_il': now_str(), 'risolto_il': None,
         }
-        self.state['mercati'].append(m_1x2)
-        creati.append(m_1x2)
-
-        for linea_info in anteprima['over_under']:
-            linea = linea_info['linea']
-            m_ou = {
-                'id': self._nuovo_id_mercato(),
-                'incontro_id': incontro_id,
-                'tipo': 'over_under',
-                'titolo': f"{squadra_a} vs {squadra_b} - Giornata {giornata} - Over/Under {linea} gol equivalenti totali",
-                'giornata': giornata, 'squadra_a': squadra_a, 'squadra_b': squadra_b, 'linea': linea,
-                'esiti': [
-                    {'chiave': 'Over', 'label': f'Over {linea}', 'quota': linea_info['quota_over']},
-                    {'chiave': 'Under', 'label': f'Under {linea}', 'quota': linea_info['quota_under']},
-                ],
-                'stato': 'aperto', 'esito_vincente': None,
-                'creato_il': now_str(), 'risolto_il': None,
-            }
-            self.state['mercati'].append(m_ou)
-            creati.append(m_ou)
-
-        self._log(f"Creato incontro {squadra_a} vs {squadra_b} (giornata {giornata}): {len(creati)} mercati")
+        self.state['mercati'].append(mercato)
+        self._log(f"Creato incontro {squadra_a} vs {squadra_b} (giornata {giornata})")
         self.save()
-        return {'ok': True, 'mercati': creati}
+        return {'ok': True, 'mercati': [mercato]}
 
     def crea_mercato_custom(self, titolo, esiti, giornata=None):
         if not titolo or not esiti or len(esiti) < 2:
@@ -474,9 +430,10 @@ class Store:
         m = self._trova_mercato(mercato_id)
         if not m:
             return {'errore': 'mercato non trovato'}
-        scommesse_collegate = [s for s in self.state['scommesse'] if s['mercato_id'] == mercato_id]
-        if scommesse_collegate:
-            return {'errore': 'ci sono gia\' scommesse piazzate su questo mercato, non puoi eliminarlo (chiudilo o risolvilo)'}
+        schedine_collegate = [s for s in self.state['schedine']
+                               if any(sel['mercato_id'] == mercato_id for sel in s['selezioni'])]
+        if schedine_collegate:
+            return {'errore': 'ci sono gia\' schedine giocate su questo mercato, non puoi eliminarlo (chiudilo o risolvilo)'}
         self.state['mercati'] = [x for x in self.state['mercati'] if x['id'] != mercato_id]
         self.save()
         return {'ok': True}
@@ -490,20 +447,30 @@ class Store:
         mercato['stato'] = 'risolto'
         mercato['esito_vincente'] = esito_vincente
         mercato['risolto_il'] = now_str()
-        for s in self.state['scommesse']:
-            if s['mercato_id'] != mercato['id'] or s['stato'] != 'in_corso':
+
+        for sch in self.state['schedine']:
+            if sch['stato'] != 'in_corso':
                 continue
-            if s['esito'] == esito_vincente:
+            if not any(sel['mercato_id'] == mercato['id'] for sel in sch['selezioni']):
+                continue
+            persa = any(sel['mercato_id'] == mercato['id'] and sel['esito'] != esito_vincente
+                        for sel in sch['selezioni'])
+            if persa:
+                sch['stato'] = 'persa'
+                sch['vincita'] = 0
+                continue
+            tutte_risolte = all(self._trova_mercato(sel['mercato_id'])
+                                 and self._trova_mercato(sel['mercato_id'])['stato'] == 'risolto'
+                                 for sel in sch['selezioni'])
+            if tutte_risolte:
                 tetto = self.config['quote'].get('vincita_massima_per_scommessa')
-                vincita = round(s['importo'] * s['quota'], 2)
+                vincita = round(sch['importo'] * sch['quota_totale'], 2)
                 if tetto is not None:
                     vincita = min(vincita, tetto)
-                s['stato'] = 'vinta'
-                s['vincita'] = vincita
-                self.state['saldi'][s['squadra']] = round(self.state['saldi'].get(s['squadra'], 0) + vincita, 2)
-            else:
-                s['stato'] = 'persa'
-                s['vincita'] = 0
+                sch['stato'] = 'vinta'
+                sch['vincita'] = vincita
+                self.state['saldi'][sch['squadra']] = round(self.state['saldi'].get(sch['squadra'], 0) + vincita, 2)
+
         self._log(f"Risolto mercato #{mercato['id']} ({mercato['titolo']}): vince '{esito_vincente}'")
 
     def risolvi_mercato_manuale(self, mercato_id, esito_vincente):
@@ -522,7 +489,7 @@ class Store:
     def auto_settle(self, giornata):
         risolti = []
         for m in self.state['mercati']:
-            if m['stato'] == 'risolto' or m['giornata'] != giornata or m['tipo'] not in ('1x2', 'over_under'):
+            if m['stato'] == 'risolto' or m['giornata'] != giornata or m['tipo'] != '1x2':
                 continue
             punti_a = self.punti_giornata(m['squadra_a'], giornata)
             punti_b = self.punti_giornata(m['squadra_b'], giornata)
@@ -531,58 +498,100 @@ class Store:
             formula = self.config['formula_gol']
             gol_a = punti_a_gol(punti_a, formula)
             gol_b = punti_a_gol(punti_b, formula)
-            if m['tipo'] == '1x2':
-                esito = '1' if gol_a > gol_b else ('X' if gol_a == gol_b else '2')
-            else:
-                esito = 'Over' if (gol_a + gol_b) > m['linea'] else 'Under'
+            esito = '1' if gol_a > gol_b else ('X' if gol_a == gol_b else '2')
             self._settle_mercato(m, esito)
             risolti.append({'mercato_id': m['id'], 'titolo': m['titolo'], 'esito_vincente': esito,
                              'gol_a': gol_a, 'gol_b': gol_b})
         return risolti
 
-    # -- scommesse ---------------------------------------------------------
+    # -- schedina (unica per squadra per giornata, combina piu' esiti come un bookmaker vero) --
 
-    def piazza_scommessa(self, squadra, mercato_id, esito, importo):
+    def _nuovo_id_schedina(self):
+        i = self.state['prossimo_id_schedina']
+        self.state['prossimo_id_schedina'] = i + 1
+        return i
+
+    def ha_schedina(self, squadra, giornata):
+        return any(s['squadra'] == squadra and s['giornata'] == giornata for s in self.state['schedine'])
+
+    def crea_schedina(self, squadra, giornata, selezioni, importo):
         if squadra not in self.squadre():
             return {'errore': 'squadra non valida'}
-        m = self._trova_mercato(mercato_id)
-        if not m:
-            return {'errore': 'mercato non trovato'}
-        if m['stato'] != 'aperto':
-            return {'errore': 'le scommesse su questo mercato sono chiuse'}
+        if not selezioni:
+            return {'errore': 'la schedina deve contenere almeno una selezione'}
+        if self.ha_schedina(squadra, giornata):
+            return {'errore': f'hai gia\' giocato la tua schedina per la giornata {giornata} (una sola a giornata)'}
         try:
             importo = round(float(importo), 2)
         except (TypeError, ValueError):
             return {'errore': 'importo non valido'}
         if importo <= 0:
             return {'errore': 'importo deve essere positivo'}
-        esito_info = next((e for e in m['esiti'] if e['chiave'] == esito), None)
-        if not esito_info:
-            return {'errore': f'esito non valido, scegli tra: {[e["chiave"] for e in m["esiti"]]}'}
+
+        dettaglio = []
+        quota_totale = 1.0
+        mercati_usati = set()
+        for sel in selezioni:
+            mercato_id = sel.get('mercato_id')
+            esito = sel.get('esito')
+            if mercato_id in mercati_usati:
+                return {'errore': 'non puoi scegliere due esiti dello stesso mercato nella stessa schedina'}
+            m = self._trova_mercato(mercato_id)
+            if not m:
+                return {'errore': f'mercato #{mercato_id} non trovato'}
+            if m['stato'] != 'aperto':
+                return {'errore': f'il mercato "{m["titolo"]}" non e\' piu\' aperto'}
+            if m['giornata'] != giornata:
+                return {'errore': 'tutte le selezioni della schedina devono appartenere alla stessa giornata'}
+            esito_info = next((e for e in m['esiti'] if e['chiave'] == esito), None)
+            if not esito_info:
+                return {'errore': f'esito non valido per il mercato "{m["titolo"]}"'}
+            mercati_usati.add(mercato_id)
+            quota_totale *= esito_info['quota']
+            dettaglio.append({'mercato_id': mercato_id, 'titolo_mercato': m['titolo'],
+                               'esito': esito, 'label_esito': esito_info['label'], 'quota': esito_info['quota']})
+
         saldo = self.state['saldi'].get(squadra, 0)
         if importo > saldo:
             return {'errore': f'fantamilioni insufficienti (saldo attuale: {saldo})'}
         self.state['saldi'][squadra] = round(saldo - importo, 2)
-        scommessa = {
-            'id': self._nuovo_id_scommessa(),
-            'mercato_id': mercato_id,
-            'squadra': squadra,
-            'esito': esito,
-            'importo': importo,
-            'quota': esito_info['quota'],
-            'stato': 'in_corso',
-            'vincita': None,
-            'piazzata_il': now_str(),
-        }
-        self.state['scommesse'].append(scommessa)
+
+        quota_totale = round(quota_totale, 2)
         tetto = self.config['quote'].get('vincita_massima_per_scommessa')
-        vincita_potenziale = round(importo * esito_info['quota'], 2)
+        vincita_potenziale = round(importo * quota_totale, 2)
         if tetto is not None:
             vincita_potenziale = min(vincita_potenziale, tetto)
-        self._log(f"{squadra} punta {importo} FM su '{esito_info['label']}' (mercato #{mercato_id}, quota {esito_info['quota']}, vincita potenziale {vincita_potenziale})")
+
+        schedina = {
+            'id': self._nuovo_id_schedina(),
+            'squadra': squadra,
+            'giornata': giornata,
+            'selezioni': dettaglio,
+            'quota_totale': quota_totale,
+            'importo': importo,
+            'stato': 'in_corso',
+            'vincita': None,
+            'creata_il': now_str(),
+        }
+        self.state['schedine'].append(schedina)
+        riepilogo = ' + '.join(f"{d['label_esito']} ({d['quota']})" for d in dettaglio)
+        self._log(f"{squadra} gioca la schedina giornata {giornata}: {riepilogo} = quota {quota_totale}, "
+                   f"punta {importo} FM (vincita potenziale {vincita_potenziale})")
         self.save()
-        return {'ok': True, 'scommessa': scommessa, 'saldo': self.state['saldi'][squadra],
+        return {'ok': True, 'schedina': schedina, 'saldo': self.state['saldi'][squadra],
                 'vincita_potenziale': vincita_potenziale}
+
+    def elimina_schedina(self, schedina_id):
+        sch = next((s for s in self.state['schedine'] if s['id'] == schedina_id), None)
+        if not sch:
+            return {'errore': 'schedina non trovata'}
+        if sch['stato'] != 'in_corso':
+            return {'errore': 'la schedina e\' gia\' risolta, non e\' piu\' eliminabile'}
+        self.state['saldi'][sch['squadra']] = round(self.state['saldi'].get(sch['squadra'], 0) + sch['importo'], 2)
+        self.state['schedine'] = [s for s in self.state['schedine'] if s['id'] != schedina_id]
+        self._log(f"Eliminata schedina #{schedina_id} di {sch['squadra']} (rimborsati {sch['importo']} FM)")
+        self.save()
+        return {'ok': True}
 
     def classifica(self):
         righe = [{'squadra': sq, 'saldo': self.state['saldi'].get(sq, 0)} for sq in self.squadre()]
@@ -611,7 +620,7 @@ class Store:
                 m['squadra_a'] = rename_map[m['squadra_a']]
             if m.get('squadra_b') in rename_map:
                 m['squadra_b'] = rename_map[m['squadra_b']]
-        for s in self.state['scommesse']:
+        for s in self.state['schedine']:
             if s.get('squadra') in rename_map:
                 s['squadra'] = rename_map[s['squadra']]
         self.state['saldi'] = nuovi_saldi
@@ -710,14 +719,14 @@ class Handler(BaseHTTPRequestHandler):
         with LOCK:
             if path == '/api/state':
                 squadra = (qs.get('squadra') or [None])[0]
-                mie_scommesse = [s for s in STORE.state['scommesse'] if s['squadra'] == squadra] if squadra else []
+                mie_schedine = [s for s in STORE.state['schedine'] if s['squadra'] == squadra] if squadra else []
                 self._send_json({
                     'lega': STORE.config['lega']['nome'],
                     'squadre': STORE.squadre(),
                     'saldi': STORE.state['saldi'],
                     'mia_squadra': squadra,
                     'mio_saldo': STORE.state['saldi'].get(squadra) if squadra else None,
-                    'mie_scommesse': mie_scommesse,
+                    'mie_schedine': mie_schedine,
                     'mercati': STORE.state['mercati'],
                     'classifica': STORE.classifica(),
                     'vincita_massima_per_scommessa': STORE.config['quote'].get('vincita_massima_per_scommessa'),
@@ -733,7 +742,16 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(STORE.state.get('log', [])[-100:])
                 return
             if path == '/api/export':
+                if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
+                    self._send_json({'errore': 'password admin errata'}, 403)
+                    return
                 self._send_json({'state': STORE.state, 'config': STORE.config, 'exported_at': now_str()})
+                return
+            if path == '/api/admin/schedine':
+                if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
+                    self._send_json({'errore': 'password admin errata'}, 403)
+                    return
+                self._send_json(STORE.state['schedine'])
                 return
             if path == '/api/admin/anteprima-h2h':
                 if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
@@ -760,9 +778,9 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         with LOCK:
-            if path == '/api/scommessa':
-                risultato = STORE.piazza_scommessa(
-                    body.get('squadra'), body.get('mercato_id'), body.get('esito'), body.get('importo'))
+            if path == '/api/schedina':
+                risultato = STORE.crea_schedina(
+                    body.get('squadra'), body.get('giornata'), body.get('selezioni', []), body.get('importo'))
                 self._send_json(risultato, 200 if risultato.get('ok') else 400)
                 return
 
@@ -803,6 +821,10 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/elimina-mercato':
                     r = STORE.elimina_mercato(body.get('mercato_id'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/elimina-schedina':
+                    r = STORE.elimina_schedina(body.get('schedina_id'))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/risolvi-mercato':

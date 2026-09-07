@@ -96,7 +96,7 @@
   ]
  },
  "mercati": [],
- "scommesse": [],
+ "schedine": [],
  "log": [
   {
    "ts": "2026-09-06 16:17:31",
@@ -104,5 +104,5 @@
   }
  ],
  "prossimo_id_mercato": 1,
- "prossimo_id_scommessa": 1
+ "prossimo_id_schedina": 1
 }

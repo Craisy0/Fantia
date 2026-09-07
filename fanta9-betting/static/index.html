@@ -36,6 +36,7 @@
 
   <main>
     <section id="tab-scommesse" class="tab-pane active">
+      <p class="hint">Tocca una quota per aggiungerla alla schedina. Una sola schedina a giornata per squadra.</p>
       <div id="lista-mercati" class="mercati-lista"></div>
     </section>
 
@@ -87,7 +88,7 @@ Cucca; 58.1; 6.4
 
         <hr>
 
-        <h2>Crea scommessa testa a testa (1X2 + Over/Under)</h2>
+        <h2>Crea scommessa testa a testa (1X2)</h2>
         <div class="riga-form">
           <select id="h2h-squadra-a"></select>
           <span>vs</span>
@@ -114,6 +115,11 @@ Cucca; 58.1; 6.4
 
         <hr>
 
+        <h2>Schedine giocate</h2>
+        <div id="admin-schedine-lista"></div>
+
+        <hr>
+
         <h2>Correggi saldo squadra</h2>
         <div class="riga-form">
           <select id="correzione-squadra"></select>
@@ -136,6 +142,26 @@ Cucca; 58.1; 6.4
       </div>
     </section>
   </main>
+
+  <button id="barra-schedina" class="barra-schedina hidden">
+    🎫 Schedina (<span id="schedina-conteggio">0</span>) — quota <span id="schedina-quota-mini">1.00</span>
+  </button>
+
+  <div id="modal-schedina" class="modal">
+    <div class="modal-box modal-schedina-box">
+      <h2>La tua schedina — Giornata <span id="schedina-giornata"></span></h2>
+      <div id="schedina-selezioni"></div>
+      <p class="hint">Quota totale (le quote si moltiplicano tra loro, come su una schedina vera): <b id="schedina-quota-totale">1.00</b></p>
+      <input type="number" id="schedina-importo" min="1" step="1" placeholder="Quanti fantamilioni punti?">
+      <p id="schedina-vincita-potenziale" class="hint"></p>
+      <p id="schedina-errore" class="errore"></p>
+      <div class="riga-bottoni">
+        <button id="btn-svuota-schedina">Svuota</button>
+        <button id="btn-conferma-schedina" class="primario">Conferma schedina</button>
+      </div>
+      <button id="btn-chiudi-schedina" class="link-btn">chiudi</button>
+    </div>
+  </div>
 
 </div>
 <script src="/static/app.js"></script>

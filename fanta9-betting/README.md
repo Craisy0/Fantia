@@ -10,16 +10,16 @@ Pagina web per scommesse virtuali in fantamilioni tra le 10 squadre della lega G
 
 ### Punti fantacalcio → "gol equivalenti"
 
-Le scommesse 1X2 e Over/Under funzionano come sul sito di un bookmaker (tipo Sisal), ma il "gol" è calcolato dal punteggio fantacalcio con la formula che ci hai dato:
+L'esito 1X2 di un testa a testa è calcolato dal punteggio fantacalcio con la formula che ci hai dato:
 
 - sotto 66 punti → 0 gol
 - da 66 punti → 1 gol, poi +1 gol ogni 4 punti aggiuntivi
 
-Modificabile in `config.json` → `formula_gol`.
+Modificabile in `config.json` → `formula_gol`. (Non ci sono più mercati Over/Under: solo 1X2 per i testa a testa, più le scommesse libere.)
 
 ### Quote automatiche
 
-Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, poi calcola le probabilità di 1/X/2 e di Over/Under con un modello di Poisson (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), e infila un margine da bookmaker (15% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali. Un margine più alto abbassa tutte le quote in blocco — utile finché ci sono poche giornate di dati e le stime sono meno affidabili.
+Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, calcola con un modello di Poisson chi ha più probabilità di segnarne di più (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), stima il pareggio a parte (vedi sotto) e infila un margine da bookmaker (15% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali. Un margine più alto abbassa tutte le quote in blocco — utile finché ci sono poche giornate di dati e le stime sono meno affidabili.
 
 La stima dei gol attesi di una squadra per una giornata, in ordine di priorità:
 
@@ -31,9 +31,9 @@ Il tab Admin ti dice sempre da quale delle tre fonti provengono le quote propost
 
 **Correzioni al modello** (emerse testando le prime quote reali):
 
-- **Tetto al pareggio** (`quote.probabilita_pareggio_max`, default 15%): i "gol equivalenti" raggruppano punteggi fantacalcio diversi nello stesso numero di gol (es. 50 e 61 punti fanno entrambi 0 gol), quindi quando le proiezioni di entrambe le squadre sono basse la probabilità di pareggio calcolata dal modello risulta artificialmente gonfiata, al punto da renderlo l'esito favorito. Il sistema limita la probabilità di pareggio a questo massimo e redistribuisce l'eccedenza sulle altre due quote, mantenendo le proporzioni tra 1 e 2.
-- **Quota minima 1.01**: nessuna quota (nemmeno un Under fortissimo favorito) può scendere sotto 1.01, altrimenti si vincerebbe meno di quanto puntato.
-- **Tetto massimo di vincita per scommessa** (`quote.vincita_massima_per_scommessa`, default 30 FM): indipendentemente da puntata e quota, una singola scommessa non può pagare più di questo importo — evita che un long shot fortunato con poche giornate di dati faccia guadagnare troppo in un colpo solo. Il sito mostra la vincita potenziale (già limitata dal tetto) prima di confermare la puntata.
+- **Pareggio stimato dalla differenza di forza, non dal Poisson grezzo** (`quote.pareggio_base` e `quote.pareggio_decadimento`, default 35% e 1.5): i "gol equivalenti" raggruppano punteggi fantacalcio diversi nello stesso numero di gol (es. 50 e 61 punti fanno entrambi 0 gol), quindi la probabilità di pareggio calcolata direttamente dal Poisson risulta artificialmente gonfiata — a volte perfino il favorito, il che non ha senso. Al suo posto, il pareggio è stimato come `pareggio_base × e^(-pareggio_decadimento × |differenza tra i due gol attesi|)`: più le due squadre sono vicine come forza, più il pareggio è probabile (fino a `pareggio_base`, un incontro perfettamente equilibrato — quota indicativa intorno a 2.5), e scende man mano che una delle due è nettamente più forte. Il resto della probabilità va a 1 e 2, mantenendo le proporzioni del modello di Poisson tra chi è più favorito.
+- **Quota minima 1.01**: nessuna quota (nemmeno un esito fortissimo favorito) può scendere sotto 1.01, altrimenti si vincerebbe meno di quanto puntato.
+- **Tetto massimo di vincita per schedina** (`quote.vincita_massima_per_scommessa`, default 30 FM): indipendentemente da puntata e quota totale, una singola schedina non può pagare più di questo importo — evita che una combinazione fortunata con poche giornate di dati faccia guadagnare troppo in un colpo solo. Il sito mostra la vincita potenziale (già limitata dal tetto) prima di confermare la puntata.
 
 #### Proiezioni pre-giornata da FantaLab (semi-automatico)
 
@@ -43,9 +43,20 @@ Non serve più aspettare che si accumuli storico per avere quote sensate: fin da
 
 Le scommesse "libere" (outright, prop bet custom) non hanno una formula automatica valida in generale: tu inserisci titolo, esiti e quote a mano nel tab Admin.
 
+### La schedina
+
+I compagni non piazzano scommesse singole: giocano una **schedina** (come su Sisal), un'unica volta a giornata per squadra:
+
+1. Nel tab "Scommesse aperte" toccano le quote che vogliono includere (anche su mercati diversi, ma tutti della stessa giornata) — ogni tocco la aggiunge a un carrello.
+2. Una barra in basso mostra quante selezioni hanno e la quota combinata; toccandola si apre il popup della schedina.
+3. Nel popup vedono l'elenco delle selezioni (rimovibili), la **quota totale** (le quote si moltiplicano tra loro, come su una schedina vera), inseriscono quanti fantamilioni puntare e vedono subito la vincita potenziale (già limitata dal tetto massimo).
+4. Confermano: la puntata viene scalata subito dal saldo. Non possono giocarne un'altra per la stessa giornata finché non ne hanno già una (a meno che tu, admin, non la elimini per correggere un errore).
+
+La schedina vince solo se **tutte** le selezioni sono corrette; basta che una sbagli per farla perdere. Si liquida in automatico non appena tutti i mercati coinvolti sono risolti (di solito quando importi i punteggi finali della giornata).
+
 ### Dati delle giornate (rose/punteggi)
 
-Non esiste un connettore ufficiale verso FantaLab o l'app Lega Fantacalcio, quindi l'unico modo pensato per adesso è: dopo ogni giornata, tu copi la tabella dei punteggi da dove la guardi di solito e la incolli nel tab Admin → "Importa punteggi giornata" (una riga per squadra, es. `Squadra 1; 72`). Il sistema riconosce automaticamente i nomi delle squadre e, appena importa i punti di una giornata, **liquida in automatico** tutte le scommesse 1X2/Over-Under aperte su quella giornata (accredita le vincite, aggiorna i saldi). Le scommesse libere le risolvi tu a mano scegliendo l'esito vincente.
+Non esiste un connettore ufficiale verso FantaLab o l'app Lega Fantacalcio, quindi l'unico modo pensato per adesso è: dopo ogni giornata, tu copi la tabella dei punteggi da dove la guardi di solito e la incolli nel tab Admin → "Importa punteggi giornata" (una riga per squadra, es. `Squadra 1; 72`). Il sistema riconosce automaticamente i nomi delle squadre e, appena importa i punti di una giornata, **liquida in automatico** tutti i mercati 1X2 aperti su quella giornata (e con loro le schedine che li includono, accreditando le vincite). Le scommesse libere le risolvi tu a mano scegliendo l'esito vincente.
 
 ## Avvio in locale (per provare prima di pubblicare)
 
@@ -82,28 +93,30 @@ Consigliato **Render** (piano free):
 
 - `server.py` — backend, solo libreria standard Python, nessuna dipendenza.
 - `config.json` — nome lega, squadre, saldo iniziale, password admin, formula gol, margine bookmaker.
-- `data/state.json` — saldi, storico punti, mercati, scommesse, log (si salva su disco a ogni azione).
+- `data/state.json` — saldi, storico punti, proiezioni, mercati, schedine, log (si salva su disco a ogni azione).
 - `static/` — frontend (HTML/CSS/JS vanilla).
 
 ## API principali
 
 | Endpoint | Uso |
 |---|---|
-| `GET /api/state?squadra=X` | stato completo per la squadra X (saldo, mercati, mie scommesse, classifica) |
+| `GET /api/state?squadra=X` | stato completo per la squadra X (saldo, mercati, mie schedine, classifica) |
 | `GET /api/mercati` | tutti i mercati (aperti/chiusi/risolti) |
 | `GET /api/classifica` | classifica fantamilioni |
-| `POST /api/scommessa {squadra, mercato_id, esito, importo}` | piazza una giocata |
-| `GET /api/admin/anteprima-h2h?admin_password=&squadra_a=&squadra_b=&giornata=` | calcola le quote di un testa a testa senza pubblicarlo (indica anche la fonte del lambda usato) |
+| `POST /api/schedina {squadra, giornata, selezioni:[{mercato_id, esito}], importo}` | gioca la schedina della giornata (una sola per squadra) |
+| `GET /api/admin/anteprima-h2h?admin_password=&squadra_a=&squadra_b=&giornata=` | calcola le quote 1X2 di un testa a testa senza pubblicarlo (indica anche la fonte del lambda usato) |
 | `POST /api/admin/anteprima-import-proiezioni {admin_password, testo}` | controlla il parsing delle proiezioni FantaLab senza salvare |
 | `POST /api/admin/importa-proiezioni {admin_password, giornata, testo}` | salva le proiezioni pre-giornata usate per calcolare le quote |
-| `POST /api/admin/crea-mercato-h2h {admin_password, squadra_a, squadra_b, giornata}` | pubblica 1X2 + Over/Under per un incontro |
+| `POST /api/admin/crea-mercato-h2h {admin_password, squadra_a, squadra_b, giornata}` | pubblica il mercato 1X2 per un incontro |
 | `POST /api/admin/crea-mercato-custom {admin_password, titolo, esiti:[{label,quota}], giornata}` | pubblica una scommessa libera |
 | `POST /api/admin/anteprima-import-punti {admin_password, testo}` | controlla il parsing dei punteggi senza salvare |
-| `POST /api/admin/importa-punti {admin_password, giornata, testo}` | salva i punteggi e liquida automaticamente i mercati di quella giornata |
+| `POST /api/admin/importa-punti {admin_password, giornata, testo}` | salva i punteggi e liquida automaticamente i mercati (e le schedine) di quella giornata |
 | `POST /api/admin/chiudi-mercato / riapri-mercato {admin_password, mercato_id}` | blocca/riapre le nuove giocate su un mercato |
 | `POST /api/admin/risolvi-mercato {admin_password, mercato_id, esito_vincente}` | liquidazione manuale (per le scommesse libere) |
-| `POST /api/admin/elimina-mercato {admin_password, mercato_id}` | elimina un mercato senza giocate |
+| `POST /api/admin/elimina-mercato {admin_password, mercato_id}` | elimina un mercato senza schedine collegate |
+| `GET /api/admin/schedine?admin_password=` | elenco di tutte le schedine giocate |
+| `POST /api/admin/elimina-schedina {admin_password, schedina_id}` | elimina una schedina non ancora risolta e rimborsa la puntata |
 | `POST /api/admin/correggi-saldo {admin_password, squadra, delta, motivo}` | aggiustamento manuale di un saldo |
 | `POST /api/admin/rinomina-squadre {admin_password, squadre:[...], rename_map:{vecchio:nuovo}}` | rinomina le squadre |
 | `POST /api/admin/cambia-password {admin_password, nuova_password}` | cambia la password admin |
-| `GET /api/export` | backup completo di stato + configurazione |
+| `GET /api/export?admin_password=` | backup completo di stato + configurazione (protetto: contiene la password admin) |
