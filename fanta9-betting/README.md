@@ -69,6 +69,8 @@ Nel tab "Scommesse aperte" i mercati sono raggruppati sotto un titolo con il num
 
 Non esiste un connettore ufficiale verso FantaLab o l'app Lega Fantacalcio, quindi l'unico modo pensato per adesso è: dopo ogni giornata, tu copi la tabella dei punteggi da dove la guardi di solito e la incolli nel tab Admin → "Importa punteggi giornata" (una riga per squadra, es. `Squadra 1; 72`). Il sistema riconosce automaticamente i nomi delle squadre e, appena importa i punti di una giornata, **liquida in automatico** tutti i mercati 1X2 aperti su quella giornata (e con loro le schedine che li includono, accreditando le vincite). Le scommesse libere le risolvi tu a mano scegliendo l'esito vincente.
 
+In cima al tab Admin trovi **"Chi ha giocato"**: un colpo d'occhio su chi ha già puntato la schedina dell'ultima giornata pubblicata e chi no. Subito sotto, **"Schedine giocate"** elenca lo storico completo (squadra, selezioni, quota, puntata, esito, vincita) — dopo aver importato i punteggi è lì che controlli se il sistema ha liquidato tutto correttamente.
+
 ## Avvio in locale (per provare prima di pubblicare)
 
 ```

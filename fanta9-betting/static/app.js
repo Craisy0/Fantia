@@ -370,6 +370,24 @@
     const schedine = await get('/api/admin/schedine?' + params.toString());
     if (!Array.isArray(schedine)) { cont.innerHTML = `<p class="errore">${escapeHtml(schedine.errore || 'errore')}</p>`; return; }
     disegnaAdminSchedine(schedine);
+    disegnaChiHaGiocato(schedine);
+  }
+
+  function disegnaChiHaGiocato(schedine) {
+    const cont = el('#admin-chi-ha-giocato');
+    const squadre = stato.squadre || [];
+    const giornateConMercati = (stato.mercati || []).map(m => m.giornata).filter(g => g != null);
+    const giornataTarget = giornateConMercati.length ? Math.max(...giornateConMercati) : null;
+    if (giornataTarget == null) { cont.innerHTML = '<p class="hint">Nessuna giornata pubblicata ancora.</p>'; return; }
+    const perSquadra = {};
+    schedine.filter(s => s.giornata === giornataTarget).forEach(s => { perSquadra[s.squadra] = s; });
+    cont.innerHTML = `<p class="hint"><b>Giornata ${giornataTarget}</b></p>` + squadre.map(sq => {
+      const s = perSquadra[sq];
+      const stato_ = s
+        ? `<span class="accesso-stato si">giocata — ${s.importo} FM @ ${s.quota_totale.toFixed(2)}${s.stato !== 'in_corso' ? ' — ' + s.stato : ''}</span>`
+        : '<span class="accesso-stato no">non ancora</span>';
+      return `<div class="accesso-riga"><span>${escapeHtml(sq)}</span>${stato_}</div>`;
+    }).join('');
   }
 
   function disegnaAdminSchedine(schedine) {
@@ -572,7 +590,10 @@
       const r = await post('/api/admin/importa-punti', { admin_password: adminPassword(), giornata, testo });
       if (r.errore) { alert(r.errore); return; }
       let msg = 'Punteggi importati.';
-      if (r.mercati_risolti && r.mercati_risolti.length) msg += ` Risolti ${r.mercati_risolti.length} mercati automaticamente.`;
+      if (r.mercati_risolti && r.mercati_risolti.length) {
+        msg += ` Risolti ${r.mercati_risolti.length} mercati automaticamente.`;
+        msg += '\nControlla "Schedine giocate" qui sopra per vedere chi ha vinto e quanto è stato pagato.';
+      }
       alert(msg);
       el('#import-testo').value = '';
       el('#import-risultato').innerHTML = '';

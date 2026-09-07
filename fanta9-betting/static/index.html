@@ -71,6 +71,18 @@
 
     <section id="tab-admin" class="tab-pane">
       <div id="admin-panel">
+        <h2>Chi ha giocato — giornata in corso</h2>
+        <p class="hint">Colpo d'occhio su chi ha già puntato la propria schedina per l'ultima giornata pubblicata.</p>
+        <div id="admin-chi-ha-giocato"></div>
+
+        <hr>
+
+        <h2>Schedine giocate</h2>
+        <p class="hint">Storico completo di tutte le schedine, di tutte le giornate. Dopo aver importato i punteggi, controlla qui chi ha vinto e quanto.</p>
+        <div id="admin-schedine-lista"></div>
+
+        <hr>
+
         <h2>Importa punteggi giornata</h2>
         <p class="hint">Una riga per squadra: <code>Nome; Punti</code></p>
         <input type="number" id="import-giornata" placeholder="Numero giornata" min="1">
@@ -121,11 +133,6 @@ Cucca; 58.1; 6.4
 
         <h2>Gestisci mercati esistenti</h2>
         <div id="admin-mercati-lista"></div>
-
-        <hr>
-
-        <h2>Schedine giocate</h2>
-        <div id="admin-schedine-lista"></div>
 
         <hr>
 
