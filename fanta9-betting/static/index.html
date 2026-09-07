@@ -6,7 +6,7 @@
 <title>Gottabet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -52,7 +52,12 @@
 
   <main>
     <section id="tab-scommesse" class="tab-pane active">
-      <p class="hint">Tocca una quota per aggiungerla alla schedina (una sola a giornata).</p>
+      <div class="riga-info">
+        <button id="btn-info-scommesse" class="btn-info" aria-label="Come funziona">?</button>
+        <div id="popover-info-scommesse" class="popover hidden">
+          Tocca una quota per aggiungerla alla schedina. Puoi giocarne una sola a giornata.
+        </div>
+      </div>
       <div id="lista-mercati" class="mercati-lista"></div>
     </section>
 
@@ -61,10 +66,7 @@
     </section>
 
     <section id="tab-classifica" class="tab-pane">
-      <table class="classifica-tab">
-        <thead><tr><th>#</th><th>Squadra</th><th>Fantamilioni</th></tr></thead>
-        <tbody id="classifica-body"></tbody>
-      </table>
+      <div id="classifica-lista" class="classifica-lista"></div>
     </section>
 
     <section id="tab-admin" class="tab-pane">

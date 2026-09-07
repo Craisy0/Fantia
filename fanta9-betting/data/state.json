@@ -1,15 +1,15 @@
 {
  "saldi": {
-  "Davide": 1000,
-  "Giammi": 1000,
-  "Nando": 1000,
-  "Luca": 1000,
-  "Cucca": 1000,
-  "Ale": 1000,
-  "Fili": 1000,
-  "Cri": 1000,
-  "Rota": 1000,
-  "Giorgio": 1000
+  "Davide": 20,
+  "Giammi": 20,
+  "Nando": 20,
+  "Luca": 20,
+  "Cucca": 20,
+  "Ale": 20,
+  "Fili": 20,
+  "Cri": 20,
+  "Rota": 20,
+  "Giorgio": 20
  },
  "storico_punti": {
   "Davide": [],

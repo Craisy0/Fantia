@@ -126,15 +126,26 @@
       const chiave = m.giornata != null ? `g${m.giornata}` : 'libere';
       if (!indice.has(chiave)) {
         indice.set(chiave, gruppi.length);
-        gruppi.push({ titolo: m.giornata != null ? `Giornata ${m.giornata}` : 'Libere', mercati: [] });
+        gruppi.push({ titolo: m.giornata != null ? `Giornata ${m.giornata}` : 'Libere', giornata: m.giornata, mercati: [] });
       }
       gruppi[indice.get(chiave)].mercati.push(m);
     });
-    cont.innerHTML = gruppi.map(g => `
+    cont.innerHTML = gruppi.map(g => {
+      const statiUnici = new Set(g.mercati.map(m => m.stato));
+      const statoComune = statiUnici.size === 1 ? [...statiUnici][0] : null;
+      const badge = statoComune ? `<span class="mercato-stato ${statoComune}">${statoComune}</span>` : '';
+      const nota = giocate.has(g.giornata)
+        ? `<p class="giornata-nota">Hai già giocato la schedina di questa giornata.</p>` : '';
+      return `
       <div class="giornata-gruppo">
-        <h2 class="giornata-titolo">${escapeHtml(g.titolo)}</h2>
-        ${g.mercati.map(m => renderMercatoCard(m, giocate)).join('')}
-      </div>`).join('');
+        <div class="giornata-head">
+          <h2 class="giornata-titolo">${escapeHtml(g.titolo)}</h2>
+          ${badge}
+        </div>
+        ${nota}
+        ${g.mercati.map(m => renderMercatoCard(m, giocate, statoComune !== null)).join('')}
+      </div>`;
+    }).join('');
 
     all('.esito-btn').forEach(btn => {
       if (btn.disabled) return;
@@ -142,7 +153,7 @@
     });
   }
 
-  function renderMercatoCard(m, giocate) {
+  function renderMercatoCard(m, giocate, nascondiStato) {
     const giaGiocata = giocate.has(m.giornata);
     const esitiHtml = m.esiti.map(e => {
       let classi = 'esito-btn';
@@ -157,14 +168,11 @@
       </button>`;
     }).join('');
 
-    const nota = giaGiocata
-      ? `<div class="hint">Hai gia' giocato la schedina della giornata ${m.giornata}.</div>`
-      : '';
+    const badge = nascondiStato ? '' : ` <span class="mercato-stato ${m.stato}">${m.stato}</span>`;
 
     return `<div class="mercato-card" data-giornata="${m.giornata}">
-      <h3>${escapeHtml(m.titolo)} <span class="mercato-stato ${m.stato}">${m.stato}</span></h3>
+      <h3>${escapeHtml(m.titolo)}${badge}</h3>
       <div class="esiti-riga">${esitiHtml}</div>
-      ${nota}
     </div>`;
   }
 
@@ -293,10 +301,21 @@
   // Tab "Classifica"
   // ---------------------------------------------------------------------
 
+  const MEDAGLIE = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
   function renderClassifica() {
-    const body = el('#classifica-body');
+    const cont = el('#classifica-lista');
     const righe = stato.classifica || [];
-    body.innerHTML = righe.map((r, i) => `<tr><td>${i + 1}</td><td>${escapeHtml(r.squadra)}</td><td>${r.saldo.toFixed(0)}</td></tr>`).join('');
+    cont.innerHTML = righe.map((r, i) => {
+      const pos = i + 1;
+      const medaglia = MEDAGLIE[pos];
+      const classeMedaglia = pos <= 3 ? ` medaglia-${pos}` : '';
+      return `<div class="classifica-riga${classeMedaglia}">
+        <span class="classifica-pos">${medaglia || pos}</span>
+        <span class="classifica-squadra">${escapeHtml(r.squadra)}</span>
+        <span class="classifica-saldo">${r.saldo.toFixed(0)} <small>FM</small></span>
+      </div>`;
+    }).join('');
   }
 
   // ---------------------------------------------------------------------
@@ -417,6 +436,20 @@
   // ---------------------------------------------------------------------
   // Event listeners statici
   // ---------------------------------------------------------------------
+
+  function initPopover(btnSel, popSel) {
+    const btn = el(btnSel);
+    const pop = el(popSel);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pop.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!pop.classList.contains('hidden') && e.target !== btn && !pop.contains(e.target)) {
+        pop.classList.add('hidden');
+      }
+    });
+  }
 
   function initTabs() {
     all('.tab-btn').forEach(btn => {
@@ -721,6 +754,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    initPopover('#btn-info-scommesse', '#popover-info-scommesse');
     initTabs();
     initIdentita();
     initImportPunti();

@@ -5,7 +5,7 @@
       "Davide", "Giammi", "Nando", "Luca", "Cucca",
       "Ale", "Fili", "Cri", "Rota", "Giorgio"
     ],
-    "saldo_iniziale": 1000
+    "saldo_iniziale": 20
   },
   "admin": {
     "password": "cambiami123"
