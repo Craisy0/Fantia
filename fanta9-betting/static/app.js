@@ -101,7 +101,21 @@
       return;
     }
     const giocate = giornateGiaGiocate();
-    cont.innerHTML = mercati.map(m => renderMercatoCard(m, giocate)).join('');
+    const gruppi = [];
+    const indice = new Map();
+    mercati.forEach(m => {
+      const chiave = m.giornata != null ? `g${m.giornata}` : 'libere';
+      if (!indice.has(chiave)) {
+        indice.set(chiave, gruppi.length);
+        gruppi.push({ titolo: m.giornata != null ? `Giornata ${m.giornata}` : 'Libere', mercati: [] });
+      }
+      gruppi[indice.get(chiave)].mercati.push(m);
+    });
+    cont.innerHTML = gruppi.map(g => `
+      <div class="giornata-gruppo">
+        <h2 class="giornata-titolo">${escapeHtml(g.titolo)}</h2>
+        ${g.mercati.map(m => renderMercatoCard(m, giocate)).join('')}
+      </div>`).join('');
 
     all('.esito-btn').forEach(btn => {
       if (btn.disabled) return;
@@ -199,11 +213,11 @@
     if (!importo || !carrelloSchedina.length) { div.textContent = ''; return; }
     const quota = quotaTotaleCarrello();
     const tetto = stato.vincita_massima_per_scommessa;
-    let vincita = Math.round(importo * quota * 100) / 100;
-    if (tetto != null && vincita > tetto) {
-      div.textContent = `Vincita potenziale: ${tetto.toFixed(2)} FM (tetto massimo per scommessa, sarebbe ${vincita.toFixed(2)})`;
+    let vincita = Math.floor(importo * quota);
+    if (tetto != null && vincita > Math.floor(tetto)) {
+      div.textContent = `Vincita potenziale: ${Math.floor(tetto)} FM (tetto massimo, sarebbe ${vincita})`;
     } else {
-      div.textContent = `Vincita potenziale: ${vincita.toFixed(2)} FM`;
+      div.textContent = `Vincita potenziale: ${vincita} FM`;
     }
   }
 

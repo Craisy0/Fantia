@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gottabet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -21,7 +24,7 @@
   <div id="modal-identita" class="modal">
     <div class="modal-box">
       <h2>Chi sei?</h2>
-      <p>Scegli la squadra che rappresenti. Verrà ricordata su questo dispositivo.</p>
+      <p>Scegli la tua squadra.</p>
       <select id="select-squadra"></select>
       <button id="btn-conferma-identita">Continua</button>
     </div>
@@ -36,7 +39,7 @@
 
   <main>
     <section id="tab-scommesse" class="tab-pane active">
-      <p class="hint">Tocca una quota per aggiungerla alla schedina. Una sola schedina a giornata per squadra.</p>
+      <p class="hint">Tocca una quota per aggiungerla alla schedina (una sola a giornata).</p>
       <div id="lista-mercati" class="mercati-lista"></div>
     </section>
 
@@ -61,21 +64,21 @@
 
       <div id="admin-panel" class="hidden">
         <h2>Importa punteggi giornata</h2>
-        <p class="hint">Incolla una riga per squadra: <code>Nome Squadra; Punti</code> (va bene anche uno spazio/tab/virgola come separatore). Le squadre verranno riconosciute automaticamente.</p>
+        <p class="hint">Una riga per squadra: <code>Nome; Punti</code></p>
         <input type="number" id="import-giornata" placeholder="Numero giornata" min="1">
         <textarea id="import-testo" rows="9" placeholder="Squadra 1; 72
 Squadra 2; 58
 ..."></textarea>
         <div class="riga-bottoni">
           <button id="btn-anteprima-import">Controlla</button>
-          <button id="btn-conferma-import" disabled>Confirma e importa</button>
+          <button id="btn-conferma-import" disabled>Conferma e importa</button>
         </div>
         <div id="import-risultato"></div>
 
         <hr>
 
         <h2>Inserisci proiezioni FantaLab (pre-giornata)</h2>
-        <p class="hint">Prima che inizi la giornata, apri su FantaLab la formazione consigliata di ogni squadra e incolla una riga per squadra con la <b>Fanta Media Proiettata Titolari</b> (e, se vuoi tenerne traccia, l'Indice di Schierabilità Medio): <code>Nome Squadra; Fanta Media Proiettata; Indice Schierabilità</code>. Se per una squadra c'è una proiezione per questa giornata, viene usata al posto della media storica per calcolare le quote del testa a testa qui sotto.</p>
+        <p class="hint">Una riga per squadra con la Fanta Media Proiettata Titolari da FantaLab: <code>Nome; Punti proiettati</code>. Usata per calcolare le quote della giornata.</p>
         <input type="number" id="proiezioni-giornata" placeholder="Numero giornata" min="1">
         <textarea id="proiezioni-testo" rows="9" placeholder="Davide; 64.3; 8.0
 Cucca; 58.1; 6.4
@@ -89,7 +92,7 @@ Cucca; 58.1; 6.4
         <hr>
 
         <h2>Pubblica una giornata dal calendario</h2>
-        <p class="hint">Crea in automatico tutti gli scontri 1X2 di una giornata già fissata dal calendario ufficiale, usando le quote calcolate dal sistema. Salta gli incontri già pubblicati.</p>
+        <p class="hint">Pubblica tutti gli scontri della giornata con le quote calcolate. Salta quelli già pubblicati.</p>
         <div class="riga-form">
           <input type="number" id="calendario-giornata" placeholder="Numero giornata" min="1" style="width:10em">
           <button id="btn-anteprima-calendario">Vedi scontri</button>
@@ -149,7 +152,7 @@ Cucca; 58.1; 6.4
     <div class="modal-box modal-schedina-box">
       <h2>La tua schedina — Giornata <span id="schedina-giornata"></span></h2>
       <div id="schedina-selezioni"></div>
-      <p class="hint">Quota totale (le quote si moltiplicano tra loro, come su una schedina vera): <b id="schedina-quota-totale">1.00</b></p>
+      <p class="hint">Quota totale: <b id="schedina-quota-totale">1.00</b></p>
       <input type="number" id="schedina-importo" min="1" step="1" placeholder="Quanti fantamilioni punti?">
       <p id="schedina-vincita-potenziale" class="hint"></p>
       <p id="schedina-errore" class="errore"></p>

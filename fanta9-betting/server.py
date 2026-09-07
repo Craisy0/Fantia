@@ -65,15 +65,18 @@ def punti_a_gol(punti, formula):
     return 1 + int((punti - soglia) // ogni)
 
 
-def punti_a_gol_continuo(punti, formula):
-    """Stessa formula ma senza lo scalino (retta continua), usata solo per stimare il lambda
-    di Poisson pre-partita da una proiezione: evita un salto brusco delle quote attorno alla soglia
-    (es. 65.9 proiettati non deve valere 'zero gol attesi' contro 66.0 che ne vale uno pieno)."""
-    soglia = formula['soglia']
-    ogni = formula['ogni_punti']
-    if punti is None:
+def lambda_da_proiezione(punti_proiettati, formula, lambda_default):
+    """Stima il lambda di Poisson pre-partita direttamente dai punti fantacalcio proiettati
+    (FantaLab), come rapporto rispetto alla soglia ufficiale dei 'gol equivalenti' (66 punti = 1 gol,
+    quindi lambda_default). A differenza della conversione 'a gol' usata per liquidare le scommesse
+    reali, qui NON si passa dal gradino/soglia: altrimenti, con poche giornate di dati, quasi tutte le
+    proiezioni finiscono sotto soglia e collassano tutte sullo stesso lambda minimo, rendendo le quote
+    quasi identiche. Il rapporto diretto sui punti mantiene invece la differenza di forza reale tra le
+    squadre anche quando nessuna delle due proietta 66+ punti."""
+    if punti_proiettati is None:
         return None
-    return max(0.0, (punti - soglia) / ogni + 1.0)
+    soglia = formula['soglia']
+    return max(lambda_default * (punti_proiettati / soglia), 0.15)
 
 
 def poisson_pmf(k, lam):
@@ -333,7 +336,8 @@ class Store:
         formula = self.config['formula_gol']
         proiezione = self.proiezione_giornata(squadra, giornata)
         if proiezione is not None:
-            return max(punti_a_gol_continuo(proiezione, formula), 0.15), 'proiezione_fantalab'
+            lambda_default = self.config['quote']['lambda_default']
+            return lambda_da_proiezione(proiezione, formula, lambda_default), 'proiezione_fantalab'
         lam_storico = self.stima_lambda_storico(squadra, escludi_giornata=giornata)
         if lam_storico is not None:
             return lam_storico, 'media_storica'
@@ -381,7 +385,7 @@ class Store:
             'id': self._nuovo_id_mercato(),
             'incontro_id': incontro_id,
             'tipo': '1x2',
-            'titolo': f"{squadra_a} vs {squadra_b} - Giornata {giornata} - Esito (1X2 su gol equivalenti)",
+            'titolo': f"{squadra_a} vs {squadra_b}",
             'giornata': giornata, 'squadra_a': squadra_a, 'squadra_b': squadra_b, 'linea': None,
             'esiti': [
                 {'chiave': '1', 'label': f'Vince {squadra_a}', 'quota': anteprima['1x2']['quota_1']},
@@ -503,9 +507,9 @@ class Store:
                                  for sel in sch['selezioni'])
             if tutte_risolte:
                 tetto = self.config['quote'].get('vincita_massima_per_scommessa')
-                vincita = round(sch['importo'] * sch['quota_totale'], 2)
+                vincita = math.floor(sch['importo'] * sch['quota_totale'])
                 if tetto is not None:
-                    vincita = min(vincita, tetto)
+                    vincita = min(vincita, math.floor(tetto))
                 sch['stato'] = 'vinta'
                 sch['vincita'] = vincita
                 self.state['saldi'][sch['squadra']] = round(self.state['saldi'].get(sch['squadra'], 0) + vincita, 2)
@@ -597,9 +601,9 @@ class Store:
 
         quota_totale = round(quota_totale, 2)
         tetto = self.config['quote'].get('vincita_massima_per_scommessa')
-        vincita_potenziale = round(importo * quota_totale, 2)
+        vincita_potenziale = math.floor(importo * quota_totale)
         if tetto is not None:
-            vincita_potenziale = min(vincita_potenziale, tetto)
+            vincita_potenziale = min(vincita_potenziale, math.floor(tetto))
 
         schedina = {
             'id': self._nuovo_id_schedina(),

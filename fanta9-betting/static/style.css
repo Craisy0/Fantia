@@ -14,7 +14,11 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.badge.saldo, .esito-btn .quota, .schedina-riga .quota, #schedina-quota-mini, #schedina-quota-totale,
+table.classifica-tab td:last-child, .giocata-stato {
+  font-variant-numeric: tabular-nums;
+}
 
 #app { max-width: 900px; margin: 0 auto; padding-bottom: 3em; }
 
@@ -81,6 +85,12 @@ button.primario:hover, #btn-conferma-identita:hover, #btn-pubblica-h2h:hover, #b
 .errore { color: var(--danger); font-size: 0.9em; }
 .hint { color: var(--text-dim); font-size: 0.85em; }
 hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+.giornata-gruppo { margin-bottom: 1.6em; }
+.giornata-titolo {
+  font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-dim); margin: 0 0 0.6em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border);
+}
 
 .mercato-card {
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
