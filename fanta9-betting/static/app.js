@@ -647,6 +647,44 @@
     });
   }
 
+  function initBackup() {
+    el('#btn-scarica-backup').addEventListener('click', async () => {
+      const params = new URLSearchParams({ admin_password: adminPassword() });
+      const dati = await get('/api/export?' + params.toString());
+      if (dati.errore) { el('#backup-errore').textContent = dati.errore; return; }
+      el('#backup-errore').textContent = '';
+      const blob = new Blob([JSON.stringify(dati, null, 1)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const bollino = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+      a.href = url;
+      a.download = `gottabet-backup-${bollino}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+    el('#btn-ripristina-backup').addEventListener('click', async () => {
+      const erroreEl = el('#backup-errore');
+      erroreEl.textContent = '';
+      const file = el('#ripristina-file').files[0];
+      if (!file) { erroreEl.textContent = 'Scegli prima un file di backup.'; return; }
+      let backup;
+      try {
+        backup = JSON.parse(await file.text());
+      } catch (e) {
+        erroreEl.textContent = 'Il file scelto non è un JSON valido.';
+        return;
+      }
+      if (!confirm('Ripristinare questo backup? Sovrascrive saldi, mercati, schedine e password attuali.')) return;
+      const r = await post('/api/admin/ripristina-backup', { admin_password: adminPassword(), backup });
+      if (r.errore) { erroreEl.textContent = r.errore; return; }
+      el('#ripristina-file').value = '';
+      alert('Backup ripristinato.');
+      await ricarica();
+    });
+  }
+
   function initSchedina() {
     el('#barra-schedina').addEventListener('click', () => {
       renderModalSchedina();
@@ -691,6 +729,7 @@
     initCustom();
     initCorrezioneSaldo();
     initCambiaPassword();
+    initBackup();
     initSchedina();
     ricarica();
   });

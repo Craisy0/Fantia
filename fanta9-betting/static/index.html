@@ -150,6 +150,19 @@ Cucca; 58.1; 6.4
         </div>
 
         <hr>
+
+        <h2>Backup e ripristino</h2>
+        <p class="hint">Su Render free il sito perde saldi, mercati, schedine e password a ogni riavvio o redeploy. Prima di riavviare, scarica un backup; subito dopo, ripristinalo.</p>
+        <div class="riga-bottoni">
+          <button id="btn-scarica-backup">Scarica backup completo</button>
+        </div>
+        <div class="riga-form">
+          <input type="file" id="ripristina-file" accept="application/json">
+          <button id="btn-ripristina-backup">Ripristina da backup</button>
+        </div>
+        <p id="backup-errore" class="errore"></p>
+
+        <hr>
         <h2>Log attività</h2>
         <div id="admin-log" class="log-box"></div>
       </div>

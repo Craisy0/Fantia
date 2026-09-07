@@ -767,6 +767,27 @@ class Store:
         save_json_atomic(CONFIG_PATH, self.config)
         return {'ok': True}
 
+    def ripristina_backup(self, dati):
+        """Ripristina stato (e opzionalmente configurazione) da un file scaricato con GET /api/export.
+        Serve perche' Render free tier azzera data/state.json a ogni restart/redeploy: l'admin scarica
+        un backup prima di riavviare il servizio e lo ricarica subito dopo."""
+        if not isinstance(dati, dict) or not isinstance(dati.get('state'), dict):
+            return {'errore': 'file di backup non valido: manca "state"'}
+        nuovo_state = dati['state']
+        chiavi_richieste = {'saldi', 'mercati', 'schedine', 'storico_punti'}
+        if not chiavi_richieste.issubset(nuovo_state.keys()):
+            return {'errore': 'file di backup non valido: mancano dei campi nello stato'}
+        self.state = nuovo_state
+        config_ripristinata = False
+        if isinstance(dati.get('config'), dict):
+            self.config = dati['config']
+            save_json_atomic(CONFIG_PATH, self.config)
+            config_ripristinata = True
+        self._assicura_squadre()
+        self._log(f"Stato ripristinato da backup (config inclusa: {config_ripristinata})")
+        self.save()
+        return {'ok': True, 'config_ripristinata': config_ripristinata}
+
 
 STORE = Store()
 
@@ -990,6 +1011,10 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/cambia-password':
                     r = STORE.cambia_password_admin(body.get('nuova_password'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/ripristina-backup':
+                    r = STORE.ripristina_backup(body.get('backup'))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/verifica-password':

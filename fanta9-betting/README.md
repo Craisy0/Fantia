@@ -89,10 +89,13 @@ Consigliato **Render** (piano free):
 6. **Start Command**: `python server.py`
 7. Deploy. Render ti darà un URL pubblico tipo `https://gottabet.onrender.com` da condividere con i compagni.
 
-**Attenzione — limite del piano gratuito**: i Web Service gratuiti di Render non hanno un disco persistente garantito: i dati (`data/state.json`) possono azzerarsi a un nuovo deploy **e anche a un semplice restart del servizio** (verificato: "Restart service" da solo riporta `state.json` alla versione salvata su GitHub). Questo azzera saldi, mercati, schedine, **e anche le password che le squadre hanno impostato** (tornano tutte a "primo accesso"). Per una lega tra amici che gioca per una stagione, per sicurezza:
-- Non serve un deploy o un restart ogni giornata (basta il primo), quindi in pratica i dati restano stabili finché non tocchi il servizio da dashboard.
-- Fai un backup periodico scaricando `GET /api/export` (salvalo da browser o con `curl`).
-- Se preferisci zero rischi (saldi stabili e password che non vanno reimpostate ogni volta), un piano con disco persistente su Render (qualche $/mese) o alternative come Railway/Fly.io con volume risolvono del tutto il problema.
+**Attenzione — limite del piano gratuito**: i Web Service gratuiti di Render non hanno un disco persistente garantito: i dati (`data/state.json`) possono azzerarsi a un nuovo deploy **e anche a un semplice restart del servizio** (verificato: "Restart service" da solo riporta `state.json` alla versione salvata su GitHub). Questo azzera saldi, mercati, schedine, **e anche le password che le squadre hanno impostato** (tornano tutte a "primo accesso"). Non serve un deploy o un restart ogni giornata (basta il primo), quindi in pratica i dati restano stabili finché non tocchi il servizio da dashboard — ma quando serve toccarlo (per aggiornare il codice), segui questa procedura:
+
+1. Dal tab Admin → "Backup e ripristino" → **"Scarica backup completo"** (salva un file `gottabet-backup-*.json` con saldi, mercati, schedine, password, log, tutto).
+2. Fai il deploy/restart su Render.
+3. Torna nel pannello Admin → "Backup e ripristino" → scegli il file appena scaricato → **"Ripristina da backup"**: saldi, mercati, schedine e password tornano esattamente come prima.
+
+Il ripristino ripristina anche `config.json` (password admin, squadre, parametri delle quote) se presente nel backup. Se preferisci zero passaggi manuali, un piano con disco persistente su Render (qualche $/mese) o alternative come Railway/Fly.io con volume risolvono del tutto il problema, ma per una lega tra amici il backup/ripristino manuale (gratis, un minuto di lavoro) è più che sufficiente.
 
 ## Prima di condividere il link con i compagni
 
@@ -134,3 +137,4 @@ Consigliato **Render** (piano free):
 | `POST /api/admin/rinomina-squadre {admin_password, squadre:[...], rename_map:{vecchio:nuovo}}` | rinomina le squadre |
 | `POST /api/admin/cambia-password {admin_password, nuova_password}` | cambia la password admin |
 | `GET /api/export?admin_password=` | backup completo di stato + configurazione (protetto: contiene la password admin) |
+| `POST /api/admin/ripristina-backup {admin_password, backup}` | ripristina uno stato (e opzionalmente la configurazione) da un file scaricato con `/api/export` |
