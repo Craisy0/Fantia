@@ -20,7 +20,7 @@ Modificabile in `config.json` → `formula_gol`. (Non ci sono più mercati Over/
 
 ### Quote automatiche
 
-Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, calcola con un modello di Poisson chi ha più probabilità di segnarne di più (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), stima il pareggio a parte (vedi sotto) e infila un margine da bookmaker (15% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali. Un margine più alto abbassa tutte le quote in blocco — utile finché ci sono poche giornate di dati e le stime sono meno affidabili.
+Per ogni testa a testa, il sistema stima quanti "gol equivalenti" farà ciascuna squadra in quella giornata, calcola con un modello di Poisson chi ha più probabilità di segnarne di più (lo stesso approccio usato realmente per stimare le quote sul mercato dei gol nel calcio), stima il pareggio a parte (vedi sotto) e infila un margine da bookmaker (25% di default, `config.json` → `quote.margine_bookmaker`) per ottenere le quote finali. Un margine più alto abbassa tutte le quote in blocco — utile finché ci sono poche giornate di dati e le stime sono meno affidabili. Attenzione a spingerlo troppo oltre: sopra ~1.30 i match molto sbilanciati iniziano a schiacciare il favorito sulla quota minima 1.01, perdendo la differenziazione che il motore delle proiezioni dà proprio a quei casi.
 
 La stima dei gol attesi di una squadra per una giornata, in ordine di priorità:
 
