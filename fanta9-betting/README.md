@@ -4,8 +4,9 @@ Pagina web per scommesse virtuali in fantamilioni tra le 10 squadre della lega G
 
 ## Come funziona
 
-- **Nessun login per i compagni**: al primo accesso ognuno scegli la propria squadra da un elenco (salvata sul proprio dispositivo). Semplice, ma chi ha il link può scegliere qualsiasi squadra — se vi serve più controllo, si può aggiungere una password per squadra in futuro.
-- **Tu (admin)** sblocchi le funzioni di gestione con una password (tab "Admin" → inserisci password). Cambiala subito in `config.json` → `admin.password` prima di condividere il link, oppure dal tab Admin → "Cambia password".
+- **Accesso con password personale**: al primo accesso ognuno sceglie la propria squadra dall'elenco e imposta una password (almeno 4 caratteri) — da quel momento in poi va inserita per rientrare con quella squadra. Il dispositivo resta collegato finché non si preme "cambia". Le password sono salvate con hash (PBKDF2-SHA256 con salt), mai in chiaro.
+- **Tu (admin)** sei una voce in più nello stesso elenco ("— Admin —"), con una password unica fissata da te (di default `GOTTA123` in `config.json` → `admin.password`, cambiala subito prima di condividere il link, oppure dal tab Admin → "Cambia password").
+- **Password dimenticata**: nel form di accesso c'è un link "Password dimenticata?" che spiega di chiedere a te. Tu, dal tab Admin → "Gestisci accessi squadre", vedi quali squadre hanno già impostato una password e puoi resettarla con un click: al prossimo accesso quella squadra potrà impostarne una nuova, senza bisogno di sapere la vecchia. Non c'è recupero via email/SMS (nessuna infrastruttura esterna, resta tutto nella lega).
 - **Fantamilioni**: saldo virtuale separato dal budget reale dell'asta, ogni squadra parte con 1000 FM (modificabile in `config.json` → `lega.saldo_iniziale`).
 
 ### Punti fantacalcio → "gol equivalenti"
@@ -88,10 +89,10 @@ Consigliato **Render** (piano free):
 6. **Start Command**: `python server.py`
 7. Deploy. Render ti darà un URL pubblico tipo `https://gottabet.onrender.com` da condividere con i compagni.
 
-**Attenzione — limite del piano gratuito**: i Web Service gratuiti di Render non hanno un disco persistente garantito: i dati (`data/state.json`) possono azzerarsi a un nuovo deploy o dopo lunga inattività. Per una lega tra amici che gioca per una stagione, il rischio più concreto è perdere storico/saldi se rifai un deploy — per sicurezza:
-- Non serve un deploy ogni giornata (basta il primo), quindi in pratica i dati restano stabili finché non tocchi il codice.
+**Attenzione — limite del piano gratuito**: i Web Service gratuiti di Render non hanno un disco persistente garantito: i dati (`data/state.json`) possono azzerarsi a un nuovo deploy **e anche a un semplice restart del servizio** (verificato: "Restart service" da solo riporta `state.json` alla versione salvata su GitHub). Questo azzera saldi, mercati, schedine, **e anche le password che le squadre hanno impostato** (tornano tutte a "primo accesso"). Per una lega tra amici che gioca per una stagione, per sicurezza:
+- Non serve un deploy o un restart ogni giornata (basta il primo), quindi in pratica i dati restano stabili finché non tocchi il servizio da dashboard.
 - Fai un backup periodico scaricando `GET /api/export` (salvalo da browser o con `curl`).
-- Se preferisci zero rischi, un piano con disco persistente su Render (qualche $/mese) o alternative come Railway/Fly.io con volume risolvono del tutto il problema.
+- Se preferisci zero rischi (saldi stabili e password che non vanno reimpostate ogni volta), un piano con disco persistente su Render (qualche $/mese) o alternative come Railway/Fly.io con volume risolvono del tutto il problema.
 
 ## Prima di condividere il link con i compagni
 
@@ -110,10 +111,13 @@ Consigliato **Render** (piano free):
 
 | Endpoint | Uso |
 |---|---|
-| `GET /api/state?squadra=X` | stato completo per la squadra X (saldo, mercati, mie schedine, classifica) |
+| `GET /api/state?token=` | stato completo per la squadra collegata al token (saldo, mercati, mie schedine, classifica, quali squadre sono già registrate) |
 | `GET /api/mercati` | tutti i mercati (aperti/chiusi/risolti) |
 | `GET /api/classifica` | classifica fantamilioni |
-| `POST /api/schedina {squadra, giornata, selezioni:[{mercato_id, esito}], importo}` | gioca la schedina della giornata (una sola per squadra) |
+| `POST /api/login {squadra, password}` | primo accesso: imposta la password; accessi successivi: la verifica. Ritorna un token di sessione |
+| `POST /api/logout {token}` | invalida il token di sessione |
+| `POST /api/schedina {token, giornata, selezioni:[{mercato_id, esito}], importo}` | gioca la schedina della giornata (una sola per squadra), la squadra è ricavata dal token |
+| `POST /api/admin/reset-password-squadra {admin_password, squadra}` | cancella la password di una squadra: al prossimo accesso potrà impostarne una nuova |
 | `GET /api/admin/anteprima-h2h?admin_password=&squadra_a=&squadra_b=&giornata=` | calcola le quote 1X2 di un testa a testa senza pubblicarlo (indica anche la fonte del lambda usato) |
 | `POST /api/admin/anteprima-import-proiezioni {admin_password, testo}` | controlla il parsing delle proiezioni FantaLab senza salvare |
 | `POST /api/admin/importa-proiezioni {admin_password, giornata, testo}` | salva le proiezioni pre-giornata usate per calcolare le quote |

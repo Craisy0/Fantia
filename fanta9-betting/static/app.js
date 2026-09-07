@@ -1,14 +1,15 @@
 (function () {
   'use strict';
 
-  const LS_SQUADRA = 'fanta9_squadra';
+  const LS_IDENTITA = 'fanta9_identita';
   const SS_ADMIN_PW = 'fanta9_admin_pw';
 
   let stato = null; // ultima risposta di /api/state
   let carrelloSchedina = []; // selezioni non ancora confermate: {mercato_id, esito, quota, label, titolo_mercato, giornata}
+  let selezioneIdentita = null; // squadra scelta nello step 1 del login, in attesa di password
 
-  function squadraAttuale() {
-    return localStorage.getItem(LS_SQUADRA) || null;
+  function identitaAttuale() {
+    try { return JSON.parse(localStorage.getItem(LS_IDENTITA)); } catch (e) { return null; }
   }
 
   function adminPassword() {
@@ -40,16 +41,17 @@
   // ---------------------------------------------------------------------
 
   async function ricarica() {
-    const squadra = squadraAttuale();
-    const qs = squadra ? `?squadra=${encodeURIComponent(squadra)}` : '';
+    const identita = identitaAttuale();
+    const token = identita && identita.tipo === 'squadra' ? identita.token : null;
+    const qs = token ? `?token=${encodeURIComponent(token)}` : '';
     stato = await get('/api/state' + qs);
     renderTutto();
   }
 
   function renderTutto() {
     el('#nome-lega').textContent = stato.lega || 'Gottabet';
-    renderIdentita();
     renderSquadreOptions();
+    renderIdentita();
     renderMercati();
     renderSchedinaBarra();
     renderGiocate();
@@ -58,27 +60,44 @@
       renderAdminMercati();
       renderAdminSchedine();
       renderAdminLog();
+      renderAdminAccessi();
+    }
+  }
+
+  function mostraTabs(tabsDaMostrare) {
+    all('.tab-btn').forEach(btn => btn.classList.toggle('hidden', !tabsDaMostrare.includes(btn.dataset.tab)));
+    const attivoVisibile = all('.tab-btn').find(b => b.classList.contains('active') && !b.classList.contains('hidden'));
+    if (!attivoVisibile) {
+      const primo = all('.tab-btn').find(b => tabsDaMostrare.includes(b.dataset.tab));
+      if (primo) primo.click();
     }
   }
 
   function renderIdentita() {
-    const squadra = squadraAttuale();
-    if (!squadra) {
+    const identita = identitaAttuale();
+    if (!identita) {
       el('#modal-identita').classList.add('open');
       el('#badge-squadra').textContent = 'Chi sei?';
       el('#badge-saldo').textContent = '';
       return;
     }
     el('#modal-identita').classList.remove('open');
-    el('#badge-squadra').textContent = squadra;
-    const saldo = stato.mio_saldo;
-    el('#badge-saldo').textContent = saldo != null ? `${saldo.toFixed(0)} FM` : '';
+    if (identita.tipo === 'admin') {
+      el('#badge-squadra').textContent = 'Admin';
+      el('#badge-saldo').textContent = '';
+      mostraTabs(['admin']);
+    } else {
+      el('#badge-squadra').textContent = identita.squadra;
+      const saldo = stato.mio_saldo;
+      el('#badge-saldo').textContent = saldo != null ? `${saldo.toFixed(0)} FM` : '';
+      mostraTabs(['scommesse', 'giocate', 'classifica']);
+    }
   }
 
   function renderSquadreOptions() {
     const squadre = stato.squadre || [];
     const opts = squadre.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-    el('#select-squadra').innerHTML = opts;
+    el('#select-squadra').innerHTML = opts + '<option value="Admin">— Admin —</option>';
     el('#correzione-squadra').innerHTML = opts;
   }
 
@@ -225,20 +244,47 @@
   // Tab "Le mie giocate"
   // ---------------------------------------------------------------------
 
+  const ETICHETTE_STATO_SCHEDINA = { in_corso: 'In corso', vinta: 'Vinta', persa: 'Persa' };
+
   function renderGiocate() {
     const cont = el('#lista-giocate');
-    const squadra = squadraAttuale();
-    if (!squadra) { cont.innerHTML = '<p class="hint">Scegli prima la tua squadra.</p>'; return; }
+    const identita = identitaAttuale();
+    if (!identita || identita.tipo !== 'squadra') { cont.innerHTML = '<p class="hint">Scegli prima la tua squadra.</p>'; return; }
     const schedine = (stato.mie_schedine || []).slice().sort((a, b) => b.id - a.id);
     if (!schedine.length) { cont.innerHTML = '<p class="hint">Non hai ancora giocato nessuna schedina.</p>'; return; }
     cont.innerHTML = schedine.map(s => {
-      const legs = s.selezioni.map(sel => `${escapeHtml(sel.label_esito)} — ${escapeHtml(sel.titolo_mercato)} @ ${sel.quota.toFixed(2)}`).join('<br>');
-      let dettaglio = `${s.importo} FM @ quota totale ${s.quota_totale.toFixed(2)}`;
-      if (s.stato === 'vinta') dettaglio += ` → vinti ${s.vincita} FM`;
-      if (s.stato === 'persa') dettaglio += ' → persi';
-      return `<div class="giocata-card">
-        <div><b>Schedina giornata ${s.giornata}</b><br><span class="hint">${legs}</span><br><span class="hint">${dettaglio}</span></div>
-        <div class="giocata-stato ${s.stato}">${s.stato}</div>
+      const selezioniHtml = s.selezioni.map(sel => `
+        <div class="giocata-sel">
+          <div class="giocata-sel-info">
+            <span class="giocata-sel-esito">${escapeHtml(sel.label_esito)}</span>
+            <span class="giocata-sel-mercato">${escapeHtml(sel.titolo_mercato)}</span>
+          </div>
+          <span class="giocata-sel-quota">${sel.quota.toFixed(2)}</span>
+        </div>`).join('');
+
+      let etichettaEsito, valoreEsito, classeEsito;
+      if (s.stato === 'vinta') {
+        etichettaEsito = 'Vincita'; valoreEsito = `${s.vincita} FM`; classeEsito = 'vinta';
+      } else if (s.stato === 'persa') {
+        etichettaEsito = 'Vincita'; valoreEsito = '0 FM'; classeEsito = 'persa';
+      } else {
+        let potenziale = Math.floor(s.importo * s.quota_totale);
+        const tetto = stato.vincita_massima_per_scommessa;
+        if (tetto != null) potenziale = Math.min(potenziale, Math.floor(tetto));
+        etichettaEsito = 'Potenziale'; valoreEsito = `${potenziale} FM`; classeEsito = 'in_corso';
+      }
+
+      return `<div class="giocata-card stato-${s.stato}">
+        <div class="giocata-head">
+          <span class="giocata-giornata">Giornata ${s.giornata}</span>
+          <span class="giocata-badge ${s.stato}">${ETICHETTE_STATO_SCHEDINA[s.stato]}</span>
+        </div>
+        <div class="giocata-selezioni">${selezioniHtml}</div>
+        <div class="giocata-riepilogo">
+          <div><span class="hint">Puntata</span><b>${s.importo} FM</b></div>
+          <div><span class="hint">Quota</span><b>${s.quota_totale.toFixed(2)}</b></div>
+          <div><span class="hint">${etichettaEsito}</span><b class="valore ${classeEsito}">${valoreEsito}</b></div>
+        </div>
       </div>`;
     }).join('');
   }
@@ -256,19 +302,6 @@
   // ---------------------------------------------------------------------
   // Tab "Admin"
   // ---------------------------------------------------------------------
-
-  function mostraPannelloAdminSeLoggato() {
-    if (adminPassword()) {
-      el('#admin-login').classList.add('hidden');
-      el('#admin-panel').classList.remove('hidden');
-      renderAdminMercati();
-      renderAdminSchedine();
-      renderAdminLog();
-    } else {
-      el('#admin-login').classList.remove('hidden');
-      el('#admin-panel').classList.add('hidden');
-    }
-  }
 
   function renderAdminMercati() {
     const cont = el('#admin-mercati-lista');
@@ -343,6 +376,27 @@
     }));
   }
 
+  function renderAdminAccessi() {
+    const cont = el('#admin-accessi-lista');
+    const squadre = stato.squadre || [];
+    const registrate = stato.squadre_registrate || {};
+    cont.innerHTML = squadre.map(sq => {
+      const reg = registrate[sq];
+      return `<div class="accesso-riga">
+        <span>${escapeHtml(sq)}</span>
+        <span class="accesso-stato ${reg ? 'si' : 'no'}">${reg ? 'registrata' : 'non registrata'}</span>
+        ${reg ? `<button class="mini-btn btn-reset-accesso" data-squadra="${escapeHtml(sq)}">Resetta password</button>` : ''}
+      </div>`;
+    }).join('');
+    all('.btn-reset-accesso').forEach(btn => btn.addEventListener('click', async () => {
+      const squadra = btn.dataset.squadra;
+      if (!confirm(`Resettare la password di ${squadra}? Al prossimo accesso potrà impostarne una nuova.`)) return;
+      const r = await post('/api/admin/reset-password-squadra', { admin_password: adminPassword(), squadra });
+      if (r.errore) { alert(r.errore); return; }
+      await ricarica();
+    }));
+  }
+
   async function renderAdminLog() {
     const cont = el('#admin-log');
     const log = await get('/api/log');
@@ -371,31 +425,98 @@
         all('.tab-pane').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         el(`#tab-${btn.dataset.tab}`).classList.add('active');
-        if (btn.dataset.tab === 'admin') mostraPannelloAdminSeLoggato();
       });
     });
   }
 
-  function initIdentita() {
-    el('#btn-conferma-identita').addEventListener('click', async () => {
-      const squadra = el('#select-squadra').value;
-      localStorage.setItem(LS_SQUADRA, squadra);
-      await ricarica();
-    });
-    el('#btn-cambia-identita').addEventListener('click', () => {
-      localStorage.removeItem(LS_SQUADRA);
-      renderIdentita();
-    });
+  function mostraStepPassword(squadra) {
+    el('#identita-step-1').classList.add('hidden');
+    el('#identita-step-2').classList.remove('hidden');
+    el('#identita-errore').textContent = '';
+    el('#identita-recupero').classList.add('hidden');
+    el('#identita-password').value = '';
+    el('#identita-password-conferma').value = '';
+    const titolo = el('#identita-step-2-titolo');
+    const hint = el('#identita-step-2-hint');
+    const conferma = el('#identita-password-conferma');
+    const dimenticata = el('#btn-password-dimenticata');
+    if (squadra === 'Admin') {
+      titolo.textContent = 'Password admin';
+      hint.textContent = '';
+      conferma.classList.add('hidden');
+      dimenticata.classList.add('hidden');
+    } else {
+      const registrata = stato && stato.squadre_registrate && stato.squadre_registrate[squadra];
+      if (registrata) {
+        titolo.textContent = `Ciao, ${squadra}`;
+        hint.textContent = 'Inserisci la tua password.';
+        conferma.classList.add('hidden');
+        dimenticata.classList.remove('hidden');
+      } else {
+        titolo.textContent = `Benvenuto, ${squadra}`;
+        hint.textContent = 'Primo accesso: imposta una password (almeno 4 caratteri).';
+        conferma.classList.remove('hidden');
+        dimenticata.classList.add('hidden');
+      }
+    }
+    el('#identita-password').focus();
   }
 
-  function initAdminLogin() {
-    el('#btn-admin-login').addEventListener('click', async () => {
-      const pw = el('#admin-password').value;
+  async function eseguiLogin() {
+    const squadra = selezioneIdentita;
+    const pw = el('#identita-password').value;
+    const erroreEl = el('#identita-errore');
+    erroreEl.textContent = '';
+    if (squadra === 'Admin') {
       const r = await post('/api/admin/verifica-password', { admin_password: pw });
-      if (r.errore) { el('#admin-login-errore').textContent = r.errore; return; }
+      if (r.errore) { erroreEl.textContent = r.errore; return; }
       sessionStorage.setItem(SS_ADMIN_PW, pw);
-      el('#admin-login-errore').textContent = '';
-      mostraPannelloAdminSeLoggato();
+      localStorage.setItem(LS_IDENTITA, JSON.stringify({ tipo: 'admin' }));
+      selezioneIdentita = null;
+      await ricarica();
+      return;
+    }
+    const registrata = stato && stato.squadre_registrate && stato.squadre_registrate[squadra];
+    if (!registrata) {
+      const conferma = el('#identita-password-conferma').value;
+      if (pw.length < 4) { erroreEl.textContent = 'La password deve avere almeno 4 caratteri.'; return; }
+      if (pw !== conferma) { erroreEl.textContent = 'Le due password non coincidono.'; return; }
+    }
+    const r = await post('/api/login', { squadra, password: pw });
+    if (r.errore) { erroreEl.textContent = r.errore; return; }
+    localStorage.setItem(LS_IDENTITA, JSON.stringify({ tipo: 'squadra', squadra: r.squadra, token: r.token }));
+    selezioneIdentita = null;
+    await ricarica();
+  }
+
+  function initIdentita() {
+    el('#btn-avanti-identita').addEventListener('click', () => {
+      selezioneIdentita = el('#select-squadra').value;
+      mostraStepPassword(selezioneIdentita);
+    });
+    el('#btn-indietro-identita').addEventListener('click', () => {
+      selezioneIdentita = null;
+      el('#identita-step-2').classList.add('hidden');
+      el('#identita-step-1').classList.remove('hidden');
+    });
+    el('#btn-password-dimenticata').addEventListener('click', () => {
+      el('#identita-recupero').classList.remove('hidden');
+    });
+    el('#btn-conferma-identita').addEventListener('click', eseguiLogin);
+    [el('#identita-password'), el('#identita-password-conferma')].forEach(input => {
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') eseguiLogin(); });
+    });
+    el('#btn-cambia-identita').addEventListener('click', async () => {
+      const identita = identitaAttuale();
+      if (identita && identita.tipo === 'squadra') {
+        post('/api/logout', { token: identita.token });
+      }
+      localStorage.removeItem(LS_IDENTITA);
+      sessionStorage.removeItem(SS_ADMIN_PW);
+      selezioneIdentita = null;
+      el('#identita-step-2').classList.add('hidden');
+      el('#identita-step-1').classList.remove('hidden');
+      await ricarica();
     });
   }
 
@@ -542,16 +663,16 @@
     });
     el('#schedina-importo').addEventListener('input', aggiornaVincitaPotenzialeSchedina);
     el('#btn-conferma-schedina').addEventListener('click', async () => {
-      const squadra = squadraAttuale();
+      const identita = identitaAttuale();
       const importo = Number(el('#schedina-importo').value);
       const erroreEl = el('#schedina-errore');
       erroreEl.textContent = '';
-      if (!squadra) { erroreEl.textContent = 'Scegli prima la tua squadra.'; return; }
+      if (!identita || identita.tipo !== 'squadra') { erroreEl.textContent = 'Scegli prima la tua squadra.'; return; }
       if (!carrelloSchedina.length) { erroreEl.textContent = 'Aggiungi almeno una selezione.'; return; }
       if (!importo || importo <= 0) { erroreEl.textContent = 'Indica quanti fantamilioni puntare.'; return; }
       const giornata = carrelloSchedina[0].giornata;
       const selezioni = carrelloSchedina.map(s => ({ mercato_id: s.mercato_id, esito: s.esito }));
-      const r = await post('/api/schedina', { squadra, giornata, selezioni, importo });
+      const r = await post('/api/schedina', { token: identita.token, giornata, selezioni, importo });
       if (r.errore) { erroreEl.textContent = r.errore; return; }
       carrelloSchedina = [];
       el('#modal-schedina').classList.remove('open');
@@ -564,7 +685,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initIdentita();
-    initAdminLogin();
     initImportPunti();
     initProiezioni();
     initCalendario();

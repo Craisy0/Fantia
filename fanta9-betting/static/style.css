@@ -16,7 +16,7 @@
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
 body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 .badge.saldo, .esito-btn .quota, .schedina-riga .quota, #schedina-quota-mini, #schedina-quota-totale,
-table.classifica-tab td:last-child, .giocata-stato {
+table.classifica-tab td:last-child {
   font-variant-numeric: tabular-nums;
 }
 
@@ -120,12 +120,36 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 
 .giocata-card {
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 0.8em 1em; margin-bottom: 0.7em; display: flex; justify-content: space-between; gap: 1em; flex-wrap: wrap;
+  padding: 1em; margin-bottom: 1em;
 }
-.giocata-stato { font-weight: 700; }
-.giocata-stato.vinta { color: var(--accent); }
-.giocata-stato.persa { color: var(--danger); }
-.giocata-stato.in_corso { color: var(--gold); }
+.giocata-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7em; }
+.giocata-giornata { font-weight: 700; font-size: 0.95em; }
+.giocata-badge {
+  padding: 0.2em 0.7em; border-radius: 999px; font-size: 0.75em; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.giocata-badge.vinta { background: #123a24; color: var(--accent); }
+.giocata-badge.persa { background: #3a1414; color: var(--danger); }
+.giocata-badge.in_corso { background: #3a2f12; color: var(--gold); }
+
+.giocata-selezioni { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.giocata-sel { display: flex; justify-content: space-between; align-items: center; gap: 0.6em; padding: 0.55em 0; }
+.giocata-sel + .giocata-sel { border-top: 1px dashed var(--border); }
+.giocata-sel-info { display: flex; flex-direction: column; gap: 0.1em; min-width: 0; }
+.giocata-sel-esito { font-weight: 600; font-size: 0.92em; }
+.giocata-sel-mercato { font-size: 0.78em; color: var(--text-dim); }
+.giocata-sel-quota { font-weight: 700; color: var(--gold); flex: none; font-variant-numeric: tabular-nums; }
+
+.giocata-riepilogo { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em; margin-top: 0.8em; text-align: center; }
+.giocata-riepilogo > div { display: flex; flex-direction: column; gap: 0.15em; }
+.giocata-riepilogo .hint { font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.03em; }
+.giocata-riepilogo b { font-size: 1.05em; font-variant-numeric: tabular-nums; }
+.giocata-riepilogo .valore.vinta { color: var(--accent); }
+.giocata-riepilogo .valore.persa { color: var(--danger); }
+.giocata-riepilogo .valore.in_corso { color: var(--gold); }
+
+.giocata-card.stato-persa .giocata-sel-esito,
+.giocata-card.stato-persa .giocata-sel-mercato { opacity: 0.6; }
 
 table.classifica-tab { width: 100%; border-collapse: collapse; }
 table.classifica-tab th, table.classifica-tab td { text-align: left; padding: 0.5em 0.6em; border-bottom: 1px solid var(--border); }
@@ -142,6 +166,16 @@ table.classifica-tab td:last-child, table.classifica-tab th:last-child { text-al
 .log-box div { padding: 0.15em 0; border-bottom: 1px solid var(--border); }
 
 .mini-btn { font-size: 0.8em; padding: 0.25em 0.6em; margin-right: 0.3em; }
+
+.accesso-riga {
+  display: flex; align-items: center; gap: 0.7em; padding: 0.5em 0; border-bottom: 1px solid var(--border);
+}
+.accesso-riga span:first-child { flex: 1; font-weight: 600; }
+.accesso-stato { font-size: 0.78em; padding: 0.15em 0.6em; border-radius: 999px; flex: none; }
+.accesso-stato.si { background: #123a24; color: var(--accent); }
+.accesso-stato.no { background: var(--bg-card-2); color: var(--text-dim); }
+
+.modal-box .link-btn { width: auto; display: block; margin-top: 0.8em; }
 
 @media (max-width: 480px) {
   .brand { font-size: 1em; }

@@ -4,10 +4,12 @@ Solo libreria standard: nessuna dipendenza da installare.
 
 Avvio:  python server.py [porta]   (default porta 8765, o $PORT se impostata dall'hosting)
 """
+import hashlib
 import json
 import math
 import os
 import re
+import secrets
 import sys
 import time
 import unicodedata
@@ -49,6 +51,17 @@ def normalize(s):
 
 def now_str():
     return time.strftime('%Y-%m-%d %H:%M:%S')
+
+
+def hash_password(password, salt=None):
+    salt = salt or secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), bytes.fromhex(salt), 100_000)
+    return salt, digest.hex()
+
+
+def verifica_password_hash(password, salt, hash_atteso):
+    _, digest = hash_password(password, salt)
+    return secrets.compare_digest(digest, hash_atteso)
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +179,8 @@ class Store:
         saldo_iniziale = self.config['lega']['saldo_iniziale']
         self.state.setdefault('schedine', [])
         self.state.setdefault('prossimo_id_schedina', 1)
+        self.state.setdefault('auth', {})
+        self.state.setdefault('sessioni', {})
         for sq in squadre:
             self.state['saldi'].setdefault(sq, saldo_iniziale)
             self.state['storico_punti'].setdefault(sq, [])
@@ -179,6 +194,56 @@ class Store:
 
     def check_admin(self, password):
         return password and password == self.config['admin']['password']
+
+    # -- accessi squadre (password personale, impostata al primo accesso) --
+
+    def squadre_registrate(self):
+        auth = self.state.get('auth', {})
+        return {sq: (sq in auth) for sq in self.squadre()}
+
+    def login(self, squadra, password):
+        if squadra not in self.squadre():
+            return {'errore': 'squadra non valida'}
+        if not password or len(password) < 4:
+            return {'errore': 'la password deve avere almeno 4 caratteri'}
+        auth = self.state.setdefault('auth', {})
+        voce = auth.get(squadra)
+        primo_accesso = voce is None
+        if primo_accesso:
+            salt, hash_ = hash_password(password)
+            auth[squadra] = {'salt': salt, 'hash': hash_}
+            self._log(f"{squadra} ha impostato la password al primo accesso")
+        elif not verifica_password_hash(password, voce['salt'], voce['hash']):
+            return {'errore': 'password errata'}
+        token = secrets.token_hex(24)
+        self.state.setdefault('sessioni', {})[token] = {'squadra': squadra, 'creata_il': now_str()}
+        self.save()
+        return {'ok': True, 'token': token, 'primo_accesso': primo_accesso, 'squadra': squadra}
+
+    def logout(self, token):
+        sessioni = self.state.get('sessioni', {})
+        if token in sessioni:
+            del sessioni[token]
+            self.save()
+        return {'ok': True}
+
+    def squadra_da_token(self, token):
+        if not token:
+            return None
+        sessione = self.state.get('sessioni', {}).get(token)
+        return sessione['squadra'] if sessione else None
+
+    def reset_password_squadra(self, squadra):
+        if squadra not in self.squadre():
+            return {'errore': 'squadra non valida'}
+        auth = self.state.setdefault('auth', {})
+        if squadra not in auth:
+            return {'errore': f'{squadra} non ha ancora impostato una password'}
+        del auth[squadra]
+        self.state['sessioni'] = {t: s for t, s in self.state.get('sessioni', {}).items() if s['squadra'] != squadra}
+        self._log(f"Admin ha resettato l'accesso di {squadra}: al prossimo accesso potra' impostarne una nuova")
+        self.save()
+        return {'ok': True}
 
     # -- import punteggi ---------------------------------------------------
 
@@ -649,12 +714,19 @@ class Store:
         nuovi_saldi = {}
         nuovo_storico = {}
         nuove_proiezioni = {}
+        nuovo_auth = {}
         for vecchio, saldo in self.state['saldi'].items():
             nuovo_nome = rename_map.get(vecchio, vecchio)
             nuovi_saldi[nuovo_nome] = saldo
         for vecchio, storico in self.state['storico_punti'].items():
             nuovo_nome = rename_map.get(vecchio, vecchio)
             nuovo_storico[nuovo_nome] = storico
+        for vecchio, voce in self.state.get('auth', {}).items():
+            nuovo_nome = rename_map.get(vecchio, vecchio)
+            nuovo_auth[nuovo_nome] = voce
+        for sessione in self.state.get('sessioni', {}).values():
+            if sessione['squadra'] in rename_map:
+                sessione['squadra'] = rename_map[sessione['squadra']]
         for vecchio, proiezioni in self.state.get('proiezioni', {}).items():
             nuovo_nome = rename_map.get(vecchio, vecchio)
             nuove_proiezioni[nuovo_nome] = proiezioni
@@ -669,6 +741,7 @@ class Store:
         self.state['saldi'] = nuovi_saldi
         self.state['storico_punti'] = nuovo_storico
         self.state['proiezioni'] = nuove_proiezioni
+        self.state['auth'] = nuovo_auth
         self.config['lega']['squadre'] = nuove_squadre
         save_json_atomic(CONFIG_PATH, self.config)
         self._log(f"Squadre rinominate: {rename_map}")
@@ -761,11 +834,13 @@ class Handler(BaseHTTPRequestHandler):
 
         with LOCK:
             if path == '/api/state':
-                squadra = (qs.get('squadra') or [None])[0]
+                token = (qs.get('token') or [None])[0]
+                squadra = STORE.squadra_da_token(token)
                 mie_schedine = [s for s in STORE.state['schedine'] if s['squadra'] == squadra] if squadra else []
                 self._send_json({
                     'lega': STORE.config['lega']['nome'],
                     'squadre': STORE.squadre(),
+                    'squadre_registrate': STORE.squadre_registrate(),
                     'saldi': STORE.state['saldi'],
                     'mia_squadra': squadra,
                     'mio_saldo': STORE.state['saldi'].get(squadra) if squadra else None,
@@ -831,9 +906,22 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         with LOCK:
+            if path == '/api/login':
+                risultato = STORE.login(body.get('squadra'), body.get('password'))
+                self._send_json(risultato, 200 if risultato.get('ok') else 400)
+                return
+
+            if path == '/api/logout':
+                self._send_json(STORE.logout(body.get('token')))
+                return
+
             if path == '/api/schedina':
+                squadra = STORE.squadra_da_token(body.get('token'))
+                if not squadra:
+                    self._send_json({'errore': 'sessione scaduta, rientra con la tua squadra'}, 401)
+                    return
                 risultato = STORE.crea_schedina(
-                    body.get('squadra'), body.get('giornata'), body.get('selezioni', []), body.get('importo'))
+                    squadra, body.get('giornata'), body.get('selezioni', []), body.get('importo'))
                 self._send_json(risultato, 200 if risultato.get('ok') else 400)
                 return
 
@@ -894,6 +982,10 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/correggi-saldo':
                     r = STORE.correggi_saldo(body.get('squadra'), body.get('delta'), body.get('motivo'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/reset-password-squadra':
+                    r = STORE.reset_password_squadra(body.get('squadra'))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/cambia-password':

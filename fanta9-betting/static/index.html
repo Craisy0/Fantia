@@ -23,15 +23,28 @@
 
   <div id="modal-identita" class="modal">
     <div class="modal-box">
-      <h2>Chi sei?</h2>
-      <p>Scegli la tua squadra.</p>
-      <select id="select-squadra"></select>
-      <button id="btn-conferma-identita">Continua</button>
+      <div id="identita-step-1">
+        <h2>Chi sei?</h2>
+        <p>Scegli la tua squadra.</p>
+        <select id="select-squadra"></select>
+        <button id="btn-avanti-identita">Continua</button>
+      </div>
+      <div id="identita-step-2" class="hidden">
+        <h2 id="identita-step-2-titolo">Password</h2>
+        <p id="identita-step-2-hint" class="hint"></p>
+        <input type="password" id="identita-password" placeholder="Password">
+        <input type="password" id="identita-password-conferma" class="hidden" placeholder="Conferma password">
+        <p id="identita-errore" class="errore"></p>
+        <button id="btn-conferma-identita">Entra</button>
+        <button id="btn-password-dimenticata" class="link-btn hidden">Password dimenticata?</button>
+        <p id="identita-recupero" class="hint hidden">Chiedi all'admin di resettarla dal pannello Admin → "Gestisci accessi squadre".</p>
+        <button id="btn-indietro-identita" class="link-btn">← cambia squadra</button>
+      </div>
     </div>
   </div>
 
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="scommesse">Scommesse aperte</button>
+    <button class="tab-btn" data-tab="scommesse">Scommesse aperte</button>
     <button class="tab-btn" data-tab="giocate">Le mie giocate</button>
     <button class="tab-btn" data-tab="classifica">Classifica</button>
     <button class="tab-btn" data-tab="admin">Admin</button>
@@ -55,14 +68,7 @@
     </section>
 
     <section id="tab-admin" class="tab-pane">
-      <div id="admin-login">
-        <h2>Accesso amministratore</h2>
-        <input type="password" id="admin-password" placeholder="Password admin">
-        <button id="btn-admin-login">Entra</button>
-        <p id="admin-login-errore" class="errore"></p>
-      </div>
-
-      <div id="admin-panel" class="hidden">
+      <div id="admin-panel">
         <h2>Importa punteggi giornata</h2>
         <p class="hint">Una riga per squadra: <code>Nome; Punti</code></p>
         <input type="number" id="import-giornata" placeholder="Numero giornata" min="1">
@@ -118,6 +124,12 @@ Cucca; 58.1; 6.4
 
         <h2>Schedine giocate</h2>
         <div id="admin-schedine-lista"></div>
+
+        <hr>
+
+        <h2>Gestisci accessi squadre</h2>
+        <p class="hint">Se qualcuno dimentica la password, resettala qui: al prossimo accesso potrà impostarne una nuova.</p>
+        <div id="admin-accessi-lista"></div>
 
         <hr>
 
