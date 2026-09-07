@@ -88,7 +88,18 @@ Cucca; 58.1; 6.4
 
         <hr>
 
-        <h2>Crea scommessa testa a testa (1X2)</h2>
+        <h2>Pubblica una giornata dal calendario</h2>
+        <p class="hint">Crea in automatico tutti gli scontri 1X2 di una giornata già fissata dal calendario ufficiale, usando le quote calcolate dal sistema. Salta gli incontri già pubblicati.</p>
+        <div class="riga-form">
+          <input type="number" id="calendario-giornata" placeholder="Numero giornata" min="1" style="width:10em">
+          <button id="btn-anteprima-calendario">Vedi scontri</button>
+        </div>
+        <div id="calendario-anteprima"></div>
+        <button id="btn-pubblica-calendario" class="hidden">Pubblica tutta la giornata</button>
+
+        <hr>
+
+        <h2>Crea scommessa testa a testa manuale (1X2)</h2>
         <div class="riga-form">
           <select id="h2h-squadra-a"></select>
           <span>vs</span>

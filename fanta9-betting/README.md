@@ -54,6 +54,10 @@ I compagni non piazzano scommesse singole: giocano una **schedina** (come su Sis
 
 La schedina vince solo se **tutte** le selezioni sono corrette; basta che una sbagli per farla perdere. Si liquida in automatico non appena tutti i mercati coinvolti sono risolti (di solito quando importi i punteggi finali della giornata).
 
+### Calendario ufficiale e pubblicazione automatica
+
+`data/calendario.json` contiene gli scontri delle giornate 1-16 del girone all'italiana della lega GOTTA, già tradotti dai nomi fantasia del calendario ai nomi reali delle 10 squadre. Nel tab Admin → "Pubblica una giornata dal calendario" scrivi il numero di giornata, controlli gli scontri e pubblichi con un click tutti e 5 i mercati 1X2 con le quote calcolate dal sistema — salta in automatico gli incontri già pubblicati, quindi puoi richiamarlo senza creare doppioni. Mancano le giornate 17-20 (non ancora fornite); per quelle, o per correggere un accoppiamento, resta disponibile la creazione manuale singola qui sotto.
+
 ### Dati delle giornate (rose/punteggi)
 
 Non esiste un connettore ufficiale verso FantaLab o l'app Lega Fantacalcio, quindi l'unico modo pensato per adesso è: dopo ogni giornata, tu copi la tabella dei punteggi da dove la guardi di solito e la incolli nel tab Admin → "Importa punteggi giornata" (una riga per squadra, es. `Squadra 1; 72`). Il sistema riconosce automaticamente i nomi delle squadre e, appena importa i punti di una giornata, **liquida in automatico** tutti i mercati 1X2 aperti su quella giornata (e con loro le schedine che li includono, accreditando le vincite). Le scommesse libere le risolvi tu a mano scegliendo l'esito vincente.

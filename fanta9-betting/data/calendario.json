@@ -1,0 +1,115 @@
+{
+  "_descrizione": "Calendario ufficiale della lega GOTTA (girone all'italiana, 10 squadre), tradotto dai nomi fantasia del calendario a quelli reali. Giornate 10+ sono il ritorno esatto di 1-9. Usato da 'Pubblica giornata' per creare in automatico tutti i mercati 1X2 di una giornata.",
+  "1": [
+    {"a": "Cucca", "b": "Cri"},
+    {"a": "Giorgio", "b": "Davide"},
+    {"a": "Luca", "b": "Rota"},
+    {"a": "Giammi", "b": "Ale"},
+    {"a": "Nando", "b": "Fili"}
+  ],
+  "2": [
+    {"a": "Cri", "b": "Giorgio"},
+    {"a": "Ale", "b": "Nando"},
+    {"a": "Rota", "b": "Giammi"},
+    {"a": "Davide", "b": "Luca"},
+    {"a": "Fili", "b": "Cucca"}
+  ],
+  "3": [
+    {"a": "Luca", "b": "Cri"},
+    {"a": "Giorgio", "b": "Fili"},
+    {"a": "Cucca", "b": "Ale"},
+    {"a": "Davide", "b": "Rota"},
+    {"a": "Nando", "b": "Giammi"}
+  ],
+  "4": [
+    {"a": "Cri", "b": "Davide"},
+    {"a": "Giammi", "b": "Cucca"},
+    {"a": "Ale", "b": "Giorgio"},
+    {"a": "Rota", "b": "Nando"},
+    {"a": "Fili", "b": "Luca"}
+  ],
+  "5": [
+    {"a": "Cri", "b": "Rota"},
+    {"a": "Giorgio", "b": "Giammi"},
+    {"a": "Cucca", "b": "Nando"},
+    {"a": "Luca", "b": "Ale"},
+    {"a": "Davide", "b": "Fili"}
+  ],
+  "6": [
+    {"a": "Fili", "b": "Cri"},
+    {"a": "Giammi", "b": "Luca"},
+    {"a": "Ale", "b": "Davide"},
+    {"a": "Rota", "b": "Cucca"},
+    {"a": "Nando", "b": "Giorgio"}
+  ],
+  "7": [
+    {"a": "Cri", "b": "Ale"},
+    {"a": "Giorgio", "b": "Cucca"},
+    {"a": "Luca", "b": "Nando"},
+    {"a": "Davide", "b": "Giammi"},
+    {"a": "Fili", "b": "Rota"}
+  ],
+  "8": [
+    {"a": "Giammi", "b": "Cri"},
+    {"a": "Giorgio", "b": "Rota"},
+    {"a": "Cucca", "b": "Luca"},
+    {"a": "Ale", "b": "Fili"},
+    {"a": "Nando", "b": "Davide"}
+  ],
+  "9": [
+    {"a": "Cri", "b": "Nando"},
+    {"a": "Luca", "b": "Giorgio"},
+    {"a": "Rota", "b": "Ale"},
+    {"a": "Davide", "b": "Cucca"},
+    {"a": "Fili", "b": "Giammi"}
+  ],
+  "10": [
+    {"a": "Cri", "b": "Cucca"},
+    {"a": "Davide", "b": "Giorgio"},
+    {"a": "Rota", "b": "Luca"},
+    {"a": "Ale", "b": "Giammi"},
+    {"a": "Fili", "b": "Nando"}
+  ],
+  "11": [
+    {"a": "Giorgio", "b": "Cri"},
+    {"a": "Nando", "b": "Ale"},
+    {"a": "Giammi", "b": "Rota"},
+    {"a": "Luca", "b": "Davide"},
+    {"a": "Cucca", "b": "Fili"}
+  ],
+  "12": [
+    {"a": "Cri", "b": "Luca"},
+    {"a": "Fili", "b": "Giorgio"},
+    {"a": "Ale", "b": "Cucca"},
+    {"a": "Rota", "b": "Davide"},
+    {"a": "Giammi", "b": "Nando"}
+  ],
+  "13": [
+    {"a": "Davide", "b": "Cri"},
+    {"a": "Cucca", "b": "Giammi"},
+    {"a": "Giorgio", "b": "Ale"},
+    {"a": "Nando", "b": "Rota"},
+    {"a": "Luca", "b": "Fili"}
+  ],
+  "14": [
+    {"a": "Rota", "b": "Cri"},
+    {"a": "Giammi", "b": "Giorgio"},
+    {"a": "Nando", "b": "Cucca"},
+    {"a": "Ale", "b": "Luca"},
+    {"a": "Fili", "b": "Davide"}
+  ],
+  "15": [
+    {"a": "Cri", "b": "Fili"},
+    {"a": "Luca", "b": "Giammi"},
+    {"a": "Davide", "b": "Ale"},
+    {"a": "Cucca", "b": "Rota"},
+    {"a": "Giorgio", "b": "Nando"}
+  ],
+  "16": [
+    {"a": "Ale", "b": "Cri"},
+    {"a": "Cucca", "b": "Giorgio"},
+    {"a": "Nando", "b": "Luca"},
+    {"a": "Giammi", "b": "Davide"},
+    {"a": "Rota", "b": "Fili"}
+  ]
+}

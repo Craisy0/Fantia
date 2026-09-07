@@ -446,6 +446,32 @@
     });
   }
 
+  function initCalendario() {
+    el('#btn-anteprima-calendario').addEventListener('click', async () => {
+      const giornata = Number(el('#calendario-giornata').value);
+      const cont = el('#calendario-anteprima');
+      if (!giornata) { alert('Indica il numero di giornata.'); return; }
+      const params = new URLSearchParams({ admin_password: adminPassword(), giornata });
+      const incontri = await get('/api/admin/calendario?' + params.toString());
+      if (!Array.isArray(incontri)) { cont.innerHTML = `<p class="errore">${escapeHtml(incontri.errore || 'errore')}</p>`; el('#btn-pubblica-calendario').classList.add('hidden'); return; }
+      if (!incontri.length) { cont.innerHTML = '<p class="errore">Nessun incontro nel calendario per questa giornata.</p>'; el('#btn-pubblica-calendario').classList.add('hidden'); return; }
+      cont.innerHTML = '<ul>' + incontri.map(i => `<li>${escapeHtml(i.a)} vs ${escapeHtml(i.b)}</li>`).join('') + '</ul>';
+      el('#btn-pubblica-calendario').classList.remove('hidden');
+      el('#btn-pubblica-calendario').dataset.giornata = giornata;
+    });
+    el('#btn-pubblica-calendario').addEventListener('click', async () => {
+      const giornata = Number(el('#btn-pubblica-calendario').dataset.giornata);
+      const r = await post('/api/admin/pubblica-giornata', { admin_password: adminPassword(), giornata });
+      if (r.errore) { alert(r.errore); return; }
+      let msg = `Pubblicati ${r.mercati_creati.length} mercati.`;
+      if (r.incontri_saltati_gia_esistenti.length) msg += ` Saltati (già esistenti): ${r.incontri_saltati_gia_esistenti.join(', ')}.`;
+      alert(msg);
+      el('#calendario-anteprima').innerHTML = '';
+      el('#btn-pubblica-calendario').classList.add('hidden');
+      await ricarica();
+    });
+  }
+
   function initH2H() {
     let ultimaAnteprima = null;
     el('#btn-anteprima-h2h').addEventListener('click', async () => {
@@ -570,6 +596,7 @@
     initAdminLogin();
     initImportPunti();
     initProiezioni();
+    initCalendario();
     initH2H();
     initCustom();
     initCorrezioneSaldo();

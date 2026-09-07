@@ -20,6 +20,7 @@ DATA_DIR = os.path.join(APP_DIR, "data")
 STATIC_DIR = os.path.join(APP_DIR, "static")
 STATE_PATH = os.path.join(DATA_DIR, "state.json")
 CONFIG_PATH = os.path.join(APP_DIR, "config.json")
+CALENDARIO_PATH = os.path.join(DATA_DIR, "calendario.json")
 
 LOCK = threading.Lock()
 
@@ -140,6 +141,7 @@ class Store:
 
     def reload_config(self):
         self.config = load_json(CONFIG_PATH)
+        self.calendario = load_json(CALENDARIO_PATH) if os.path.exists(CALENDARIO_PATH) else {}
 
     def save(self):
         save_json_atomic(STATE_PATH, self.state)
@@ -379,6 +381,29 @@ class Store:
         self._log(f"Creato incontro {squadra_a} vs {squadra_b} (giornata {giornata})")
         self.save()
         return {'ok': True, 'mercati': [mercato]}
+
+    def pubblica_giornata(self, giornata):
+        """Crea in automatico i mercati 1X2 di tutti gli incontri di una giornata gia' fissati
+        dal calendario ufficiale (data/calendario.json), saltando quelli gia' pubblicati."""
+        incontri = self.calendario.get(str(giornata))
+        if not incontri:
+            return {'errore': f'nessun incontro nel calendario per la giornata {giornata}'}
+        creati = []
+        saltati = []
+        for incontro in incontri:
+            squadra_a, squadra_b = incontro['a'], incontro['b']
+            gia_esistente = any(
+                m['giornata'] == giornata and m['tipo'] == '1x2'
+                and {m.get('squadra_a'), m.get('squadra_b')} == {squadra_a, squadra_b}
+                for m in self.state['mercati']
+            )
+            if gia_esistente:
+                saltati.append(f"{squadra_a} vs {squadra_b}")
+                continue
+            r = self.crea_mercato_h2h(squadra_a, squadra_b, giornata)
+            if r.get('ok'):
+                creati.extend(r['mercati'])
+        return {'ok': True, 'mercati_creati': creati, 'incontri_saltati_gia_esistenti': saltati}
 
     def crea_mercato_custom(self, titolo, esiti, giornata=None):
         if not titolo or not esiti or len(esiti) < 2:
@@ -753,6 +778,16 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 self._send_json(STORE.state['schedine'])
                 return
+            if path == '/api/admin/calendario':
+                if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
+                    self._send_json({'errore': 'password admin errata'}, 403)
+                    return
+                giornata = (qs.get('giornata') or [None])[0]
+                if giornata:
+                    self._send_json(STORE.calendario.get(giornata, []))
+                else:
+                    self._send_json(STORE.calendario)
+                return
             if path == '/api/admin/anteprima-h2h':
                 if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
                     self._send_json({'errore': 'password admin errata'}, 403)
@@ -805,6 +840,10 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/crea-mercato-h2h':
                     r = STORE.crea_mercato_h2h(body.get('squadra_a'), body.get('squadra_b'), body.get('giornata'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/pubblica-giornata':
+                    r = STORE.pubblica_giornata(body.get('giornata'))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/crea-mercato-custom':
