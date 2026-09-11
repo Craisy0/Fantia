@@ -85,6 +85,14 @@ Non esiste un connettore ufficiale verso FantaLab o l'app Lega Fantacalcio, quin
 
 In cima al tab Admin trovi **"Chi ha giocato"**: un colpo d'occhio su chi ha già puntato la schedina dell'ultima giornata pubblicata e chi no. Subito sotto, **"Schedine giocate"** elenca lo storico completo (squadra, selezioni, quota, puntata, esito, vincita) — dopo aver importato i punteggi è lì che controlli se il sistema ha liquidato tutto correttamente.
 
+### Notifiche push del browser
+
+Al primo accesso di ogni compagno (dopo aver scelto la propria squadra), il sito chiede subito il permesso per le notifiche push — niente bisogno di cercare un bottone, se accettano sono già attive. Non è possibile attivarle "di default" senza chiedere nulla: ogni browser impone sempre un consenso esplicito dell'utente, è una regola di sicurezza che nessun sito può aggirare via codice. Chi rifiuta (o il browser non ripropone più la richiesta) resta con le notifiche disattivate senza essere disturbato di nuovo, ma può riattivarle in qualsiasi momento dal bottone "🔔 notifiche" in alto (che diventa "🔕 disattiva notifiche" quando sono già attive — stesso bottone per accenderle e spegnerle). Richiede un browser compatibile — funziona su Chrome/Edge/Firefox desktop e Android; su iOS Safari serve aggiungere il sito alla schermata Home, disponibile da iOS 16.4. Da lì il browser registra il dispositivo; **niente email o numero di telefono**, tutto passa dal protocollo Web Push standard.
+
+Nel tab Admin → "Notifiche push" trovi due scorciatoie che avvisano solo chi non ha ancora giocato — "Ricorda schedina (ultima giornata)" e "Ricorda vincitore girone d'andata" — più un campo libero per un messaggio a piacere a tutti. Chi non ha attivato le notifiche semplicemente non riceve nulla (nessun errore, il sistema salta chi non ha sottoscrizioni attive).
+
+**Nota tecnica**: questa è l'unica funzionalità che richiede una dipendenza esterna (`pywebpush`, per la crittografia VAPID che Python di base non ha — vedi `requirements.txt`). Le chiavi VAPID sono già generate: la **pubblica** (non segreta) è in `config.json` → `push.vapid_public_key`; la **privata** invece non è nel repository apposta — va impostata come variabile d'ambiente `VAPID_PRIVATE_KEY` dalla dashboard Render del servizio ("Environment" → "Add Environment Variable", il valore te l'ha dato Claude quando ha attivato la funzionalità, conservalo in un posto sicuro, es. un password manager). Senza quella variabile l'invio delle notifiche fallisce con un errore chiaro ("VAPID_PRIVATE_KEY non impostata"), il resto dell'app funziona comunque. Su Render assicurati anche che il "Build Command" del servizio sia `pip install -r requirements.txt` (vedi `render.yaml`), altrimenti l'avvio fallisce per `pywebpush` mancante. Se le chiavi vanno rigenerate in futuro, tutte le sottoscrizioni push esistenti nei browser dei compagni si rompono e vanno riattivate.
+
 ## Avvio in locale (per provare prima di pubblicare)
 
 ```

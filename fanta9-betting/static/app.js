@@ -7,6 +7,7 @@
   let stato = null; // ultima risposta di /api/state
   let carrelloSchedina = []; // selezioni non ancora confermate: {mercato_id, esito, quota, label, titolo_mercato, giornata}
   let selezioneIdentita = null; // squadra scelta nello step 1 del login, in attesa di password
+  let tentativoAutoNotificheFatto = false; // evita di ripetere il prompt automatico piu' volte nella stessa sessione di pagina
 
   function identitaAttuale() {
     try { return JSON.parse(localStorage.getItem(LS_IDENTITA)); } catch (e) { return null; }
@@ -85,12 +86,18 @@
     if (identita.tipo === 'admin') {
       el('#badge-squadra').textContent = 'Admin';
       el('#badge-saldo').textContent = '';
+      el('#btn-notifiche').classList.add('hidden');
       mostraTabs(['admin']);
     } else {
       el('#badge-squadra').textContent = identita.squadra;
       const saldo = stato.mio_saldo;
       el('#badge-saldo').textContent = saldo != null ? `${saldo.toFixed(0)} FM` : '';
       mostraTabs(['scommesse', 'giocate', 'classifica']);
+      if (pushSupportato()) {
+        el('#btn-notifiche').classList.remove('hidden');
+        aggiornaBottoneNotifiche();
+        provaAttivazioneAutomaticaNotifiche();
+      }
     }
   }
 
@@ -768,6 +775,136 @@
     });
   }
 
+  // ---------------------------------------------------------------------
+  // Notifiche push del browser (lato squadra: attiva/disattiva sul dispositivo)
+  // ---------------------------------------------------------------------
+
+  function pushSupportato() {
+    return 'serviceWorker' in navigator && 'PushManager' in window;
+  }
+
+  function base64UrlToUint8Array(base64Url) {
+    const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
+    const base64 = (base64Url + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+  }
+
+  async function sottoscrizioneAttuale() {
+    try {
+      const reg = await navigator.serviceWorker.getRegistration('/');
+      if (!reg) return null;
+      return await reg.pushManager.getSubscription();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function aggiornaBottoneNotifiche() {
+    const btn = el('#btn-notifiche');
+    const sub = await sottoscrizioneAttuale();
+    btn.textContent = sub ? '🔕' : '🔔';
+    const etichetta = sub ? 'Disattiva notifiche' : 'Attiva notifiche';
+    btn.setAttribute('aria-label', etichetta);
+    btn.setAttribute('title', etichetta);
+  }
+
+  async function attivaNotifiche(silenzioso) {
+    const identita = identitaAttuale();
+    const permesso = await Notification.requestPermission();
+    if (permesso !== 'granted') {
+      if (!silenzioso) alert('Permesso negato: le notifiche restano disattivate. Puoi riprovare dalle impostazioni del browser.');
+      return;
+    }
+    const { chiave_pubblica } = await get('/api/push/chiave-pubblica');
+    if (!chiave_pubblica) { if (!silenzioso) alert('Notifiche non configurate sul server.'); return; }
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: base64UrlToUint8Array(chiave_pubblica),
+    });
+    const r = await post('/api/push/sottoscrivi', { token: identita.token, subscription: sub.toJSON() });
+    if (r.errore) { if (!silenzioso) alert(r.errore); return; }
+    await aggiornaBottoneNotifiche();
+  }
+
+  async function provaAttivazioneAutomaticaNotifiche() {
+    // Le notifiche non si possono attivare "di default" da codice: ogni browser richiede
+    // sempre un consenso esplicito dell'utente (finestra nativa Consenti/Blocca), altrimenti
+    // qualunque sito potrebbe spammare notifiche senza permesso. Il piu' vicino a "attivate di
+    // default" che si puo' fare e' chiedere subito il consenso al login, invece di aspettare che
+    // l'utente noti e prema il bottone campanella: se accetta e' attivo da subito, se rifiuta (o
+    // il browser non ripropone piu' la richiesta) resta disattivato senza disturbare oltre.
+    if (tentativoAutoNotificheFatto) return;
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+    const sub = await sottoscrizioneAttuale();
+    if (sub) return;
+    tentativoAutoNotificheFatto = true;
+    try { await attivaNotifiche(true); } catch (e) { /* silenzioso: nessun disturbo se fallisce */ }
+  }
+
+  async function disattivaNotifiche() {
+    const identita = identitaAttuale();
+    const sub = await sottoscrizioneAttuale();
+    if (sub) {
+      await post('/api/push/annulla', { token: identita.token, endpoint: sub.endpoint });
+      await sub.unsubscribe();
+    }
+    await aggiornaBottoneNotifiche();
+  }
+
+  function initPush() {
+    if (!pushSupportato()) return;
+    el('#btn-notifiche').addEventListener('click', async () => {
+      const sub = await sottoscrizioneAttuale();
+      if (sub) {
+        await disattivaNotifiche();
+      } else {
+        try {
+          await attivaNotifiche();
+        } catch (e) {
+          alert('Non è stato possibile attivare le notifiche su questo dispositivo/browser.');
+        }
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Notifiche push (lato admin: promemoria a chi non ha giocato)
+  // ---------------------------------------------------------------------
+
+  function initAdminNotifiche() {
+    const risultatoEl = el('#notifiche-risultato');
+    const mostraRisultato = (r) => {
+      if (r.errore) { risultatoEl.innerHTML = `<p class="errore">${escapeHtml(r.errore)}</p>`; return; }
+      if (r.nota) { risultatoEl.innerHTML = `<p class="hint">${escapeHtml(r.nota)}</p>`; return; }
+      const squadre = r.squadre_avvisate || Object.keys(r.risultati || {});
+      const elenco = squadre.map(sq => {
+        const esito = r.risultati && r.risultati[sq];
+        const dettaglio = esito && esito.nessuna_sottoscrizione ? ' (nessuna notifica attiva)' : '';
+        return `<li>${escapeHtml(sq)}${dettaglio}</li>`;
+      }).join('');
+      risultatoEl.innerHTML = elenco ? `<p class="hint">Avvisate:</p><ul>${elenco}</ul>` : '<p class="hint">Nessuno da avvisare.</p>';
+    };
+    el('#btn-ricorda-schedina').addEventListener('click', async () => {
+      const r = await post('/api/admin/ricorda-schedina', { admin_password: adminPassword() });
+      mostraRisultato(r);
+    });
+    el('#btn-ricorda-girone-andata').addEventListener('click', async () => {
+      const r = await post('/api/admin/ricorda-girone-andata', { admin_password: adminPassword() });
+      mostraRisultato(r);
+    });
+    el('#btn-invia-notifica').addEventListener('click', async () => {
+      const titolo = el('#notifica-titolo').value.trim() || undefined;
+      const testo = el('#notifica-testo').value.trim();
+      if (!testo) { alert('Scrivi un messaggio da inviare.'); return; }
+      const r = await post('/api/admin/notifica', { admin_password: adminPassword(), titolo, testo });
+      mostraRisultato(r);
+      if (r.ok) el('#notifica-testo').value = '';
+    });
+  }
+
   function initSchedina() {
     el('#barra-schedina').addEventListener('click', () => {
       renderModalSchedina();
@@ -815,6 +952,8 @@
     initCorrezioneSaldo();
     initCambiaPassword();
     initBackup();
+    initPush();
+    initAdminNotifiche();
     initSchedina();
     ricarica();
   });

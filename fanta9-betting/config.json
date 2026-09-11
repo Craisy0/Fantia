@@ -2,8 +2,16 @@
   "lega": {
     "nome": "Gottabet",
     "squadre": [
-      "Davide", "Giammi", "Nando", "Luca", "Cucca",
-      "Ale", "Fili", "Cri", "Rota", "Giorgio"
+      "Davide",
+      "Giammi",
+      "Nando",
+      "Luca",
+      "Cucca",
+      "Ale",
+      "Fili",
+      "Cri",
+      "Rota",
+      "Giorgio"
     ],
     "saldo_iniziale": 20
   },
@@ -34,5 +42,10 @@
     "_descrizione": "Punti fantacalcio -> gol equivalenti: sotto soglia = 0 gol, alla soglia = 1 gol, poi +1 gol ogni 'ogni_punti' punti aggiuntivi.",
     "soglia": 66,
     "ogni_punti": 4
+  },
+  "push": {
+    "_descrizione": "Chiavi VAPID per le notifiche push del browser, generate una tantum (non vanno rigenerate: se cambiano, tutte le sottoscrizioni esistenti nei browser dei compagni smettono di funzionare finche' non ri-attivano le notifiche). La chiave pubblica qui sotto non e' segreta (la usa il browser). La chiave PRIVATA invece non va mai messa in questo file/nel repository: va impostata come variabile d'ambiente VAPID_PRIVATE_KEY (su Render: dashboard del servizio -> Environment). vapid_claims_sub e' il contatto richiesto dallo standard VAPID (formato mailto:), non deve essere un indirizzo vero.",
+    "vapid_public_key": "BHoH2tOChPKX33CjvGN1eUQaSoMFspESHpkmSiopohCm_4dMRp38UPebuhYteva5iUYZriqbKvgkaAmubPegLPQ",
+    "vapid_claims_sub": "mailto:admin@gottabet.local"
   }
 }
