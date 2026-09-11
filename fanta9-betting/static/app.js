@@ -7,6 +7,7 @@
   let stato = null; // ultima risposta di /api/state
   let carrelloSchedina = []; // selezioni non ancora confermate: {mercato_id, esito, quota, label, titolo_mercato, giornata}
   let selezioneIdentita = null; // squadra scelta nello step 1 del login, in attesa di password
+  let tentativoAutoNotificheFatto = false; // evita di ripetere il prompt automatico piu' volte nella stessa sessione di pagina
 
   function identitaAttuale() {
     try { return JSON.parse(localStorage.getItem(LS_IDENTITA)); } catch (e) { return null; }
@@ -95,6 +96,7 @@
       if (pushSupportato()) {
         el('#btn-notifiche').classList.remove('hidden');
         aggiornaBottoneNotifiche();
+        provaAttivazioneAutomaticaNotifiche();
       }
     }
   }
@@ -804,15 +806,15 @@
     btn.textContent = sub ? '🔕 disattiva notifiche' : '🔔 notifiche';
   }
 
-  async function attivaNotifiche() {
+  async function attivaNotifiche(silenzioso) {
     const identita = identitaAttuale();
     const permesso = await Notification.requestPermission();
     if (permesso !== 'granted') {
-      alert('Permesso negato: le notifiche restano disattivate. Puoi riprovare dalle impostazioni del browser.');
+      if (!silenzioso) alert('Permesso negato: le notifiche restano disattivate. Puoi riprovare dalle impostazioni del browser.');
       return;
     }
     const { chiave_pubblica } = await get('/api/push/chiave-pubblica');
-    if (!chiave_pubblica) { alert('Notifiche non configurate sul server.'); return; }
+    if (!chiave_pubblica) { if (!silenzioso) alert('Notifiche non configurate sul server.'); return; }
     const reg = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({
@@ -820,8 +822,23 @@
       applicationServerKey: base64UrlToUint8Array(chiave_pubblica),
     });
     const r = await post('/api/push/sottoscrivi', { token: identita.token, subscription: sub.toJSON() });
-    if (r.errore) { alert(r.errore); return; }
+    if (r.errore) { if (!silenzioso) alert(r.errore); return; }
     await aggiornaBottoneNotifiche();
+  }
+
+  async function provaAttivazioneAutomaticaNotifiche() {
+    // Le notifiche non si possono attivare "di default" da codice: ogni browser richiede
+    // sempre un consenso esplicito dell'utente (finestra nativa Consenti/Blocca), altrimenti
+    // qualunque sito potrebbe spammare notifiche senza permesso. Il piu' vicino a "attivate di
+    // default" che si puo' fare e' chiedere subito il consenso al login, invece di aspettare che
+    // l'utente noti e prema il bottone campanella: se accetta e' attivo da subito, se rifiuta (o
+    // il browser non ripropone piu' la richiesta) resta disattivato senza disturbare oltre.
+    if (tentativoAutoNotificheFatto) return;
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+    const sub = await sottoscrizioneAttuale();
+    if (sub) return;
+    tentativoAutoNotificheFatto = true;
+    try { await attivaNotifiche(true); } catch (e) { /* silenzioso: nessun disturbo se fallisce */ }
   }
 
   async function disattivaNotifiche() {
