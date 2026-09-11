@@ -1,0 +1,801 @@
+{
+ "_descrizione": "Calendario reale di Serie A 2026/27, giornate 4-22 (corrispondono alle giornate GOTTA 1-19: GOTTA parte dalla 4a di Serie A). Usato per sapere contro quale squadra reale gioca ogni titolare, giornata per giornata.",
+ "4": [
+  {
+   "casa": "VEN",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "ATA",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "UDI"
+  }
+ ],
+ "5": [
+  {
+   "casa": "MON",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "BOL",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "LEC"
+  }
+ ],
+ "6": [
+  {
+   "casa": "GEN",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "ATA",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "UDI"
+  }
+ ],
+ "7": [
+  {
+   "casa": "FRO",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "BOL",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "TOR"
+  }
+ ],
+ "8": [
+  {
+   "casa": "TOR",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "ATA",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "MIL"
+  }
+ ],
+ "9": [
+  {
+   "casa": "SAS",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "ATA"
+  }
+ ],
+ "10": [
+  {
+   "casa": "BOL",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "ATA",
+   "trasferta": "PAR"
+  }
+ ],
+ "11": [
+  {
+   "casa": "VEN",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "JUV"
+  }
+ ],
+ "12": [
+  {
+   "casa": "COM",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "BOL",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "ATA",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "VEN"
+  }
+ ],
+ "13": [
+  {
+   "casa": "CAG",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "BOL"
+  }
+ ],
+ "14": [
+  {
+   "casa": "BOL",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "SAS"
+  }
+ ],
+ "15": [
+  {
+   "casa": "ATA",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "FRO"
+  }
+ ],
+ "16": [
+  {
+   "casa": "ATA",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "MON"
+  }
+ ],
+ "17": [
+  {
+   "casa": "BOL",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "ATA"
+  }
+ ],
+ "18": [
+  {
+   "casa": "ATA",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "ROM"
+  }
+ ],
+ "19": [
+  {
+   "casa": "BOL",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "NAP"
+  }
+ ],
+ "20": [
+  {
+   "casa": "ATA",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "GEN"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "BOL"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "UDI"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "PAR",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "MON"
+  },
+  {
+   "casa": "VEN",
+   "trasferta": "FRO"
+  }
+ ],
+ "21": [
+  {
+   "casa": "BOL",
+   "trasferta": "ATA"
+  },
+  {
+   "casa": "COM",
+   "trasferta": "NAP"
+  },
+  {
+   "casa": "FIO",
+   "trasferta": "SAS"
+  },
+  {
+   "casa": "FRO",
+   "trasferta": "MIL"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "INT",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "JUV",
+   "trasferta": "CAG"
+  },
+  {
+   "casa": "LEC",
+   "trasferta": "TOR"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "LAZ"
+  },
+  {
+   "casa": "ROM",
+   "trasferta": "UDI"
+  }
+ ],
+ "22": [
+  {
+   "casa": "ATA",
+   "trasferta": "FIO"
+  },
+  {
+   "casa": "CAG",
+   "trasferta": "PAR"
+  },
+  {
+   "casa": "GEN",
+   "trasferta": "LEC"
+  },
+  {
+   "casa": "LAZ",
+   "trasferta": "VEN"
+  },
+  {
+   "casa": "MIL",
+   "trasferta": "JUV"
+  },
+  {
+   "casa": "MON",
+   "trasferta": "ROM"
+  },
+  {
+   "casa": "NAP",
+   "trasferta": "INT"
+  },
+  {
+   "casa": "SAS",
+   "trasferta": "COM"
+  },
+  {
+   "casa": "TOR",
+   "trasferta": "FRO"
+  },
+  {
+   "casa": "UDI",
+   "trasferta": "BOL"
+  }
+ ]
+}

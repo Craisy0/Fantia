@@ -1,0 +1,2023 @@
+{
+ "_descrizione": "Rose GOTTA (fonte: export utente rose.csv), un giocatore per riga: nome (cognome fantacalcio), club reale di appartenenza, ruolo classico (P/D/C/A), quotazione Mantra. Usato dal modello a livello giocatore del mercato 'Vincitore girone d'andata'.",
+ "Davide": [
+  {
+   "nome": "Meret",
+   "club": "NAP",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Milinkovic-Savic V.",
+   "club": "NAP",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Muric",
+   "club": "SAS",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Pavlovic",
+   "club": "MIL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 14,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "Solet",
+   "club": "UDI",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 13,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Kempf",
+   "club": "COM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 5,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Lucumì",
+   "club": "JUV",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Chalobah T.",
+   "club": "COM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Dd",
+   "quotazione": 10,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Marusic",
+   "club": "LAZ",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,Dd,E",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Mangas",
+   "club": "MON",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Molina N.",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "E",
+   "quotazione": 18,
+   "quotazione_mantra": 18
+  },
+  {
+   "nome": "Diouf",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "E,C",
+   "quotazione": 9,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Basic",
+   "club": "VEN",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Konè M.",
+   "club": "ROM",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 10,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Oulai",
+   "club": "FIO",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Ekkelenkamp",
+   "club": "UDI",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Samardzic",
+   "club": "ATA",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 13,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Caqueret",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Cambiaghi",
+   "club": "BOL",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 8,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Gnonto",
+   "club": "FIO",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Mora",
+   "club": "ROM",
+   "ruolo": "C",
+   "ruoli_mantra": "T",
+   "quotazione": 20,
+   "quotazione_mantra": 19
+  },
+  {
+   "nome": "Odgaard",
+   "club": "BOL",
+   "ruolo": "C",
+   "ruoli_mantra": "T",
+   "quotazione": 8,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Krstovic",
+   "club": "ATA",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 18,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "Colombo",
+   "club": "GEN",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 11,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Yildiz",
+   "club": "JUV",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 21,
+   "quotazione_mantra": 22
+  }
+ ],
+ "Giammi": [
+  {
+   "nome": "Terracciano",
+   "club": "MIL",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Maignan",
+   "club": "MIL",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 15,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Corvi",
+   "club": "PAR",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 3,
+   "quotazione_mantra": 3
+  },
+  {
+   "nome": "Siebert",
+   "club": "LEC",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Gaspar K.",
+   "club": "LEC",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 5,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Doekhi",
+   "club": "LAZ",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Troilo",
+   "club": "PAR",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Olivera",
+   "club": "NAP",
+   "ruolo": "D",
+   "ruoli_mantra": "B,Ds,E",
+   "quotazione": 4,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Birindelli",
+   "club": "MON",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,Dd,E",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Doig",
+   "club": "SAS",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Saelemaekers",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "E,W",
+   "quotazione": 11,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Frendrup",
+   "club": "GEN",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Modric",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 12,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Cristante",
+   "club": "ROM",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 9,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Mkhitaryan",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Thorstvedt",
+   "club": "SAS",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Gandelman",
+   "club": "LEC",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Alajbegovic",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Neres",
+   "club": "NAP",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Zaccagni",
+   "club": "LAZ",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 16,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "De Bruyne",
+   "club": "NAP",
+   "ruolo": "C",
+   "ruoli_mantra": "T",
+   "quotazione": 17,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Pulisic",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "T,A",
+   "quotazione": 23,
+   "quotazione_mantra": 21
+  },
+  {
+   "nome": "Pellegrino M.",
+   "club": "FIO",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 14,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "De Ketelaere",
+   "club": "ATA",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 17,
+   "quotazione_mantra": 18
+  },
+  {
+   "nome": "Berardi",
+   "club": "SAS",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 19,
+   "quotazione_mantra": 20
+  }
+ ],
+ "Nando": [
+  {
+   "nome": "Sanchez Ro.",
+   "club": "COM",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Vigorito",
+   "club": "COM",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Butez",
+   "club": "COM",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 15,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Mina",
+   "club": "CAG",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Tiago Gabriel",
+   "club": "LEC",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Caleta-Car",
+   "club": "SAS",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Scalvini",
+   "club": "ATA",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Valdepenas",
+   "club": "FIO",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Vasquez",
+   "club": "GEN",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Delprato",
+   "club": "PAR",
+   "ruolo": "D",
+   "ruoli_mantra": "B,Dd,E",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Zortea",
+   "club": "BOL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Ricci S.",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 3,
+   "quotazione_mantra": 3
+  },
+  {
+   "nome": "Sarr P.",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "De Roon",
+   "club": "ROM",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 3,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Busio",
+   "club": "VEN",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Ferguson",
+   "club": "BOL",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Kessiè",
+   "club": "ATA",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Jones C.",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Adzic",
+   "club": "SAS",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Ghedjemis",
+   "club": "FRO",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 9,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Beto",
+   "club": "FIO",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 14,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "Laurientè",
+   "club": "SAS",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 15,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Dybala",
+   "club": "ROM",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 16,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "Woltemade",
+   "club": "JUV",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 23,
+   "quotazione_mantra": 23
+  },
+  {
+   "nome": "Raspadori",
+   "club": "ATA",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 13,
+   "quotazione_mantra": 14
+  }
+ ],
+ "Luca": [
+  {
+   "nome": "De Gea",
+   "club": "FIO",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Pinsoglio",
+   "club": "JUV",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Vicario",
+   "club": "JUV",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 16,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Diego Carlos",
+   "club": "PAR",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Heggem",
+   "club": "BOL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Jimenez A.",
+   "club": "FIO",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,Dd,E",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Tavares N.",
+   "club": "LAZ",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Kamara H.",
+   "club": "UDI",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Bellanova",
+   "club": "ATA",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 5,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Coulibaly L.",
+   "club": "LEC",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Bernabè",
+   "club": "PAR",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Douglas Luiz",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Konè I.",
+   "club": "SAS",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Musah",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "C,W",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Atta",
+   "club": "FIO",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 15,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Loftus-Cheek",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Kvernadze",
+   "club": "FRO",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Conceicao",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 13,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Boga",
+   "club": "JUV",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Baturina",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "T",
+   "quotazione": 21,
+   "quotazione_mantra": 20
+  },
+  {
+   "nome": "Maldini",
+   "club": "CAG",
+   "ruolo": "A",
+   "ruoli_mantra": "T,A",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Raimondo",
+   "club": "FRO",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 11,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Kolo Muani",
+   "club": "JUV",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 24,
+   "quotazione_mantra": 24
+  },
+  {
+   "nome": "Esposito F.P.",
+   "club": "INT",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 17,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "Vitinha O.",
+   "club": "GEN",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  }
+ ],
+ "Cucca": [
+  {
+   "nome": "Caprile",
+   "club": "CAG",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Grabara",
+   "club": "JUV",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Okoye",
+   "club": "UDI",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Balerdi",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Stones",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Kabasele",
+   "club": "UDI",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Bisseck",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 13,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Pavard",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Dd",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Celik",
+   "club": "JUV",
+   "ruolo": "D",
+   "ruoli_mantra": "B,Dd,E",
+   "quotazione": 8,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Mazzocchi",
+   "club": "VEN",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,Dd,E",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Lulli",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "E",
+   "quotazione": 3,
+   "quotazione_mantra": 3
+  },
+  {
+   "nome": "Cacciamani",
+   "club": "TOR",
+   "ruolo": "C",
+   "ruoli_mantra": "E,W",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Milla",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Locatelli",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 9,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Gaetano",
+   "club": "ATA",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Sucic P.",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "El Shaarawy",
+   "club": "GEN",
+   "ruolo": "C",
+   "ruoli_mantra": "W",
+   "quotazione": 7,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Volpato",
+   "club": "SAS",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Goncalves P.",
+   "club": "FIO",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Cissè A.",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Santos A.",
+   "club": "NAP",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 14,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Isaksen",
+   "club": "LAZ",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 9,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Malen",
+   "club": "ROM",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 37,
+   "quotazione_mantra": 37
+  },
+  {
+   "nome": "Kevin Carlos",
+   "club": "CAG",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 12,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Davis K.",
+   "club": "UDI",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 19,
+   "quotazione_mantra": 19
+  }
+ ],
+ "Ale": [
+  {
+   "nome": "De Marzi",
+   "club": "ROM",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Gollini",
+   "club": "ROM",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Svilar",
+   "club": "ROM",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 18,
+   "quotazione_mantra": 18
+  },
+  {
+   "nome": "Badiashile",
+   "club": "NAP",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Buongiorno",
+   "club": "NAP",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Dragusin",
+   "club": "FIO",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Comuzzo",
+   "club": "TOR",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Carboni A.",
+   "club": "MON",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Kelly L.",
+   "club": "JUV",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Kalulu",
+   "club": "JUV",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Dd",
+   "quotazione": 14,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Kristensen T.",
+   "club": "ATA",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Dd",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Bartesaghi",
+   "club": "MIL",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Zappacosta",
+   "club": "ATA",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Perrone",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 11,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Da Cunha",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 18,
+   "quotazione_mantra": 18
+  },
+  {
+   "nome": "McKennie",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 16,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Fabbian",
+   "club": "PAR",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Taylor K.",
+   "club": "LAZ",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 13,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Mbangula",
+   "club": "BOL",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Zaniolo",
+   "club": "UDI",
+   "ruolo": "C",
+   "ruoli_mantra": "T,A",
+   "quotazione": 17,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Gudmundsson A.",
+   "club": "LAZ",
+   "ruolo": "C",
+   "ruoli_mantra": "T,A",
+   "quotazione": 13,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Kean",
+   "club": "COM",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 25,
+   "quotazione_mantra": 25
+  },
+  {
+   "nome": "Pinamonti",
+   "club": "LAZ",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 12,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Soulè",
+   "club": "ROM",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 15,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Esposito Se.",
+   "club": "SAS",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 12,
+   "quotazione_mantra": 13
+  }
+ ],
+ "Fili": [
+  {
+   "nome": "Skorupski",
+   "club": "BOL",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Sportiello",
+   "club": "ATA",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Carnesecchi",
+   "club": "ATA",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 17,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "N'Dicka",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Koulierakis",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Gabbia",
+   "club": "MIL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Gila",
+   "club": "MIL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 13,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Hermoso",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Theate",
+   "club": "BOL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 8,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Rensch",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "B,Dd,E",
+   "quotazione": 4,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Wesley",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "E",
+   "quotazione": 18,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "Dimarco",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "E,W",
+   "quotazione": 31,
+   "quotazione_mantra": 30
+  },
+  {
+   "nome": "Moreira",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "E,W",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Chukwueze",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "E,W",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Romano",
+   "club": "CAG",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Fitz-Jim",
+   "club": "TOR",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Mandragora",
+   "club": "TOR",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Rabiot",
+   "club": "MIL",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 22,
+   "quotazione_mantra": 22
+  },
+  {
+   "nome": "Rowe",
+   "club": "ATA",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Orsolini",
+   "club": "BOL",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 25,
+   "quotazione_mantra": 24
+  },
+  {
+   "nome": "Gonzalez N.",
+   "club": "JUV",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 13,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Bowie",
+   "club": "SAS",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 10,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Osmajic",
+   "club": "GEN",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 9,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Adams C.",
+   "club": "TOR",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 12,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Yeboah J.",
+   "club": "VEN",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  }
+ ],
+ "Cri": [
+  {
+   "nome": "Provedel",
+   "club": "INT",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Bijlow",
+   "club": "GEN",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Martinez Jo.",
+   "club": "INT",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 17,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "Bella-Kotchap",
+   "club": "VEN",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 5,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Akanji",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 15,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Ramon",
+   "club": "COM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Mancini",
+   "club": "ROM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 15,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Idzes",
+   "club": "SAS",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Rodriguez Ju.",
+   "club": "CAG",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Cambiaso",
+   "club": "JUV",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,Dd,E",
+   "quotazione": 8,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Bernasconi",
+   "club": "ATA",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 5,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Valle",
+   "club": "COM",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Sow",
+   "club": "GEN",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 7,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Karlstrom",
+   "club": "UDI",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 8,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Ederson D.S.",
+   "club": "ATA",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 13,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "Zambo Anguissa",
+   "club": "NAP",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Frattesi",
+   "club": "LAZ",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Casadei",
+   "club": "TOR",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Politano",
+   "club": "NAP",
+   "ruolo": "C",
+   "ruoli_mantra": "W",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Vergara",
+   "club": "NAP",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Ramos G.",
+   "club": "MIL",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 27,
+   "quotazione_mantra": 27
+  },
+  {
+   "nome": "Varela G.",
+   "club": "MON",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Martinez L.",
+   "club": "INT",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 35,
+   "quotazione_mantra": 35
+  },
+  {
+   "nome": "Castro S.",
+   "club": "ROM",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 14,
+   "quotazione_mantra": 13
+  },
+  {
+   "nome": "Romero D.",
+   "club": "PAR",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  }
+ ],
+ "Rota": [
+  {
+   "nome": "Motta",
+   "club": "LAZ",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Perri",
+   "club": "TOR",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Mandas",
+   "club": "LAZ",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Ostigard",
+   "club": "GEN",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Marcandalli",
+   "club": "GEN",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Rrahmani",
+   "club": "NAP",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 14,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "Zè Pedro",
+   "club": "CAG",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Dd",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Valeri",
+   "club": "PAR",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Miranda J.",
+   "club": "BOL",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Couto",
+   "club": "COM",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Belghali",
+   "club": "TOR",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Calhanoglu",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 28,
+   "quotazione_mantra": 29
+  },
+  {
+   "nome": "Matic",
+   "club": "SAS",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Lobotka",
+   "club": "NAP",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 8,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Piotrowski",
+   "club": "UDI",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 6,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Ndour",
+   "club": "FIO",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "McTominay",
+   "club": "NAP",
+   "ruolo": "C",
+   "ruoli_mantra": "C,T",
+   "quotazione": 26,
+   "quotazione_mantra": 26
+  },
+  {
+   "nome": "Bernardeschi",
+   "club": "BOL",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 10,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Mastantuono",
+   "club": "FIO",
+   "ruolo": "C",
+   "ruoli_mantra": "W,T",
+   "quotazione": 11,
+   "quotazione_mantra": 11
+  },
+  {
+   "nome": "Vlasic",
+   "club": "TOR",
+   "ruolo": "C",
+   "ruoli_mantra": "T",
+   "quotazione": 13,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Douvikas",
+   "club": "COM",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 21,
+   "quotazione_mantra": 21
+  },
+  {
+   "nome": "Simeone",
+   "club": "TOR",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 14,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "Thuram",
+   "club": "INT",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 28,
+   "quotazione_mantra": 28
+  },
+  {
+   "nome": "Scamacca",
+   "club": "ATA",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 19,
+   "quotazione_mantra": 18
+  },
+  {
+   "nome": "Lang",
+   "club": "NAP",
+   "ruolo": "A",
+   "ruoli_mantra": "A",
+   "quotazione": 3,
+   "quotazione_mantra": 3
+  }
+ ],
+ "Giorgio": [
+  {
+   "nome": "Desplanches",
+   "club": "FRO",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 1,
+   "quotazione_mantra": 1
+  },
+  {
+   "nome": "Falcone",
+   "club": "LEC",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 8,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Palmisani",
+   "club": "FRO",
+   "ruolo": "P",
+   "ruoli_mantra": "Por",
+   "quotazione": 5,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Bastoni",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 14,
+   "quotazione_mantra": 14
+  },
+  {
+   "nome": "Coco",
+   "club": "TOR",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 7,
+   "quotazione_mantra": 7
+  },
+  {
+   "nome": "Provstgaard",
+   "club": "LAZ",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 4,
+   "quotazione_mantra": 4
+  },
+  {
+   "nome": "Bremer",
+   "club": "JUV",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc",
+   "quotazione": 16,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Juan Jesus",
+   "club": "VEN",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 4,
+   "quotazione_mantra": 5
+  },
+  {
+   "nome": "Viery",
+   "club": "FIO",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Ds",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "De Winter",
+   "club": "MIL",
+   "ruolo": "D",
+   "ruoli_mantra": "Dc,Dd",
+   "quotazione": 5,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Obrador",
+   "club": "SAS",
+   "ruolo": "D",
+   "ruoli_mantra": "Ds,E",
+   "quotazione": 6,
+   "quotazione_mantra": 6
+  },
+  {
+   "nome": "Di Lorenzo",
+   "club": "NAP",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Vojvoda",
+   "club": "UDI",
+   "ruolo": "D",
+   "ruoli_mantra": "Dd,E",
+   "quotazione": 9,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Spence",
+   "club": "INT",
+   "ruolo": "D",
+   "ruoli_mantra": "E",
+   "quotazione": 11,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Calò",
+   "club": "FRO",
+   "ruolo": "C",
+   "ruoli_mantra": "M,C",
+   "quotazione": 8,
+   "quotazione_mantra": 9
+  },
+  {
+   "nome": "Zielinski",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 12,
+   "quotazione_mantra": 12
+  },
+  {
+   "nome": "Barella",
+   "club": "INT",
+   "ruolo": "C",
+   "ruoli_mantra": "C",
+   "quotazione": 17,
+   "quotazione_mantra": 17
+  },
+  {
+   "nome": "Diao",
+   "club": "COM",
+   "ruolo": "A",
+   "ruoli_mantra": "W,A",
+   "quotazione": 14,
+   "quotazione_mantra": 15
+  },
+  {
+   "nome": "Rodriguez Je.",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "W,A",
+   "quotazione": 11,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Baldanzi",
+   "club": "GEN",
+   "ruolo": "C",
+   "ruoli_mantra": "T",
+   "quotazione": 11,
+   "quotazione_mantra": 10
+  },
+  {
+   "nome": "Paz N.",
+   "club": "COM",
+   "ruolo": "C",
+   "ruoli_mantra": "T,A",
+   "quotazione": 30,
+   "quotazione_mantra": 28
+  },
+  {
+   "nome": "Dovbyk",
+   "club": "BOL",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 16,
+   "quotazione_mantra": 16
+  },
+  {
+   "nome": "Lucca",
+   "club": "NAP",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 3,
+   "quotazione_mantra": 3
+  },
+  {
+   "nome": "Piccoli",
+   "club": "BOL",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 9,
+   "quotazione_mantra": 8
+  },
+  {
+   "nome": "Hojlund",
+   "club": "NAP",
+   "ruolo": "A",
+   "ruoli_mantra": "Pc",
+   "quotazione": 29,
+   "quotazione_mantra": 29
+  }
+ ]
+}

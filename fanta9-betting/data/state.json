@@ -1,0 +1,108 @@
+{
+ "saldi": {
+  "Davide": 20,
+  "Giammi": 20,
+  "Nando": 20,
+  "Luca": 20,
+  "Cucca": 20,
+  "Ale": 20,
+  "Fili": 20,
+  "Cri": 20,
+  "Rota": 20,
+  "Giorgio": 20
+ },
+ "storico_punti": {
+  "Davide": [],
+  "Giammi": [],
+  "Nando": [],
+  "Luca": [],
+  "Cucca": [],
+  "Ale": [],
+  "Fili": [],
+  "Cri": [],
+  "Rota": [],
+  "Giorgio": []
+ },
+ "proiezioni": {
+  "Davide": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 50.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Giammi": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 52.4,
+    "indice_schierabilita": null
+   }
+  ],
+  "Nando": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 42.8,
+    "indice_schierabilita": null
+   }
+  ],
+  "Luca": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 42.9,
+    "indice_schierabilita": null
+   }
+  ],
+  "Cucca": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 54.0,
+    "indice_schierabilita": null
+   }
+  ],
+  "Ale": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 57.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Fili": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 52.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Cri": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 64.5,
+    "indice_schierabilita": null
+   }
+  ],
+  "Rota": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 60.2,
+    "indice_schierabilita": null
+   }
+  ],
+  "Giorgio": [
+   {
+    "giornata": 1,
+    "punti_proiettati": 65.2,
+    "indice_schierabilita": null
+   }
+  ]
+ },
+ "mercati": [],
+ "schedine": [],
+ "log": [
+  {
+   "ts": "2026-09-06 16:17:31",
+   "testo": "Importate proiezioni FantaLab giornata 1: Davide=50.5, Giammi=52.4, Nando=42.8, Luca=42.9, Cucca=54.0, Ale=57.5, Fili=52.5, Cri=64.5, Rota=60.2, Giorgio=65.2"
+  }
+ ],
+ "prossimo_id_mercato": 1,
+ "prossimo_id_schedina": 1
+}

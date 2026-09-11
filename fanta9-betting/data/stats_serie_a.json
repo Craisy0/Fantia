@@ -1,0 +1,103 @@
+{
+ "_descrizione": "Statistiche reali di Serie A 2026/27 (partite giocate, gol fatti/subiti) al momento della raccolta dati (giornata 3). Usate per stimare quanto e' forte/debole l'attacco o la difesa dell'avversario reale di ogni titolare, con smorzamento verso la media di lega quando il campione di partite e' piccolo.",
+ "ROM": {
+  "partite_giocate": 3,
+  "gol_fatti": 10,
+  "gol_subiti": 1
+ },
+ "INT": {
+  "partite_giocate": 3,
+  "gol_fatti": 8,
+  "gol_subiti": 3
+ },
+ "LAZ": {
+  "partite_giocate": 3,
+  "gol_fatti": 4,
+  "gol_subiti": 1
+ },
+ "COM": {
+  "partite_giocate": 3,
+  "gol_fatti": 7,
+  "gol_subiti": 3
+ },
+ "MIL": {
+  "partite_giocate": 3,
+  "gol_fatti": 5,
+  "gol_subiti": 2
+ },
+ "JUV": {
+  "partite_giocate": 3,
+  "gol_fatti": 4,
+  "gol_subiti": 1
+ },
+ "FRO": {
+  "partite_giocate": 3,
+  "gol_fatti": 6,
+  "gol_subiti": 3
+ },
+ "ATA": {
+  "partite_giocate": 3,
+  "gol_fatti": 4,
+  "gol_subiti": 3
+ },
+ "CAG": {
+  "partite_giocate": 3,
+  "gol_fatti": 2,
+  "gol_subiti": 1
+ },
+ "SAS": {
+  "partite_giocate": 3,
+  "gol_fatti": 5,
+  "gol_subiti": 5
+ },
+ "UDI": {
+  "partite_giocate": 3,
+  "gol_fatti": 5,
+  "gol_subiti": 5
+ },
+ "NAP": {
+  "partite_giocate": 3,
+  "gol_fatti": 5,
+  "gol_subiti": 5
+ },
+ "TOR": {
+  "partite_giocate": 3,
+  "gol_fatti": 4,
+  "gol_subiti": 5
+ },
+ "LEC": {
+  "partite_giocate": 3,
+  "gol_fatti": 2,
+  "gol_subiti": 5
+ },
+ "BOL": {
+  "partite_giocate": 3,
+  "gol_fatti": 2,
+  "gol_subiti": 4
+ },
+ "PAR": {
+  "partite_giocate": 3,
+  "gol_fatti": 1,
+  "gol_subiti": 4
+ },
+ "MON": {
+  "partite_giocate": 3,
+  "gol_fatti": 4,
+  "gol_subiti": 8
+ },
+ "VEN": {
+  "partite_giocate": 3,
+  "gol_fatti": 2,
+  "gol_subiti": 7
+ },
+ "GEN": {
+  "partite_giocate": 3,
+  "gol_fatti": 1,
+  "gol_subiti": 7
+ },
+ "FIO": {
+  "partite_giocate": 3,
+  "gol_fatti": 1,
+  "gol_subiti": 9
+ }
+}

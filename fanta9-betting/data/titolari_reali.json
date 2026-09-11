@@ -1,0 +1,983 @@
+{
+ "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti.",
+ "ATA": {
+  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
+  "titolari": [
+   {
+    "nome": "Carnesecchi",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Kossounou",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Scalvini",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Kolasinac",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Bellanova",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Ederson D.S.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Samardzic",
+    "ruolo": "C"
+   },
+   {
+    "nome": "De Ketelaere",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Elmas",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Scamacca",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Gaetano",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "BOL": {
+  "fonte": "probabile formazione giornata 4 (vs Napoli)",
+  "titolari": [
+   {
+    "nome": "Skorupski",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Holm",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Heggem",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Theate",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Miranda J.",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Pobega",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Ferguson",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Bernardeschi",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Odgaard",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Cambiaghi",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Piccoli",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "CAG": {
+  "fonte": "probabile formazione giornata 4 (vs Atalanta)",
+  "titolari": [
+   {
+    "nome": "Caprile",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Zè Pedro",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Deiola",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Rodriguez Ju.",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Obert",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Romano",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Winks",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Fazzini",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Gagliardini",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Maldini",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Kevin Carlos",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "COM": {
+  "fonte": "probabile formazione giornata 4 (vs Parma)",
+  "titolari": [
+   {
+    "nome": "Butez",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Couto",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Ramon",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Chalobah T.",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Valle",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Perrone",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Da Cunha",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Paz N.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Diao",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Baturina",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Kean",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "FIO": {
+  "fonte": "formazione ufficiale giornata 3 (Fiorentina-Torino, 05/09/2026)",
+  "titolari": [
+   {
+    "nome": "De Gea",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Joao Mario",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Dragusin",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Viery",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Valdepenas",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Fagioli",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Oulai",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Brescianini",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Mastantuono",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Pellegrino M.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Njie",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "FRO": {
+  "fonte": "probabile formazione giornata 4 (vs Genoa)",
+  "titolari": [
+   {
+    "nome": "Palmisani",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Oyono",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Calvani",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Monterisi",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Terzic",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Calò",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Masini",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Schmid",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Ghedjemis",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Kvernadze",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Raimondo",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "GEN": {
+  "fonte": "probabile formazione giornata 4 (vs Frosinone)",
+  "titolari": [
+   {
+    "nome": "Bijlow",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Marcandalli",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Ostigard",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Vasquez",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Ehizibue",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Baldanzi",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Frendrup",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Sow",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Ellertsson",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Osmajic",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Colombo",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "INT": {
+  "fonte": "formazione ufficiale giornata 3 (Inter-Napoli 3-2, 05/09/2026)",
+  "titolari": [
+   {
+    "nome": "Martinez Jo.",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Bisseck",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Akanji",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Bastoni",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Diouf",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Barella",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Zielinski",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Sucic P.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Dimarco",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Esposito F.P.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Martinez L.",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "JUV": {
+  "fonte": "formazione ufficiale giornata 3 (Juventus-Milan, 06/09/2026)",
+  "titolari": [
+   {
+    "nome": "Vicario",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Kalulu",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Bremer",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Lucumì",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Celik",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Locatelli",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Douglas Luiz",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Conceicao",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Gonzalez N.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Alajbegovic",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Kolo Muani",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "LAZ": {
+  "fonte": "probabile formazione giornata 4 (vs Milan)",
+  "titolari": [
+   {
+    "nome": "Mandas",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Floriani Mussolini",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Doekhi",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Provstgaard",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Tavares N.",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Frattesi",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Belahyane",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Taylor K.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Isaksen",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Pinamonti",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Zaccagni",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "LEC": {
+  "fonte": "probabile formazione giornata 4 (vs Monza)",
+  "titolari": [
+   {
+    "nome": "Falcone",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Veiga",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Gaspar K.",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Tiago Gabriel",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Gallo",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Coulibaly L.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Ilic",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Ngom",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Pierotti",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Stulic",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Monteiro",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "MIL": {
+  "fonte": "formazione ufficiale giornata 3 (Juventus-Milan, 06/09/2026)",
+  "titolari": [
+   {
+    "nome": "Maignan",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Gila",
+    "ruolo": "D"
+   },
+   {
+    "nome": "De Winter",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Pavlovic",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Saelemaekers",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Musah",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Modric",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Estupinan",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Rabiot",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Moreira",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Ramos G.",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "MON": {
+  "fonte": "probabile formazione giornata 4 (vs Lecce)",
+  "titolari": [
+   {
+    "nome": "Thiam",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Kouadio",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Lucchesi",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Carboni A.",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Birindelli",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Akinsanmiro",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Folorunsho",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Mangas",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Colpani",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Robinson",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Mota",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "NAP": {
+  "fonte": "formazione ufficiale giornata 3 (Inter-Napoli 3-2, 05/09/2026)",
+  "titolari": [
+   {
+    "nome": "Meret",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Di Lorenzo",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Rrahmani",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Rafa Marin",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Spinazzola",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Zambo Anguissa",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Lobotka",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Vergara",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Politano",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Hojlund",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Santos A.",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "PAR": {
+  "fonte": "probabile formazione giornata 4 (vs Como)",
+  "titolari": [
+   {
+    "nome": "Corvi",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Delprato",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Troilo",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Diego Carlos",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Britschgi",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Fabbian",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Keita",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Ordonez",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Valeri",
+    "ruolo": "C"
+   },
+   {
+    "nome": "El Bilal Touré",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Romero D.",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "ROM": {
+  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
+  "titolari": [
+   {
+    "nome": "Svilar",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Mancini",
+    "ruolo": "D"
+   },
+   {
+    "nome": "N'Dicka",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Hermoso",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Wesley",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Cristante",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Konè M.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Malen",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Dybala",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Lulli",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Mora",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "SAS": {
+  "fonte": "probabile formazione giornata 4 (vs Juventus)",
+  "titolari": [
+   {
+    "nome": "Muric",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Cinquegrano",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Idzes",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Leysen",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Doig",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Adzic",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Matic",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Lipani",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Berardi",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Bowie",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Laurientè",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "TOR": {
+  "fonte": "formazione ufficiale giornata 3 (Fiorentina-Torino, 05/09/2026)",
+  "titolari": [
+   {
+    "nome": "Perri",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Coco",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Comuzzo",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Cömert",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Fortini",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Mandragora",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Fitz-Jim",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Gineitis",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Cacciamani",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Vlasic",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Adams C.",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "UDI": {
+  "fonte": "probabile formazione giornata 4 (vs Inter)",
+  "titolari": [
+   {
+    "nome": "Okoye",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Abankwah",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Kabasele",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Ebosse",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Vojvoda",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Miller",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Karlstrom",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Kamara H.",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Unai Gomez",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Ekkelenkamp",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Davis K.",
+    "ruolo": "A"
+   }
+  ]
+ },
+ "VEN": {
+  "fonte": "probabile formazione tipo (vs Fiorentina, giornata 4)",
+  "titolari": [
+   {
+    "nome": "Stankovic",
+    "ruolo": "P"
+   },
+   {
+    "nome": "Schingtienne",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Bella-Kotchap",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Juan Jesus",
+    "ruolo": "D"
+   },
+   {
+    "nome": "Hainaut",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Kike Perez",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Busio",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Basic",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Correia",
+    "ruolo": "C"
+   },
+   {
+    "nome": "Yeboah J.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Adams",
+    "ruolo": "A"
+   }
+  ]
+ }
+}

@@ -1,0 +1,249 @@
+:root {
+  --bg: #0f1720;
+  --bg-card: #182233;
+  --bg-card-2: #1f2c42;
+  --border: #2b3a52;
+  --text: #e7edf5;
+  --text-dim: #9aabc2;
+  --accent: #22c55e;
+  --accent-dim: #16a34a;
+  --danger: #ef4444;
+  --gold: #f5b83d;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+body { font-family: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+h2, h3, .brand, .giornata-titolo, .esito-btn .quota, .schedina-riga .quota, #schedina-quota-mini, #schedina-quota-totale,
+.classifica-saldo, .giocata-riepilogo b, .mercato-stato, .giocata-badge {
+  font-family: "Barlow Condensed", "Barlow", sans-serif;
+}
+.badge.saldo, .esito-btn .quota, .schedina-riga .quota, #schedina-quota-mini, #schedina-quota-totale,
+.classifica-saldo {
+  font-variant-numeric: tabular-nums;
+}
+
+#app { max-width: 900px; margin: 0 auto; padding-bottom: 3em; }
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.9em 1em; background: var(--bg-card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 5; flex-wrap: wrap; gap: 0.5em;
+}
+.brand { font-size: 1.15em; font-weight: 700; }
+.brand small { font-weight: 400; color: var(--text-dim); font-size: 0.7em; }
+.identita { display: flex; align-items: center; gap: 0.5em; }
+.badge {
+  background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 999px;
+  padding: 0.3em 0.8em; font-size: 0.85em;
+}
+.badge.saldo { color: var(--gold); font-weight: 600; }
+.link-btn {
+  background: none; border: none; color: var(--text-dim); text-decoration: underline;
+  cursor: pointer; font-size: 0.85em; padding: 0.2em;
+}
+
+.tabs {
+  display: flex; gap: 0.3em; padding: 0.6em 1em 0; overflow-x: auto;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  background: none; border: none; color: var(--text-dim); padding: 0.6em 1em;
+  font-size: 0.95em; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+
+main { padding: 1em; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.modal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  align-items: center; justify-content: center; z-index: 20;
+}
+.modal.open { display: flex; }
+.modal-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.5em; width: 90%; max-width: 380px;
+}
+.modal-box h2 { margin-top: 0; }
+.modal-box select, .modal-box button, .modal-box input { width: 100%; margin-top: 0.6em; }
+
+select, input, textarea, button {
+  background: var(--bg-card-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.5em 0.7em; font-size: 0.95em; font-family: inherit;
+}
+textarea { width: 100%; resize: vertical; }
+button { cursor: pointer; transition: background 0.15s; }
+button:hover:not(:disabled) { background: #28394f; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.primario, #btn-conferma-identita, #btn-pubblica-h2h, #btn-pubblica-custom, #btn-conferma-import {
+  background: var(--accent-dim); border-color: var(--accent-dim); color: #06210f; font-weight: 700;
+}
+button.primario:hover, #btn-conferma-identita:hover, #btn-pubblica-h2h:hover, #btn-pubblica-custom:hover, #btn-conferma-import:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.hidden { display: none !important; }
+.errore { color: var(--danger); font-size: 0.9em; }
+.hint { color: var(--text-dim); font-size: 0.85em; }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+.giornata-gruppo { margin-bottom: 1.6em; }
+.giornata-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 0 0 0.5em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border);
+}
+.giornata-titolo {
+  font-size: 1.05em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-dim); margin: 0;
+}
+.giornata-nota { color: var(--gold); font-size: 0.82em; margin: 0 0 0.6em; }
+
+.riga-info { display: flex; justify-content: flex-end; margin-bottom: 0.8em; position: relative; }
+.btn-info {
+  width: 1.9em; height: 1.9em; border-radius: 50%; padding: 0; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; font-size: 0.9em;
+  background: var(--bg-card-2); color: var(--text-dim);
+}
+.btn-info:hover { color: var(--text); border-color: var(--accent); }
+.popover {
+  position: absolute; top: 2.5em; right: 0; z-index: 10; width: min(280px, 80vw);
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.9em 1em; font-size: 0.85em; color: var(--text-dim); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.popover::before {
+  content: ''; position: absolute; top: -6px; right: 0.6em; width: 12px; height: 12px;
+  background: var(--bg-card); border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.mercato-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1em; margin-bottom: 1em;
+}
+.mercato-card h3 { margin: 0 0 0.6em; font-size: 1em; }
+.mercato-meta { color: var(--text-dim); font-size: 0.8em; margin-bottom: 0.7em; }
+.mercato-stato { display: inline-block; padding: 0.15em 0.6em; border-radius: 999px; font-size: 0.75em; margin-left: 0.5em; }
+.mercato-stato.aperto { background: #123a24; color: var(--accent); }
+.mercato-stato.chiuso { background: #3a2f12; color: var(--gold); }
+.mercato-stato.risolto { background: #2a2a35; color: var(--text-dim); }
+
+.esiti-riga { display: flex; gap: 0.5em; flex-wrap: wrap; }
+.esito-btn {
+  flex: 1 1 auto; min-width: 90px; display: flex; flex-direction: column; align-items: center;
+  gap: 0.2em; padding: 0.6em 0.4em;
+}
+.esito-btn .label { font-size: 0.8em; color: var(--text-dim); }
+.esito-btn .quota { font-size: 1.15em; font-weight: 700; color: var(--gold); }
+.esito-btn.vincente { border-color: var(--accent); }
+.esito-btn.perdente { opacity: 0.5; }
+.esito-btn.selezionato { border-color: var(--gold); background: #2a2410; }
+
+.bet-box { margin-top: 0.8em; display: none; gap: 0.5em; align-items: center; flex-wrap: wrap; }
+.bet-box.open { display: flex; }
+.bet-box input { width: 8em; }
+
+.giocata-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1em; margin-bottom: 1em;
+}
+.giocata-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7em; }
+.giocata-giornata { font-weight: 700; font-size: 0.95em; }
+.giocata-badge {
+  padding: 0.2em 0.7em; border-radius: 999px; font-size: 0.75em; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.giocata-badge.vinta { background: #123a24; color: var(--accent); }
+.giocata-badge.persa { background: #3a1414; color: var(--danger); }
+.giocata-badge.in_corso { background: #3a2f12; color: var(--gold); }
+
+.giocata-selezioni { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.giocata-sel { display: flex; justify-content: space-between; align-items: center; gap: 0.6em; padding: 0.55em 0; }
+.giocata-sel + .giocata-sel { border-top: 1px dashed var(--border); }
+.giocata-sel-info { display: flex; flex-direction: column; gap: 0.1em; min-width: 0; }
+.giocata-sel-esito { font-weight: 600; font-size: 0.92em; }
+.giocata-sel-mercato { font-size: 0.78em; color: var(--text-dim); }
+.giocata-sel-quota { font-weight: 700; color: var(--gold); flex: none; font-variant-numeric: tabular-nums; }
+
+.giocata-riepilogo { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em; margin-top: 0.8em; text-align: center; }
+.giocata-riepilogo > div { display: flex; flex-direction: column; gap: 0.15em; }
+.giocata-riepilogo .hint { font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.03em; }
+.giocata-riepilogo b { font-size: 1.05em; font-variant-numeric: tabular-nums; }
+.giocata-riepilogo .valore.vinta { color: var(--accent); }
+.giocata-riepilogo .valore.persa { color: var(--danger); }
+.giocata-riepilogo .valore.in_corso { color: var(--gold); }
+
+.giocata-card.stato-persa .giocata-sel-esito,
+.giocata-card.stato-persa .giocata-sel-mercato { opacity: 0.6; }
+
+.classifica-riga {
+  display: flex; align-items: center; gap: 0.9em; padding: 0.7em 0.9em; margin-bottom: 0.5em;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.classifica-pos {
+  flex: none; width: 2.2em; height: 2.2em; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 1.05em;
+  background: var(--bg-card-2); color: var(--text-dim);
+}
+.classifica-squadra { flex: 1; font-weight: 700; font-size: 1.05em; min-width: 0; }
+.classifica-saldo { font-weight: 800; font-size: 1.25em; color: var(--gold); flex: none; }
+.classifica-saldo small { font-size: 0.6em; font-weight: 600; color: var(--text-dim); }
+
+.classifica-riga.medaglia-1 {
+  border-color: #7a5a12; background: linear-gradient(135deg, #2a2410, var(--bg-card));
+}
+.classifica-riga.medaglia-1 .classifica-pos { background: #4a3a0c; font-size: 1.3em; }
+.classifica-riga.medaglia-1 .classifica-squadra { font-size: 1.15em; }
+.classifica-riga.medaglia-2 .classifica-pos { background: #33404f; }
+.classifica-riga.medaglia-3 .classifica-pos { background: #3d2c1a; }
+
+.riga-form { display: flex; gap: 0.5em; flex-wrap: wrap; align-items: center; margin: 0.6em 0; }
+.riga-bottoni { display: flex; gap: 0.5em; margin: 0.6em 0; }
+#admin-panel input, #admin-panel select, #admin-panel textarea { display: block; width: 100%; margin: 0.4em 0; }
+#admin-panel .riga-form input, #admin-panel .riga-form select { width: auto; flex: 1; margin: 0; }
+.custom-esito-riga { display: flex; gap: 0.5em; margin-bottom: 0.4em; }
+.custom-esito-riga input { flex: 1; }
+
+.log-box { max-height: 240px; overflow-y: auto; background: var(--bg-card-2); border-radius: 6px; padding: 0.6em; font-size: 0.85em; color: var(--text-dim); }
+.log-box div { padding: 0.15em 0; border-bottom: 1px solid var(--border); }
+
+.mini-btn { font-size: 0.8em; padding: 0.25em 0.6em; margin-right: 0.3em; }
+
+.accesso-riga {
+  display: flex; align-items: center; gap: 0.7em; padding: 0.5em 0; border-bottom: 1px solid var(--border);
+}
+.accesso-riga span:first-child { flex: 1; font-weight: 600; }
+.accesso-stato { font-size: 0.78em; padding: 0.15em 0.6em; border-radius: 999px; flex: none; }
+.accesso-stato.si { background: #123a24; color: var(--accent); }
+.accesso-stato.no { background: var(--bg-card-2); color: var(--text-dim); }
+
+.modal-box .link-btn { width: auto; display: block; margin-top: 0.8em; }
+
+@media (max-width: 480px) {
+  .brand { font-size: 1em; }
+  .esito-btn { min-width: 80px; }
+}
+
+/* Schedina (betslip) */
+.barra-schedina {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 1em; z-index: 15;
+  background: var(--accent-dim); color: #06210f; font-weight: 700; border: none;
+  border-radius: 999px; padding: 0.8em 1.4em; box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  cursor: pointer; font-size: 0.95em;
+}
+.barra-schedina:hover { background: var(--accent); }
+
+.modal-schedina-box { max-width: 460px; text-align: left; }
+.modal-schedina-box h2 { font-size: 1.1em; }
+.schedina-riga {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.5em;
+  background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.5em 0.7em; margin-bottom: 0.5em;
+}
+.schedina-riga .info { font-size: 0.85em; }
+.schedina-riga .info b { display: block; font-size: 0.95em; color: var(--text); }
+.schedina-riga .quota { color: var(--gold); font-weight: 700; margin-right: 0.4em; }
+.schedina-riga .btn-rimuovi-sel { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1em; }
+#modal-schedina input { width: 100%; margin: 0.6em 0; }
