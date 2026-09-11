@@ -1,6 +1,7 @@
 """
 Gottabet - Scommesse tra amici della lega GOTTA
-Solo libreria standard: nessuna dipendenza da installare.
+Solo libreria standard, a eccezione di pywebpush (notifiche push del browser: serve per la
+crittografia VAPID/aes128gcm che Python di base non ha) - vedi requirements.txt.
 
 Avvio:  python server.py [porta]   (default porta 8765, o $PORT se impostata dall'hosting)
 """
@@ -17,6 +18,8 @@ import unicodedata
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
+
+from pywebpush import webpush, WebPushException
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(APP_DIR, "data")
@@ -206,10 +209,12 @@ class Store:
         self.state.setdefault('prossimo_id_schedina', 1)
         self.state.setdefault('auth', {})
         self.state.setdefault('sessioni', {})
+        self.state.setdefault('push_subscriptions', {})
         for sq in squadre:
             self.state['saldi'].setdefault(sq, saldo_iniziale)
             self.state['storico_punti'].setdefault(sq, [])
             self.state.setdefault('proiezioni', {}).setdefault(sq, [])
+            self.state['push_subscriptions'].setdefault(sq, [])
 
     def _log(self, testo):
         self.state.setdefault('log', []).append({'ts': now_str(), 'testo': testo})
@@ -968,6 +973,113 @@ class Store:
         self.save()
         return {'ok': True}
 
+    # -- notifiche push del browser (promemoria "non hai ancora giocato la schedina") --
+
+    def vapid_chiave_pubblica(self):
+        return self.config.get('push', {}).get('vapid_public_key')
+
+    def sottoscrivi_push(self, squadra, subscription):
+        if squadra not in self.squadre():
+            return {'errore': 'squadra non valida'}
+        if not isinstance(subscription, dict) or not subscription.get('endpoint'):
+            return {'errore': 'sottoscrizione non valida (manca endpoint)'}
+        lista = self.state['push_subscriptions'].setdefault(squadra, [])
+        lista[:] = [s for s in lista if s.get('endpoint') != subscription['endpoint']]
+        lista.append(subscription)
+        self._log(f"{squadra} ha attivato le notifiche push su un dispositivo")
+        self.save()
+        return {'ok': True}
+
+    def annulla_push(self, squadra, endpoint):
+        if squadra not in self.squadre():
+            return {'errore': 'squadra non valida'}
+        lista = self.state['push_subscriptions'].setdefault(squadra, [])
+        prima = len(lista)
+        lista[:] = [s for s in lista if s.get('endpoint') != endpoint]
+        if len(lista) < prima:
+            self._log(f"{squadra} ha disattivato le notifiche push su un dispositivo")
+            self.save()
+        return {'ok': True}
+
+    def _invia_push_a_squadra(self, squadra, titolo, testo):
+        """Manda la notifica a tutti i dispositivi sottoscritti di una squadra. Rimuove da sole le
+        sottoscrizioni scadute/non piu' valide (410/404: il browser non le riconosce piu')."""
+        push_cfg = self.config.get('push', {})
+        # la chiave privata non sta mai in config.json/nel repository: solo variabile d'ambiente
+        chiave_privata = os.environ.get('VAPID_PRIVATE_KEY')
+        claims_sub = push_cfg.get('vapid_claims_sub')
+        if not chiave_privata:
+            return {'inviate': 0, 'fallite': 0,
+                    'errore': "variabile d'ambiente VAPID_PRIVATE_KEY non impostata sul server"}
+        lista = self.state['push_subscriptions'].get(squadra, [])
+        if not lista:
+            return {'inviate': 0, 'fallite': 0, 'nessuna_sottoscrizione': True}
+        payload = json.dumps({'titolo': titolo, 'testo': testo})
+        inviate, fallite, scadute = 0, 0, []
+        for sub in list(lista):
+            try:
+                webpush(subscription_info=sub, data=payload,
+                        vapid_private_key=chiave_privata, vapid_claims={'sub': claims_sub})
+                inviate += 1
+            except WebPushException as e:
+                status = getattr(e.response, 'status_code', None) if e.response is not None else None
+                if status in (404, 410):
+                    scadute.append(sub['endpoint'])
+                else:
+                    fallite += 1
+        if scadute:
+            lista[:] = [s for s in lista if s.get('endpoint') not in scadute]
+            self.save()
+        return {'inviate': inviate, 'fallite': fallite, 'scadute_rimosse': len(scadute)}
+
+    def invia_notifica(self, squadre, titolo, testo):
+        if not titolo or not testo:
+            return {'errore': 'titolo e testo sono obbligatori'}
+        squadre_valide = [sq for sq in (squadre or self.squadre()) if sq in self.squadre()]
+        risultati = {sq: self._invia_push_a_squadra(sq, titolo, testo) for sq in squadre_valide}
+        self._log(f"Notifica push \"{titolo}\" inviata a: " + ", ".join(squadre_valide))
+        return {'ok': True, 'risultati': risultati}
+
+    def squadre_senza_schedina_giornata(self, giornata):
+        return [sq for sq in self.squadre() if not self.ha_schedina(sq, giornata)]
+
+    def squadre_senza_schedina_girone_andata(self):
+        mercato = self.mercato_girone_andata_aperto()
+        if not mercato:
+            return None
+        hanno_giocato = {s['squadra'] for s in self.state['schedine']
+                         if any(sel['mercato_id'] == mercato['id'] for sel in s['selezioni'])}
+        return [sq for sq in self.squadre() if sq not in hanno_giocato]
+
+    def ricorda_schedina_giornata(self, giornata=None, titolo=None, testo=None):
+        if giornata is None:
+            giornate = [m['giornata'] for m in self.state['mercati'] if m.get('giornata') is not None]
+            if not giornate:
+                return {'errore': "nessuna giornata pubblicata, indica un numero di giornata"}
+            giornata = max(giornate)
+        squadre = self.squadre_senza_schedina_giornata(giornata)
+        if not squadre:
+            return {'ok': True, 'squadre_avvisate': [], 'nota': f'tutti hanno gia\' giocato la giornata {giornata}'}
+        titolo = titolo or 'Gottabet'
+        testo = testo or f"Non hai ancora giocato la schedina della giornata {giornata}!"
+        r = self.invia_notifica(squadre, titolo, testo)
+        if not r.get('ok'):
+            return r
+        return {'ok': True, 'giornata': giornata, 'squadre_avvisate': squadre, 'risultati': r['risultati']}
+
+    def ricorda_girone_andata(self, titolo=None, testo=None):
+        squadre = self.squadre_senza_schedina_girone_andata()
+        if squadre is None:
+            return {'errore': "nessun mercato 'vincitore girone d'andata' aperto al momento"}
+        if not squadre:
+            return {'ok': True, 'squadre_avvisate': [], 'nota': 'hanno gia\' tutti scelto il loro vincitore'}
+        titolo = titolo or 'Gottabet'
+        testo = testo or "Non hai ancora scelto il tuo vincitore del girone d'andata!"
+        r = self.invia_notifica(squadre, titolo, testo)
+        if not r.get('ok'):
+            return r
+        return {'ok': True, 'squadre_avvisate': squadre, 'risultati': r['risultati']}
+
     def classifica(self):
         righe = [{'squadra': sq, 'saldo': self.state['saldi'].get(sq, 0)} for sq in self.squadre()]
         righe.sort(key=lambda r: -r['saldo'])
@@ -1111,6 +1223,11 @@ class Handler(BaseHTTPRequestHandler):
         if path == '/' or path == '/index.html':
             self._send_file(os.path.join(STATIC_DIR, 'index.html'), 'text/html; charset=utf-8')
             return
+        if path == '/sw.js':
+            # servito dalla radice (non /static/) apposta: e' l'unico modo per cui lo scope di
+            # default del service worker copre tutto il sito e non solo /static/.
+            self._send_file(os.path.join(STATIC_DIR, 'sw.js'), 'application/javascript; charset=utf-8')
+            return
         if path.startswith('/static/'):
             rel = path[len('/static/'):]
             full = os.path.join(STATIC_DIR, rel)
@@ -1146,6 +1263,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if path == '/api/log':
                 self._send_json(STORE.state.get('log', [])[-100:])
+                return
+            if path == '/api/push/chiave-pubblica':
+                self._send_json({'chiave_pubblica': STORE.vapid_chiave_pubblica()})
                 return
             if path == '/api/export':
                 if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
@@ -1221,6 +1341,24 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(risultato, 200 if risultato.get('ok') else 400)
                 return
 
+            if path == '/api/push/sottoscrivi':
+                squadra = STORE.squadra_da_token(body.get('token'))
+                if not squadra:
+                    self._send_json({'errore': 'sessione scaduta, rientra con la tua squadra'}, 401)
+                    return
+                r = STORE.sottoscrivi_push(squadra, body.get('subscription'))
+                self._send_json(r, 200 if r.get('ok') else 400)
+                return
+
+            if path == '/api/push/annulla':
+                squadra = STORE.squadra_da_token(body.get('token'))
+                if not squadra:
+                    self._send_json({'errore': 'sessione scaduta, rientra con la tua squadra'}, 401)
+                    return
+                r = STORE.annulla_push(squadra, body.get('endpoint'))
+                self._send_json(r, 200 if r.get('ok') else 400)
+                return
+
             if path.startswith('/api/admin/'):
                 if not STORE.check_admin(body.get('admin_password')):
                     self._send_json({'errore': 'password admin errata'}, 403)
@@ -1254,6 +1392,18 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/pubblica-girone-andata':
                     r = STORE.pubblica_girone_andata(body.get('n_simulazioni'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/notifica':
+                    r = STORE.invia_notifica(body.get('squadre'), body.get('titolo'), body.get('testo'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/ricorda-schedina':
+                    r = STORE.ricorda_schedina_giornata(body.get('giornata'), body.get('titolo'), body.get('testo'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/ricorda-girone-andata':
+                    r = STORE.ricorda_girone_andata(body.get('titolo'), body.get('testo'))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/chiudi-mercato':

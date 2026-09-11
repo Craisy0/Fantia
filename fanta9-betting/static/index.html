@@ -15,6 +15,7 @@
   <header class="topbar">
     <div class="brand">⚽ <span id="nome-lega">Gottabet</span> <small>lega GOTTA</small></div>
     <div class="identita">
+      <button id="btn-notifiche" class="link-btn hidden">🔔 notifiche</button>
       <span id="badge-squadra" class="badge">Chi sei?</span>
       <span id="badge-saldo" class="badge saldo"></span>
       <button id="btn-cambia-identita" class="link-btn">cambia</button>
@@ -127,6 +128,21 @@ Cucca; 58.1; 6.4
         <button id="btn-calcola-girone-andata">Calcola quote</button>
         <div id="girone-andata-risultato"></div>
         <button id="btn-pubblica-girone-andata" class="hidden">Pubblica come scommessa</button>
+
+        <hr>
+
+        <h2>Notifiche push</h2>
+        <p class="hint">Manda un promemoria come notifica push ai compagni che l'hanno attivata (bottone "🔔 notifiche" in alto, disponibile dopo aver scelto la propria squadra). Chi non l'ha attivata non riceve nulla.</p>
+        <div class="riga-bottoni">
+          <button id="btn-ricorda-schedina">Ricorda schedina (ultima giornata)</button>
+          <button id="btn-ricorda-girone-andata">Ricorda vincitore girone d'andata</button>
+        </div>
+        <div id="notifiche-risultato"></div>
+        <div class="riga-form">
+          <input type="text" id="notifica-titolo" placeholder="Titolo (opzionale, default: Gottabet)">
+        </div>
+        <textarea id="notifica-testo" rows="2" placeholder="Messaggio libero da inviare a tutti"></textarea>
+        <button id="btn-invia-notifica">Invia a tutti</button>
 
         <hr>
 

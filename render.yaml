@@ -4,5 +4,8 @@ services:
     runtime: python
     plan: free
     rootDir: fanta9-betting
-    buildCommand: "true"
+    buildCommand: "pip install -r requirements.txt"
     startCommand: "python server.py"
+    envVars:
+      - key: VAPID_PRIVATE_KEY
+        sync: false  # segreta: si imposta a mano dalla dashboard Render, non finisce nel repository
