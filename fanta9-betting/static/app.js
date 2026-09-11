@@ -653,6 +653,30 @@
     });
   }
 
+  function initGironeAndata() {
+    el('#btn-calcola-girone-andata').addEventListener('click', async () => {
+      const cont = el('#girone-andata-risultato');
+      const btnPubblica = el('#btn-pubblica-girone-andata');
+      cont.innerHTML = '<p class="hint">Calcolo in corso…</p>';
+      btnPubblica.classList.add('hidden');
+      const params = new URLSearchParams({ admin_password: adminPassword() });
+      const r = await get('/api/admin/quote-girone-andata?' + params.toString());
+      if (!r.ok) { cont.innerHTML = `<p class="errore">${escapeHtml(r.errore || 'errore')}</p>`; return; }
+      const righe = r.quote.map(q => `<li>${escapeHtml(q.squadra)} — quota <b>${q.quota}</b> (${(q.probabilita * 100).toFixed(1)}%)</li>`).join('');
+      cont.innerHTML = `<p class="hint">Giornata fine girone: ${r.giornata_fine} · partite ancora da giocare: ${r.partite_da_giocare} · simulazioni: ${r.n_simulazioni}</p><ul>${righe}</ul>`;
+      btnPubblica.classList.remove('hidden');
+    });
+    el('#btn-pubblica-girone-andata').addEventListener('click', async () => {
+      if (!confirm("Pubblicare la scommessa \"Vincitore girone d'andata\" con queste quote?")) return;
+      const r = await post('/api/admin/pubblica-girone-andata', { admin_password: adminPassword() });
+      if (r.errore) { alert(r.errore); return; }
+      alert('Scommessa pubblicata.');
+      el('#girone-andata-risultato').innerHTML = '';
+      el('#btn-pubblica-girone-andata').classList.add('hidden');
+      await ricarica();
+    });
+  }
+
   function initCustom() {
     aggiungiRigaEsitoCustom();
     aggiungiRigaEsitoCustom();
@@ -781,6 +805,7 @@
     initImportPunti();
     initProiezioni();
     initCalendario();
+    initGironeAndata();
     initCustom();
     initCorrezioneSaldo();
     initCambiaPassword();

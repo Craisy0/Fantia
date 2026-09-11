@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import os
+import random
 import re
 import secrets
 import sys
@@ -488,6 +489,108 @@ class Store:
                 creati.extend(r['mercati'])
         return {'ok': True, 'mercati_creati': creati, 'incontri_saltati_gia_esistenti': saltati}
 
+    # -- vincitore girone d'andata (mercato "outright" a N vie, calcolato via simulazione) --
+
+    def _probabilita_1x2(self, squadra_a, squadra_b, giornata):
+        lam_a, _ = self.stima_lambda_con_fonte(squadra_a, giornata)
+        lam_b, _ = self.stima_lambda_con_fonte(squadra_b, giornata)
+        max_gol = self.config['quote']['max_gol_simulati']
+        p1_raw, _, p2_raw = calcola_probabilita_1x2(lam_a, lam_b, max_gol)
+        px = stima_probabilita_pareggio(lam_a, lam_b, self.config['quote']['pareggio_base'],
+                                         self.config['quote']['pareggio_decadimento'])
+        return combina_pareggio(p1_raw, p2_raw, px)
+
+    def simula_vincitore_girone_andata(self, n_simulazioni=None):
+        """Simulazione Monte Carlo del vincitore del girone d'andata (classifica a punti stile
+        campionato: 3/1/0 a partita). Le giornate gia' giocate contano con il risultato reale
+        (fisso in ogni simulazione); quelle non ancora giocate vengono estratte a ogni run dalle
+        stesse probabilita' 1X2 usate per le quote delle singole partite. In caso di parita' a fine
+        girone il "credito" di vittoria viene diviso tra le squadre appaiate."""
+        cfg = self.config.get('girone_andata', {})
+        giornata_fine = cfg.get('giornata_fine')
+        if not giornata_fine:
+            return {'errore': "giornata_fine del girone d'andata non configurata "
+                               "(config['girone_andata']['giornata_fine'])"}
+        n_simulazioni = int(n_simulazioni or cfg.get('n_simulazioni', 20000))
+        if n_simulazioni < 100:
+            return {'errore': 'n_simulazioni troppo basso (minimo 100)'}
+
+        formula = self.config['formula_gol']
+        squadre = self.squadre()
+        punti_base = {sq: 0 for sq in squadre}
+        partite_da_simulare = []  # (squadra_a, squadra_b, p1, px, p2)
+
+        for g in range(1, giornata_fine + 1):
+            incontri = self.calendario.get(str(g))
+            if not incontri:
+                return {'errore': f"calendario incompleto: manca la giornata {g} "
+                                   f"(il girone d'andata arriva alla {giornata_fine})"}
+            for incontro in incontri:
+                a, b = incontro['a'], incontro['b']
+                punti_a = self.punti_giornata(a, g)
+                punti_b = self.punti_giornata(b, g)
+                if punti_a is not None and punti_b is not None:
+                    gol_a = punti_a_gol(punti_a, formula)
+                    gol_b = punti_a_gol(punti_b, formula)
+                    if gol_a > gol_b:
+                        punti_base[a] += 3
+                    elif gol_a == gol_b:
+                        punti_base[a] += 1
+                        punti_base[b] += 1
+                    else:
+                        punti_base[b] += 3
+                else:
+                    p1, px, p2 = self._probabilita_1x2(a, b, g)
+                    partite_da_simulare.append((a, b, p1, px, p2))
+
+        vittorie = {sq: 0.0 for sq in squadre}
+        for _ in range(n_simulazioni):
+            punti = dict(punti_base)
+            for a, b, p1, px, p2 in partite_da_simulare:
+                r = random.random()
+                if r < p1:
+                    punti[a] += 3
+                elif r < p1 + px:
+                    punti[a] += 1
+                    punti[b] += 1
+                else:
+                    punti[b] += 3
+            massimo = max(punti.values())
+            vincitori = [sq for sq, p in punti.items() if p == massimo]
+            credito = 1.0 / len(vincitori)
+            for sq in vincitori:
+                vittorie[sq] += credito
+
+        margine = self.config['quote']['margine_bookmaker']
+        soglia_tassa = self.config['quote'].get('quota_soglia_tassa')
+        quota_massima = self.config['quote'].get('quota_massima')
+        tassa_scala = self.config['quote'].get('quota_tassa_scala')
+
+        quote = []
+        for sq in squadre:
+            probabilita = vittorie[sq] / n_simulazioni
+            quote.append({
+                'squadra': sq,
+                'probabilita': round(probabilita, 4),
+                'quota': quota_da_probabilita(probabilita, margine, soglia_tassa, quota_massima, tassa_scala),
+            })
+        quote.sort(key=lambda r: r['quota'])
+        return {'ok': True, 'giornata_fine': giornata_fine, 'n_simulazioni': n_simulazioni,
+                'partite_gia_giocate': len(partite_da_simulare) == 0,
+                'partite_da_giocare': len(partite_da_simulare), 'quote': quote}
+
+    def pubblica_girone_andata(self, n_simulazioni=None):
+        r = self.simula_vincitore_girone_andata(n_simulazioni)
+        if not r.get('ok'):
+            return r
+        esiti = [{'chiave': q['squadra'], 'label': f"Vince {q['squadra']}", 'quota': q['quota']}
+                 for q in r['quote']]
+        creato = self.crea_mercato_custom("Vincitore girone d'andata", esiti, r['giornata_fine'])
+        if creato.get('ok'):
+            creato['simulazione'] = {'giornata_fine': r['giornata_fine'], 'n_simulazioni': r['n_simulazioni'],
+                                      'partite_da_giocare': r['partite_da_giocare']}
+        return creato
+
     def crea_mercato_custom(self, titolo, esiti, giornata=None):
         if not titolo or not esiti or len(esiti) < 2:
             return {'errore': 'servono un titolo e almeno 2 esiti possibili'}
@@ -914,6 +1017,14 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 self._send_json(STORE.anteprima_h2h(squadra_a, squadra_b, giornata))
                 return
+            if path == '/api/admin/quote-girone-andata':
+                if not STORE.check_admin((qs.get('admin_password') or [''])[0]):
+                    self._send_json({'errore': 'password admin errata'}, 403)
+                    return
+                n_simulazioni = (qs.get('n_simulazioni') or [None])[0]
+                r = STORE.simula_vincitore_girone_andata(n_simulazioni)
+                self._send_json(r, 200 if r.get('ok') else 400)
+                return
 
         self._send_json({'error': 'not found', 'path': path}, 404)
 
@@ -975,6 +1086,10 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 if path == '/api/admin/crea-mercato-custom':
                     r = STORE.crea_mercato_custom(body.get('titolo'), body.get('esiti', []), body.get('giornata'))
+                    self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/pubblica-girone-andata':
+                    r = STORE.pubblica_girone_andata(body.get('n_simulazioni'))
                     self._send_json(r, 200 if r.get('ok') else 400)
                     return
                 if path == '/api/admin/chiudi-mercato':

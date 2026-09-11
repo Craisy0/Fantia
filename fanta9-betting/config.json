@@ -21,6 +21,11 @@
     "quota_massima": 3.2,
     "quota_tassa_scala": 8.0
   },
+  "girone_andata": {
+    "_descrizione": "Il girone d'andata finisce alla giornata sotto: tutte le partite fino a quella giornata (inclusa) contano per il mercato 'Vincitore girone d'andata'. Per GOTTA e' la giornata 19 (= 22a di Serie A, ultima giocata prima della chiusura del calciomercato invernale del 1 febbraio 2027; GOTTA parte dalla 4a di Serie A).",
+    "giornata_fine": 19,
+    "n_simulazioni": 20000
+  },
   "formula_gol": {
     "_descrizione": "Punti fantacalcio -> gol equivalenti: sotto soglia = 0 gol, alla soglia = 1 gol, poi +1 gol ogni 'ogni_punti' punti aggiuntivi.",
     "soglia": 66,

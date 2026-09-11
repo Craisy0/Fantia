@@ -61,9 +61,21 @@ La schedina vince solo se **tutte** le selezioni sono corrette; basta che una sb
 
 ### Calendario ufficiale e pubblicazione automatica
 
-`data/calendario.json` contiene gli scontri delle giornate 1-16 del girone all'italiana della lega GOTTA, già tradotti dai nomi fantasia del calendario ai nomi reali delle 10 squadre. Nel tab Admin → "Pubblica una giornata dal calendario" scrivi il numero di giornata, controlli gli scontri e pubblichi con un click tutti e 5 i mercati 1X2 con le quote calcolate dal sistema — salta in automatico gli incontri già pubblicati, quindi puoi richiamarlo senza creare doppioni. È l'unico modo per creare un testa a testa: non c'è più una creazione manuale singola. Mancano le giornate 17-20 (non ancora fornite) — appena arrivano gli screenshot mancanti si possono aggiungere a `calendario.json`.
+`data/calendario.json` contiene gli scontri delle giornate 1-19 del girone all'italiana della lega GOTTA (campionato da 35 giornate, GOTTA parte dalla 4ª giornata di Serie A), già tradotti dai nomi fantasia della piattaforma ai nomi reali delle 10 squadre. Nel tab Admin → "Pubblica una giornata dal calendario" scrivi il numero di giornata, controlli gli scontri e pubblichi con un click tutti e 5 i mercati 1X2 con le quote calcolate dal sistema — salta in automatico gli incontri già pubblicati, quindi puoi richiamarlo senza creare doppioni. È l'unico modo per creare un testa a testa: non c'è più una creazione manuale singola. Mancano le giornate 20+ (non ancora fornite) — man mano che arrivano gli screenshot del calendario si possono aggiungere a `calendario.json` (tradotti dai nomi fantasia a quelli reali).
 
 Nel tab "Scommesse aperte" i mercati sono raggruppati sotto un titolo con il numero di giornata; ogni singolo incontro mostra solo i nomi delle due squadre (es. "Giammi vs Ale"), senza ripetere giornata e dettagli tecnici nel titolo.
+
+### Vincitore girone d'andata
+
+Il girone d'andata di GOTTA finisce alla **giornata 19** (`config.json` → `girone_andata.giornata_fine`), che corrisponde alla 22ª giornata di Serie A: l'ultima giocata (31 gennaio 2027) prima della chiusura del calciomercato invernale (1° febbraio 2027, ore 20:00).
+
+Nel tab Admin → "Vincitore girone d'andata" premi "Calcola quote": il sistema fa una **simulazione Monte Carlo** (di default 20.000 run, `config.json` → `girone_andata.n_simulazioni`) dell'intero girone, giornata per giornata fino alla 19ª:
+
+- le giornate **già giocate** contano con il risultato reale (fisso in ogni simulazione, niente da stimare);
+- le giornate **non ancora giocate** vengono estratte a ogni run dalle stesse probabilità 1X2 usate per le quote dei singoli testa a testa (stessa fonte del lambda: proiezione FantaLab > media storica > default);
+- la classifica di ogni simulazione segue le regole di un campionato normale (vittoria 3 punti, pareggio 1, sconfitta 0); in caso di parità a pari punti il "credito" di vittoria si divide tra le squadre appaiate, invece di inventare un criterio di spareggio arbitrario.
+
+La frequenza con cui ogni squadra risulta prima in classifica nelle simulazioni diventa la sua probabilità di vincere il girone, convertita in quota con lo stesso margine bookmaker delle altre quote. Il risultato è puramente indicativo finché mancano molte giornate (a inizio stagione, con poche proiezioni disponibili, le quote di tutte le squadre saranno simili) e si affina man mano che importi punteggi e proiezioni reali. Premendo "Pubblica come scommessa" il sistema crea in automatico una scommessa libera con un esito per squadra (`Vince <squadra>`), pronta per essere giocata come le altre; per liquidarla a fine girone la risolvi come una qualunque scommessa libera scegliendo la squadra vincitrice.
 
 ### Dati delle giornate (rose/punteggi)
 
@@ -128,6 +140,8 @@ Il ripristino ripristina anche `config.json` (password admin, squadre, parametri
 | `POST /api/admin/importa-proiezioni {admin_password, giornata, testo}` | salva le proiezioni pre-giornata usate per calcolare le quote |
 | `POST /api/admin/crea-mercato-h2h {admin_password, squadra_a, squadra_b, giornata}` | pubblica il mercato 1X2 per un incontro |
 | `POST /api/admin/crea-mercato-custom {admin_password, titolo, esiti:[{label,quota}], giornata}` | pubblica una scommessa libera |
+| `GET /api/admin/quote-girone-andata?admin_password=&n_simulazioni=` | calcola (senza pubblicare) le quote del vincitore del girone d'andata con una simulazione Monte Carlo |
+| `POST /api/admin/pubblica-girone-andata {admin_password, n_simulazioni}` | calcola le quote del vincitore del girone d'andata e pubblica subito la scommessa libera con quel titolo/esiti |
 | `POST /api/admin/anteprima-import-punti {admin_password, testo}` | controlla il parsing dei punteggi senza salvare |
 | `POST /api/admin/importa-punti {admin_password, giornata, testo}` | salva i punteggi e liquida automaticamente i mercati (e le schedine) di quella giornata |
 | `POST /api/admin/chiudi-mercato / riapri-mercato {admin_password, mercato_id}` | blocca/riapre le nuove giocate su un mercato |
