@@ -24,6 +24,10 @@ STATIC_DIR = os.path.join(APP_DIR, "static")
 STATE_PATH = os.path.join(DATA_DIR, "state.json")
 CONFIG_PATH = os.path.join(APP_DIR, "config.json")
 CALENDARIO_PATH = os.path.join(DATA_DIR, "calendario.json")
+ROSE_GOTTA_PATH = os.path.join(DATA_DIR, "rose_gotta.json")
+TITOLARI_REALI_PATH = os.path.join(DATA_DIR, "titolari_reali.json")
+CALENDARIO_SERIE_A_PATH = os.path.join(DATA_DIR, "calendario_serie_a.json")
+STATS_SERIE_A_PATH = os.path.join(DATA_DIR, "stats_serie_a.json")
 
 LOCK = threading.Lock()
 
@@ -170,6 +174,26 @@ class Store:
     def reload_config(self):
         self.config = load_json(CONFIG_PATH)
         self.calendario = load_json(CALENDARIO_PATH) if os.path.exists(CALENDARIO_PATH) else {}
+        # dati statici per il modello a livello giocatore del mercato "Vincitore girone d'andata"
+        self.rose_gotta = load_json(ROSE_GOTTA_PATH) if os.path.exists(ROSE_GOTTA_PATH) else {}
+        self.titolari_reali = load_json(TITOLARI_REALI_PATH) if os.path.exists(TITOLARI_REALI_PATH) else {}
+        self.calendario_serie_a = load_json(CALENDARIO_SERIE_A_PATH) if os.path.exists(CALENDARIO_SERIE_A_PATH) else {}
+        self.stats_serie_a = load_json(STATS_SERIE_A_PATH) if os.path.exists(STATS_SERIE_A_PATH) else {}
+        self._prepara_modello_giocatori()
+
+    def _prepara_modello_giocatori(self):
+        """Indici derivati dai dati statici (titolare -> club/ruolo reale, medie di lega) usati dal
+        modello a livello giocatore. Ricalcolati a ogni reload_config, non a ogni chiamata."""
+        self._titolare_index = {}
+        for club, dati in self.titolari_reali.items():
+            if club.startswith('_'):
+                continue
+            for p in dati.get('titolari', []):
+                self._titolare_index[p['nome']] = (club, p['ruolo'])
+        club_stats = {k: v for k, v in self.stats_serie_a.items() if not k.startswith('_')}
+        partite_tot = sum(v['partite_giocate'] for v in club_stats.values()) or 1
+        self._media_lega_fatti_pp = sum(v['gol_fatti'] for v in club_stats.values()) / partite_tot
+        self._media_lega_subiti_pp = sum(v['gol_subiti'] for v in club_stats.values()) / partite_tot
 
     def save(self):
         save_json_atomic(STATE_PATH, self.state)
@@ -505,6 +529,97 @@ class Store:
                                          self.config['quote']['pareggio_decadimento'])
         return combina_pareggio(p1_raw, p2_raw, px)
 
+    # -- modello a livello giocatore (solo per il girone d'andata): forza squadra giornata =
+    # somma quotazione_mantra * fattore_avversario dei migliori 11 titolari reali statici --
+
+    def _gol_pp_squadra_reale(self, club, chiave):
+        v = self.stats_serie_a.get(club)
+        if not v:
+            return None
+        return max(v[chiave] / max(v['partite_giocate'], 1), 0.2)
+
+    def _fattore_avversario_giocatore(self, ruolo, avversario):
+        """ruolo P/D -> beneficia di un avversario che segna poco; ruolo A -> beneficia di un
+        avversario che subisce molto; ruolo C -> media dei due. Smorzato verso 1.0 (nessun
+        vantaggio/svantaggio) in base a quante partite reali ha giocato l'avversario: con pochi
+        dati il fattore grezzo e' rumoroso, quindi pesa meno finche' il campione e' piccolo."""
+        gol_subiti_pp = self._gol_pp_squadra_reale(avversario, 'gol_subiti')
+        gol_fatti_pp = self._gol_pp_squadra_reale(avversario, 'gol_fatti')
+        if gol_subiti_pp is None or gol_fatti_pp is None:
+            return 1.0
+        f_att = self._media_lega_subiti_pp / gol_subiti_pp
+        f_dif = self._media_lega_fatti_pp / gol_fatti_pp
+        costante_smorzamento = self.config.get('girone_andata', {}).get('smorzamento_partite', 5)
+        partite = self.stats_serie_a.get(avversario, {}).get('partite_giocate', 0)
+        peso = partite / (partite + costante_smorzamento) if costante_smorzamento else 1.0
+        f_att = 1.0 + (f_att - 1.0) * peso
+        f_dif = 1.0 + (f_dif - 1.0) * peso
+        if ruolo == 'A':
+            return f_att
+        if ruolo in ('P', 'D'):
+            return f_dif
+        return (f_att + f_dif) / 2  # C
+
+    def _avversario_reale(self, club, giornata_serie_a):
+        for m in self.calendario_serie_a.get(str(giornata_serie_a), []):
+            if m['casa'] == club:
+                return m['trasferta']
+            if m['trasferta'] == club:
+                return m['casa']
+        return None
+
+    def punti_proiettati_giocatori(self, squadra_gotta, giornata):
+        """Miglior 11 (1 portiere migliore + 10 di movimento migliori) tra i giocatori della rosa
+        che sono titolari reali (statico) nel proprio club quella giornata, pesati per la
+        difficolta' del loro avversario reale. Ritorna None se manca un dato indispensabile
+        (calendario Serie A o rosa non disponibili per quella giornata/squadra)."""
+        giornata_serie_a = giornata + 3  # GOTTA parte dalla 4a giornata di Serie A
+        if str(giornata_serie_a) not in self.calendario_serie_a:
+            return None
+        rosa = self.rose_gotta.get(squadra_gotta)
+        if not rosa:
+            return None
+        candidati = []
+        for giocatore in rosa:
+            nome = giocatore['nome']
+            info = self._titolare_index.get(nome)
+            if not info:
+                continue
+            club, ruolo = info
+            if club != giocatore['club']:
+                continue  # incongruenza rosa/club reale, salta per sicurezza
+            avversario = self._avversario_reale(club, giornata_serie_a)
+            if avversario is None:
+                continue
+            fattore = self._fattore_avversario_giocatore(ruolo, avversario)
+            candidati.append({'ruolo': ruolo, 'punteggio': giocatore['quotazione_mantra'] * fattore})
+        if not candidati:
+            return None
+        portieri = sorted((c for c in candidati if c['ruolo'] == 'P'), key=lambda c: -c['punteggio'])
+        movimento = sorted((c for c in candidati if c['ruolo'] != 'P'), key=lambda c: -c['punteggio'])
+        undici = ([portieri[0]] + movimento[:10]) if portieri else sorted(candidati, key=lambda c: -c['punteggio'])[:11]
+        return sum(c['punteggio'] for c in undici)
+
+    def stima_lambda_giocatori(self, squadra, giornata):
+        punti = self.punti_proiettati_giocatori(squadra, giornata)
+        if punti is None:
+            return self.config['quote']['lambda_default'], 'default'
+        formula = self.config['formula_gol']
+        lambda_default = self.config['quote']['lambda_default']
+        return lambda_da_proiezione(punti, formula, lambda_default), 'modello_giocatori'
+
+    def _probabilita_1x2_girone_andata(self, squadra_a, squadra_b, giornata):
+        """Come _probabilita_1x2, ma usa il modello a livello giocatore (formazioni titolari reali
+        statiche + calendario reale + forza da listone) invece della proiezione FantaLab/media
+        storica/default: solo per questo mercato, le partite settimanali 1X2 restano invariate."""
+        lam_a, _ = self.stima_lambda_giocatori(squadra_a, giornata)
+        lam_b, _ = self.stima_lambda_giocatori(squadra_b, giornata)
+        max_gol = self.config['quote']['max_gol_simulati']
+        p1_raw, _, p2_raw = calcola_probabilita_1x2(lam_a, lam_b, max_gol)
+        px = stima_probabilita_pareggio(lam_a, lam_b, self.config['quote']['pareggio_base'],
+                                         self.config['quote']['pareggio_decadimento'])
+        return combina_pareggio(p1_raw, p2_raw, px)
+
     def simula_vincitore_girone_andata(self, n_simulazioni=None):
         """Simulazione Monte Carlo del vincitore del girone d'andata (classifica a punti stile
         campionato: 3/1/0 a partita). Le giornate gia' giocate contano con il risultato reale
@@ -545,7 +660,7 @@ class Store:
                     else:
                         punti_base[b] += 3
                 else:
-                    p1, px, p2 = self._probabilita_1x2(a, b, g)
+                    p1, px, p2 = self._probabilita_1x2_girone_andata(a, b, g)
                     partite_da_simulare.append((a, b, p1, px, p2))
 
         vittorie = {sq: 0.0 for sq in squadre}
