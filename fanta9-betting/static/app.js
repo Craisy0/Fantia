@@ -859,12 +859,27 @@
     el('#btn-notifiche').addEventListener('click', async () => {
       const sub = await sottoscrizioneAttuale();
       if (sub) {
-        await disattivaNotifiche();
+        // Il browser pensa di avere gia' una sottoscrizione attiva: puo' essere vera, o "orfana"
+        // (creata nel browser ma mai arrivata al server, es. per un problema di rete). Invece di
+        // disattivarla alla cieca, prima la ri-sincronizza col server (innocuo se era gia' a
+        // posto) e lo dice chiaramente, cosi' non sparisce piu' in silenzio.
+        try {
+          const identita = identitaAttuale();
+          const r = await post('/api/push/sottoscrivi', { token: identita.token, subscription: sub.toJSON() });
+          if (r.errore) { alert('Notifiche: ' + r.errore); return; }
+          if (!confirm('Le notifiche sono attive su questo dispositivo. Vuoi disattivarle?')) return;
+          await disattivaNotifiche();
+          alert('Notifiche disattivate su questo dispositivo.');
+        } catch (e) {
+          alert('Errore con le notifiche: ' + (e && e.message ? e.message : e));
+        }
       } else {
         try {
           await attivaNotifiche();
+          const sub2 = await sottoscrizioneAttuale();
+          alert(sub2 ? 'Notifiche attivate!' : 'Le notifiche non risultano attive: riprova, o controlla che siano consentite nelle impostazioni del sito nel browser.');
         } catch (e) {
-          alert('Non è stato possibile attivare le notifiche su questo dispositivo/browser.');
+          alert('Non è stato possibile attivare le notifiche: ' + (e && e.message ? e.message : e));
         }
       }
     });
