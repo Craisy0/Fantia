@@ -310,8 +310,13 @@ class Store:
             storico.sort(key=lambda v: v['giornata'])
         self._log(f"Importati punti giornata {giornata}: " + ", ".join(f"{r['squadra']}={r['punti']}" for r in risultati))
         risolti = self.auto_settle(giornata)
+        giornata_fine_andata = self.config.get('girone_andata', {}).get('giornata_fine')
+        girone_andata_aggiornato = None
+        if giornata_fine_andata and giornata <= giornata_fine_andata:
+            girone_andata_aggiornato = self.aggiorna_quote_girone_andata()
         self.save()
-        return {'ok': True, 'importati': risultati, 'mercati_risolti': risolti}
+        return {'ok': True, 'importati': risultati, 'mercati_risolti': risolti,
+                'girone_andata_aggiornato': girone_andata_aggiornato}
 
     def punti_giornata(self, squadra, giornata):
         for voce in self.state['storico_punti'].get(squadra, []):
@@ -562,9 +567,11 @@ class Store:
                 vittorie[sq] += credito
 
         margine = self.config['quote']['margine_bookmaker']
-        soglia_tassa = self.config['quote'].get('quota_soglia_tassa')
-        quota_massima = self.config['quote'].get('quota_massima')
-        tassa_scala = self.config['quote'].get('quota_tassa_scala')
+        # tassa/tetto dedicati al girone d'andata (mercato a 10 vie, favorite piu' nette delle
+        # singole partite): usano i valori sotto girone_andata, con fallback su quelli generali.
+        soglia_tassa = cfg.get('quota_soglia_tassa', self.config['quote'].get('quota_soglia_tassa'))
+        quota_massima = cfg.get('quota_massima', self.config['quote'].get('quota_massima'))
+        tassa_scala = cfg.get('quota_tassa_scala', self.config['quote'].get('quota_tassa_scala'))
 
         quote = []
         for sq in squadre:
@@ -579,19 +586,47 @@ class Store:
                 'partite_gia_giocate': len(partite_da_simulare) == 0,
                 'partite_da_giocare': len(partite_da_simulare), 'quote': quote}
 
+    def mercato_girone_andata_aperto(self):
+        return next((m for m in self.state['mercati']
+                     if m.get('tipo') == 'girone_andata' and m['stato'] == 'aperto'), None)
+
     def pubblica_girone_andata(self, n_simulazioni=None):
+        if self.mercato_girone_andata_aperto():
+            return {'errore': "esiste gia' un mercato aperto per il vincitore del girone d'andata "
+                               "(chiudilo o risolvilo prima di pubblicarne uno nuovo)"}
         r = self.simula_vincitore_girone_andata(n_simulazioni)
         if not r.get('ok'):
             return r
         esiti = [{'chiave': q['squadra'], 'label': f"Vince {q['squadra']}", 'quota': q['quota']}
                  for q in r['quote']]
-        creato = self.crea_mercato_custom("Vincitore girone d'andata", esiti, r['giornata_fine'])
+        # giornata=None: e' una scommessa "libera" a se stante, non lega/consuma lo slot
+        # settimanale di una singola giornata (vedi anche crea_schedina).
+        creato = self.crea_mercato_custom("Vincitore girone d'andata", esiti, giornata=None,
+                                           tipo='girone_andata')
         if creato.get('ok'):
             creato['simulazione'] = {'giornata_fine': r['giornata_fine'], 'n_simulazioni': r['n_simulazioni'],
                                       'partite_da_giocare': r['partite_da_giocare']}
         return creato
 
-    def crea_mercato_custom(self, titolo, esiti, giornata=None):
+    def aggiorna_quote_girone_andata(self):
+        """Ricalcola le quote del mercato 'vincitore girone d'andata' ancora aperto con i dati
+        piu' recenti (punteggi/calendario). Aggiorna le quote sul mercato stesso: le schedine gia'
+        giocate non ne risentono, perche' ognuna si porta dietro la propria quota congelata al
+        momento della giocata."""
+        mercato = self.mercato_girone_andata_aperto()
+        if not mercato:
+            return None
+        r = self.simula_vincitore_girone_andata()
+        if not r.get('ok'):
+            return None
+        quote_per_squadra = {q['squadra']: q['quota'] for q in r['quote']}
+        for esito in mercato['esiti']:
+            if esito['chiave'] in quote_per_squadra:
+                esito['quota'] = quote_per_squadra[esito['chiave']]
+        self._log(f"Ricalcolate le quote del vincitore girone d'andata (mercato #{mercato['id']})")
+        return {'mercato_id': mercato['id'], 'quote': mercato['esiti']}
+
+    def crea_mercato_custom(self, titolo, esiti, giornata=None, tipo='custom'):
         if not titolo or not esiti or len(esiti) < 2:
             return {'errore': 'servono un titolo e almeno 2 esiti possibili'}
         chiavi = set()
@@ -609,7 +644,7 @@ class Store:
         mercato = {
             'id': self._nuovo_id_mercato(),
             'incontro_id': None,
-            'tipo': 'custom',
+            'tipo': tipo,
             'titolo': titolo,
             'giornata': giornata, 'squadra_a': None, 'squadra_b': None, 'linea': None,
             'esiti': esiti_norm,
@@ -730,6 +765,20 @@ class Store:
             return {'errore': 'squadra non valida'}
         if not selezioni:
             return {'errore': 'la schedina deve contenere almeno una selezione'}
+
+        mercati_selezionati = [self._trova_mercato(s.get('mercato_id')) for s in selezioni]
+        if any(m and m.get('tipo') == 'girone_andata' for m in mercati_selezionati):
+            if len(selezioni) != 1:
+                return {'errore': "la scommessa sul vincitore del girone d'andata va giocata da sola, "
+                                   "non combinata con altre selezioni"}
+            mercato_ga = mercati_selezionati[0]
+            gia_giocata = any(s['squadra'] == squadra
+                               and any(sel['mercato_id'] == mercato_ga['id'] for sel in s['selezioni'])
+                               for s in self.state['schedine'])
+            if gia_giocata:
+                return {'errore': "hai gia' scelto il tuo vincitore del girone d'andata: si puo' "
+                                   "giocare un solo vincitore, la scelta resta bloccata"}
+
         if self.ha_schedina(squadra, giornata):
             return {'errore': f'hai gia\' giocato la tua schedina per la giornata {giornata} (una sola a giornata)'}
         try:

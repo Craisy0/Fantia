@@ -123,10 +123,12 @@
     const gruppi = [];
     const indice = new Map();
     mercati.forEach(m => {
-      const chiave = m.giornata != null ? `g${m.giornata}` : 'libere';
+      const chiave = m.tipo === 'girone_andata' ? 'girone_andata' : (m.giornata != null ? `g${m.giornata}` : 'libere');
       if (!indice.has(chiave)) {
+        const titolo = m.tipo === 'girone_andata' ? "Vincitore girone d'andata"
+          : (m.giornata != null ? `Giornata ${m.giornata}` : 'Libere');
         indice.set(chiave, gruppi.length);
-        gruppi.push({ titolo: m.giornata != null ? `Giornata ${m.giornata}` : 'Libere', giornata: m.giornata, mercati: [] });
+        gruppi.push({ titolo, giornata: m.giornata, tipo: m.tipo, mercati: [] });
       }
       gruppi[indice.get(chiave)].mercati.push(m);
     });
@@ -134,8 +136,10 @@
       const statiUnici = new Set(g.mercati.map(m => m.stato));
       const statoComune = statiUnici.size === 1 ? [...statiUnici][0] : null;
       const badge = statoComune ? `<span class="mercato-stato ${statoComune}">${statoComune}</span>` : '';
-      const nota = giocate.has(g.giornata)
-        ? `<p class="giornata-nota">Hai già giocato la schedina di questa giornata.</p>` : '';
+      const testoNota = g.tipo === 'girone_andata'
+        ? 'Hai già scelto il tuo vincitore del girone d\'andata: si può giocare una sola volta.'
+        : 'Hai già giocato la schedina di questa giornata.';
+      const nota = giocate.has(g.giornata) ? `<p class="giornata-nota">${testoNota}</p>` : '';
       return `
       <div class="giornata-gruppo">
         <div class="giornata-head">
@@ -170,7 +174,7 @@
 
     const badge = nascondiStato ? '' : ` <span class="mercato-stato ${m.stato}">${m.stato}</span>`;
 
-    return `<div class="mercato-card" data-giornata="${m.giornata}">
+    return `<div class="mercato-card" data-giornata="${m.giornata != null ? m.giornata : ''}">
       <h3>${escapeHtml(m.titolo)}${badge}</h3>
       <div class="esiti-riga">${esitiHtml}</div>
     </div>`;
@@ -182,7 +186,8 @@
     const quota = Number(btn.dataset.quota);
     const label = btn.dataset.label;
     const card = btn.closest('.mercato-card');
-    const giornata = Number(card.dataset.giornata);
+    const giornataAttr = card.dataset.giornata;
+    const giornata = giornataAttr === '' ? null : Number(giornataAttr);
     const titoloMercato = card.querySelector('h3').firstChild.textContent.trim();
 
     const giaInCarrello = carrelloSchedina.find(s => s.mercato_id === mercatoId && s.esito === esito);
