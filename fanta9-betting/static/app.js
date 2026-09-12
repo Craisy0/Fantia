@@ -266,47 +266,49 @@
 
   const ETICHETTE_STATO_SCHEDINA = { in_corso: 'In corso', vinta: 'Vinta', persa: 'Persa' };
 
+  function renderizzaSchedinaCard(s) {
+    const selezioniHtml = s.selezioni.map(sel => `
+      <div class="giocata-sel">
+        <div class="giocata-sel-info">
+          <span class="giocata-sel-esito">${escapeHtml(sel.label_esito)}</span>
+          <span class="giocata-sel-mercato">${escapeHtml(sel.titolo_mercato)}</span>
+        </div>
+        <span class="giocata-sel-quota">${sel.quota.toFixed(2)}</span>
+      </div>`).join('');
+
+    let etichettaEsito, valoreEsito, classeEsito;
+    if (s.stato === 'vinta') {
+      etichettaEsito = 'Vincita'; valoreEsito = `${s.vincita} FM`; classeEsito = 'vinta';
+    } else if (s.stato === 'persa') {
+      etichettaEsito = 'Vincita'; valoreEsito = '0 FM'; classeEsito = 'persa';
+    } else {
+      let potenziale = Math.floor(s.importo * s.quota_totale);
+      const tetto = stato.vincita_massima_per_scommessa;
+      if (tetto != null) potenziale = Math.min(potenziale, Math.floor(tetto));
+      etichettaEsito = 'Potenziale'; valoreEsito = `${potenziale} FM`; classeEsito = 'in_corso';
+    }
+
+    return `<div class="giocata-card stato-${s.stato}">
+      <div class="giocata-head">
+        <span class="giocata-giornata">${s.giornata != null ? 'Giornata ' + s.giornata : 'Libera'}</span>
+        <span class="giocata-badge ${s.stato}">${ETICHETTE_STATO_SCHEDINA[s.stato]}</span>
+      </div>
+      <div class="giocata-selezioni">${selezioniHtml}</div>
+      <div class="giocata-riepilogo">
+        <div><span class="hint">Puntata</span><b>${s.importo} FM</b></div>
+        <div><span class="hint">Quota</span><b>${s.quota_totale.toFixed(2)}</b></div>
+        <div><span class="hint">${etichettaEsito}</span><b class="valore ${classeEsito}">${valoreEsito}</b></div>
+      </div>
+    </div>`;
+  }
+
   function renderGiocate() {
     const cont = el('#lista-giocate');
     const identita = identitaAttuale();
     if (!identita || identita.tipo !== 'squadra') { cont.innerHTML = '<p class="hint">Scegli prima la tua squadra.</p>'; return; }
     const schedine = (stato.mie_schedine || []).slice().sort((a, b) => b.id - a.id);
     if (!schedine.length) { cont.innerHTML = '<p class="hint">Non hai ancora giocato nessuna schedina.</p>'; return; }
-    cont.innerHTML = schedine.map(s => {
-      const selezioniHtml = s.selezioni.map(sel => `
-        <div class="giocata-sel">
-          <div class="giocata-sel-info">
-            <span class="giocata-sel-esito">${escapeHtml(sel.label_esito)}</span>
-            <span class="giocata-sel-mercato">${escapeHtml(sel.titolo_mercato)}</span>
-          </div>
-          <span class="giocata-sel-quota">${sel.quota.toFixed(2)}</span>
-        </div>`).join('');
-
-      let etichettaEsito, valoreEsito, classeEsito;
-      if (s.stato === 'vinta') {
-        etichettaEsito = 'Vincita'; valoreEsito = `${s.vincita} FM`; classeEsito = 'vinta';
-      } else if (s.stato === 'persa') {
-        etichettaEsito = 'Vincita'; valoreEsito = '0 FM'; classeEsito = 'persa';
-      } else {
-        let potenziale = Math.floor(s.importo * s.quota_totale);
-        const tetto = stato.vincita_massima_per_scommessa;
-        if (tetto != null) potenziale = Math.min(potenziale, Math.floor(tetto));
-        etichettaEsito = 'Potenziale'; valoreEsito = `${potenziale} FM`; classeEsito = 'in_corso';
-      }
-
-      return `<div class="giocata-card stato-${s.stato}">
-        <div class="giocata-head">
-          <span class="giocata-giornata">Giornata ${s.giornata}</span>
-          <span class="giocata-badge ${s.stato}">${ETICHETTE_STATO_SCHEDINA[s.stato]}</span>
-        </div>
-        <div class="giocata-selezioni">${selezioniHtml}</div>
-        <div class="giocata-riepilogo">
-          <div><span class="hint">Puntata</span><b>${s.importo} FM</b></div>
-          <div><span class="hint">Quota</span><b>${s.quota_totale.toFixed(2)}</b></div>
-          <div><span class="hint">${etichettaEsito}</span><b class="valore ${classeEsito}">${valoreEsito}</b></div>
-        </div>
-      </div>`;
-    }).join('');
+    cont.innerHTML = schedine.map(renderizzaSchedinaCard).join('');
   }
 
   // ---------------------------------------------------------------------
@@ -322,12 +324,60 @@
       const pos = i + 1;
       const medaglia = MEDAGLIE[pos];
       const classeMedaglia = pos <= 3 ? ` medaglia-${pos}` : '';
-      return `<div class="classifica-riga${classeMedaglia}">
+      return `<div class="classifica-riga${classeMedaglia}" data-squadra="${escapeHtml(r.squadra)}" role="button">
         <span class="classifica-pos">${medaglia || pos}</span>
         <span class="classifica-squadra">${escapeHtml(r.squadra)}</span>
         <span class="classifica-saldo">${r.saldo.toFixed(0)} <small>FM</small></span>
       </div>`;
     }).join('');
+    all('.classifica-riga').forEach(riga => {
+      riga.addEventListener('click', () => apriSchedaSquadra(riga.dataset.squadra));
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Scheda squadra pubblica (statistiche + andamento saldo + storico schedine)
+  // ---------------------------------------------------------------------
+
+  function sparklineSvg(punti) {
+    if (punti.length < 2) return '<p class="hint">Non c\'è ancora abbastanza storico per un grafico.</p>';
+    const larghezza = 400, altezza = 90, margine = 6;
+    const valori = punti.map(p => p.saldo);
+    const min = Math.min(...valori), max = Math.max(...valori);
+    const scalaX = (i) => margine + (i / (punti.length - 1)) * (larghezza - margine * 2);
+    const scalaY = (v) => max === min ? altezza / 2
+      : altezza - margine - ((v - min) / (max - min)) * (altezza - margine * 2);
+    const coordinate = punti.map((p, i) => `${scalaX(i).toFixed(1)},${scalaY(p.saldo).toFixed(1)}`).join(' ');
+    const ultimo = punti[punti.length - 1];
+    const colore = ultimo.saldo >= punti[0].saldo ? 'var(--accent)' : 'var(--danger)';
+    return `<svg class="sparkline" viewBox="0 0 ${larghezza} ${altezza}" preserveAspectRatio="none">
+      <polyline points="${coordinate}" fill="none" stroke="${colore}" stroke-width="2.5"
+        stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+  }
+
+  async function apriSchedaSquadra(squadra) {
+    el('#scheda-titolo').textContent = squadra;
+    el('#scheda-contenuto').innerHTML = '<p class="hint">Carico…</p>';
+    el('#modal-scheda-squadra').classList.add('open');
+    const dati = await get('/api/statistiche?squadra=' + encodeURIComponent(squadra));
+    if (dati.errore) { el('#scheda-contenuto').innerHTML = `<p class="errore">${escapeHtml(dati.errore)}</p>`; return; }
+    const c = dati.conteggi;
+    const schedineHtml = dati.schedine.length
+      ? dati.schedine.slice().reverse().map(renderizzaSchedinaCard).join('')
+      : '<p class="hint">Nessuna schedina giocata finora.</p>';
+    el('#scheda-contenuto').innerHTML = `
+      <div class="scheda-stats">
+        <div class="scheda-stat"><b>${dati.saldo_attuale.toFixed(0)}</b><span>Saldo (FM)</span></div>
+        <div class="scheda-stat"><b>${c.vinte}-${c.perse}-${c.in_corso}</b><span>Vinte-Perse-In corso</span></div>
+        <div class="scheda-stat"><b>${dati.quota_media != null ? dati.quota_media.toFixed(2) : '—'}</b><span>Quota media</span></div>
+        <div class="scheda-stat"><b>${dati.totale_puntato.toFixed(0)}</b><span>Totale puntato (FM)</span></div>
+      </div>
+      <p class="hint">Andamento saldo</p>
+      <div class="scheda-sparkline">${sparklineSvg(dati.storico_saldo)}</div>
+      <p class="hint">Storico schedine</p>
+      ${schedineHtml}
+    `;
   }
 
   // ---------------------------------------------------------------------
@@ -979,6 +1029,9 @@
     initPush();
     initAdminNotifiche();
     initSchedina();
+    el('#btn-chiudi-scheda').addEventListener('click', () => {
+      el('#modal-scheda-squadra').classList.remove('open');
+    });
     ricarica();
   });
 })();

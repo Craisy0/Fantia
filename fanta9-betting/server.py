@@ -824,6 +824,9 @@ class Store:
             if persa:
                 sch['stato'] = 'persa'
                 sch['vincita'] = 0
+                self._invia_push_a_squadra(sch['squadra'], 'Gottabet',
+                                            f"Schedina persa: hai puntato {sch['importo']} FM, "
+                                            f"esito non arrivato.")
                 continue
             tutte_risolte = all(self._trova_mercato(sel['mercato_id'])
                                  and self._trova_mercato(sel['mercato_id'])['stato'] == 'risolto'
@@ -836,6 +839,9 @@ class Store:
                 sch['stato'] = 'vinta'
                 sch['vincita'] = vincita
                 self.state['saldi'][sch['squadra']] = round(self.state['saldi'].get(sch['squadra'], 0) + vincita, 2)
+                self._invia_push_a_squadra(sch['squadra'], 'Gottabet',
+                                            f"Schedina vinta! +{vincita} FM (puntati {sch['importo']} "
+                                            f"@ {sch['quota_totale']})")
 
         self._log(f"Risolto mercato #{mercato['id']} ({mercato['titolo']}): vince '{esito_vincente}'")
 
@@ -1085,6 +1091,63 @@ class Store:
         righe.sort(key=lambda r: -r['saldo'])
         return righe
 
+    # -- scheda squadra pubblica (statistiche + storico saldo + schedine) --
+
+    def statistiche_squadra(self, squadra):
+        """Scheda pubblica di una squadra: conteggi, quota media, storico saldo ricostruito
+        dagli eventi reali (piazzata/vinta/persa/correzione) e lo storico completo delle
+        schedine. Non richiede password admin: consultabile da chiunque."""
+        if squadra not in self.squadre():
+            return {'errore': 'squadra non valida'}
+        schedine = [s for s in self.state['schedine'] if s['squadra'] == squadra]
+        schedine.sort(key=lambda s: s['id'])
+
+        vinte = sum(1 for s in schedine if s['stato'] == 'vinta')
+        perse = sum(1 for s in schedine if s['stato'] == 'persa')
+        in_corso = sum(1 for s in schedine if s['stato'] == 'in_corso')
+        totale_puntato = round(sum(s['importo'] for s in schedine), 2)
+        totale_vinto = round(sum(s['vincita'] or 0 for s in schedine if s['stato'] == 'vinta'), 2)
+        quota_media = round(sum(s['quota_totale'] for s in schedine) / len(schedine), 2) if schedine else None
+
+        eventi = []
+        for s in schedine:
+            eventi.append({'ts': s['creata_il'], 'delta': -s['importo'], 'evento': f"Schedina #{s['id']} giocata"})
+            if s['stato'] == 'vinta':
+                ts_risoluzione = None
+                for sel in s['selezioni']:
+                    m = self._trova_mercato(sel['mercato_id'])
+                    if m and m.get('risolto_il'):
+                        if ts_risoluzione is None or m['risolto_il'] > ts_risoluzione:
+                            ts_risoluzione = m['risolto_il']
+                eventi.append({'ts': ts_risoluzione or s['creata_il'], 'delta': s['vincita'],
+                                'evento': f"Schedina #{s['id']} vinta"})
+        for voce in self.state.get('log', []):
+            m = re.match(rf"^Correzione saldo {re.escape(squadra)}: ([+-]\d+(?:\.\d+)?) FM \((.+)\)$",
+                         voce.get('testo', ''))
+            if m:
+                eventi.append({'ts': voce['ts'], 'delta': float(m.group(1)),
+                                'evento': f"Correzione saldo ({m.group(2)})"})
+        eventi.sort(key=lambda e: e['ts'])
+
+        saldo_iniziale = self.config['lega']['saldo_iniziale']
+        storico_saldo = [{'ts': None, 'saldo': saldo_iniziale, 'evento': 'Saldo iniziale'}]
+        corrente = saldo_iniziale
+        for e in eventi:
+            corrente = round(corrente + e['delta'], 2)
+            storico_saldo.append({'ts': e['ts'], 'saldo': corrente, 'evento': e['evento']})
+
+        return {
+            'ok': True,
+            'squadra': squadra,
+            'saldo_attuale': self.state['saldi'].get(squadra, 0),
+            'conteggi': {'vinte': vinte, 'perse': perse, 'in_corso': in_corso},
+            'quota_media': quota_media,
+            'totale_puntato': totale_puntato,
+            'totale_vinto': totale_vinto,
+            'storico_saldo': storico_saldo,
+            'schedine': schedine,
+        }
+
     # -- amministrazione ---------------------------------------------------
 
     def rinomina_squadre(self, nuove_squadre, rename_map):
@@ -1265,6 +1328,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if path == '/api/classifica':
                 self._send_json(STORE.classifica())
+                return
+            if path == '/api/statistiche':
+                squadra = (qs.get('squadra') or [None])[0]
+                r = STORE.statistiche_squadra(squadra)
+                self._send_json(r, 200 if r.get('ok') else 400)
                 return
             if path == '/api/log':
                 self._send_json(STORE.state.get('log', [])[-100:])
