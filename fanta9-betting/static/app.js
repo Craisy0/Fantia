@@ -803,7 +803,7 @@
   async function aggiornaBottoneNotifiche() {
     const btn = el('#btn-notifiche');
     const sub = await sottoscrizioneAttuale();
-    btn.textContent = sub ? '🔕' : '🔔';
+    btn.textContent = sub ? '🔔' : '🔕';
     const etichetta = sub ? 'Disattiva notifiche' : 'Attiva notifiche';
     btn.setAttribute('aria-label', etichetta);
     btn.setAttribute('title', etichetta);
