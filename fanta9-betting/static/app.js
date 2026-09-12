@@ -860,6 +860,11 @@
 
   function initPush() {
     if (!pushSupportato()) return;
+    // Registra il service worker a ogni apertura del sito, non solo quando ci si iscrive: e'
+    // questo che fa controllare al browser se /sw.js e' cambiato (es. nuova icona) - altrimenti,
+    // per chi e' gia' iscritto da prima, il codice non lo richiamava mai piu' e restava bloccato
+    // sulla versione vecchia finche' non ri-attivava le notifiche da zero.
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
     el('#btn-notifiche').addEventListener('click', async () => {
       const sub = await sottoscrizioneAttuale();
       if (sub) {
