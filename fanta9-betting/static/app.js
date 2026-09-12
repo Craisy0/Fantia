@@ -837,9 +837,13 @@
     // l'utente noti e prema il bottone campanella: se accetta e' attivo da subito, se rifiuta (o
     // il browser non ripropone piu' la richiesta) resta disattivato senza disturbare oltre.
     if (tentativoAutoNotificheFatto) return;
-    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+    if (typeof Notification === 'undefined' || Notification.permission === 'denied') return;
     const sub = await sottoscrizioneAttuale();
     if (sub) return;
+    // Se il permesso e' gia' concesso da prima (es. dopo un reset del server che ha cancellato
+    // solo la sottoscrizione salvata li', non il permesso del browser) non ricompare nessun
+    // popup - il browser non lo ripropone mai una volta deciso - quindi si ri-sottoscrive da
+    // sola in silenzio, senza dover ridisturbare l'utente con nulla.
     tentativoAutoNotificheFatto = true;
     try { await attivaNotifiche(true); } catch (e) { /* silenzioso: nessun disturbo se fallisce */ }
   }
