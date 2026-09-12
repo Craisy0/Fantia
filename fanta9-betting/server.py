@@ -1228,12 +1228,17 @@ class Handler(BaseHTTPRequestHandler):
             # default del service worker copre tutto il sito e non solo /static/.
             self._send_file(os.path.join(STATIC_DIR, 'sw.js'), 'application/javascript; charset=utf-8')
             return
+        if path == '/favicon.ico':
+            # alcuni browser lo richiedono qui per abitudine, oltre al <link rel="icon"> in testa
+            self._send_file(os.path.join(STATIC_DIR, 'favicon.ico'), 'image/x-icon')
+            return
         if path.startswith('/static/'):
             rel = path[len('/static/'):]
             full = os.path.join(STATIC_DIR, rel)
             ext = os.path.splitext(full)[1]
             ctype = {'.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
-                     '.png': 'image/png', '.svg': 'image/svg+xml'}.get(ext, 'application/octet-stream')
+                     '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+                     '.json': 'application/manifest+json'}.get(ext, 'application/octet-stream')
             self._send_file(full, ctype)
             return
 
