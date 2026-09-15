@@ -126,6 +126,22 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
   transform: rotate(45deg);
 }
 
+.gruppo-giornata {
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card-2);
+  margin-bottom: 1em; overflow: hidden;
+}
+.gruppo-giornata summary {
+  cursor: pointer; padding: 0.7em 1em; list-style: none; user-select: none;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: "Barlow Condensed", "Barlow", sans-serif; font-weight: 700; font-size: 1.05em;
+}
+.gruppo-giornata summary::-webkit-details-marker { display: none; }
+.gruppo-giornata summary::after { content: '▸'; color: var(--text-dim); transition: transform 0.15s ease; margin-left: 0.5em; }
+.gruppo-giornata[open] summary::after { transform: rotate(90deg); }
+.gruppo-giornata .gruppo-conteggio { color: var(--text-dim); font-weight: 400; font-size: 0.8em; margin-left: auto; margin-right: 0.6em; }
+.gruppo-giornata .gruppo-contenuto { padding: 0 1em 1em; }
+.gruppo-giornata .gruppo-contenuto .mercato-card:last-child { margin-bottom: 0; }
+
 .mercato-card {
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 1em; margin-bottom: 1em;

@@ -398,11 +398,42 @@
   // Tab "Admin"
   // ---------------------------------------------------------------------
 
+  // Raggruppa una lista di mercati/schedine per giornata (le voci senza giornata, es. il
+  // vincitore girone d'andata, finiscono in un gruppo "Scommesse speciali" a parte). Ogni
+  // giornata nuova pubblicata genera automaticamente un nuovo gruppo, senza bisogno di
+  // configurazione: il gruppo esiste solo se c'e' almeno una voce con quella giornata.
+  function raggruppaPerGiornata(voci) {
+    const gruppi = new Map();
+    voci.forEach(v => {
+      const chiave = v.giornata == null ? '__speciali__' : v.giornata;
+      if (!gruppi.has(chiave)) gruppi.set(chiave, { giornata: v.giornata, voci: [] });
+      gruppi.get(chiave).voci.push(v);
+    });
+    return Array.from(gruppi.values()).sort((a, b) => {
+      if (a.giornata == null) return 1;
+      if (b.giornata == null) return -1;
+      return b.giornata - a.giornata;
+    });
+  }
+
+  function renderGruppiGiornata(voci, renderVoce) {
+    const gruppi = raggruppaPerGiornata(voci);
+    return gruppi.map((g, i) => {
+      const titolo = g.giornata == null ? 'Scommesse speciali' : `Giornata ${g.giornata}`;
+      return `<details class="gruppo-giornata"${i === 0 ? ' open' : ''}>
+        <summary>${escapeHtml(titolo)} <span class="gruppo-conteggio">${g.voci.length}</span></summary>
+        <div class="gruppo-contenuto">${g.voci.map(renderVoce).join('')}</div>
+      </details>`;
+    }).join('');
+  }
+
   function renderAdminMercati() {
     const cont = el('#admin-mercati-lista');
     const mercati = (stato.mercati || []).slice().sort((a, b) => b.id - a.id);
     if (!mercati.length) { cont.innerHTML = '<p class="hint">Nessun mercato creato.</p>'; return; }
-    cont.innerHTML = mercati.map(m => {
+    cont.innerHTML = renderGruppiGiornata(mercati, renderMercatoAdminCard);
+
+    function renderMercatoAdminCard(m) {
       const esitiOpts = m.esiti.map(e => `<option value="${escapeHtml(e.chiave)}">${escapeHtml(e.label)}</option>`).join('');
       const azioni = m.stato === 'risolto' ? '<span class="hint">risolto</span>' : `
         <button class="mini-btn btn-chiudi-riapri" data-id="${m.id}" data-chiudi="${m.stato === 'aperto'}">${m.stato === 'aperto' ? 'Chiudi' : 'Riapri'}</button>
@@ -415,7 +446,7 @@
         <div class="mercato-meta">${m.esiti.map(e => `${escapeHtml(e.label)}: ${e.quota.toFixed(2)}`).join(' · ')}${m.esito_vincente ? ' · vincente: ' + escapeHtml(m.esito_vincente) : ''}</div>
         <div>${azioni}</div>
       </div>`;
-    }).join('');
+    }
 
     all('.btn-chiudi-riapri').forEach(btn => btn.addEventListener('click', async () => {
       const chiudi = btn.dataset.chiudi === 'true';
@@ -470,17 +501,20 @@
     const cont = el('#admin-schedine-lista');
     schedine = schedine.slice().sort((a, b) => b.id - a.id);
     if (!schedine.length) { cont.innerHTML = '<p class="hint">Nessuna schedina giocata.</p>'; return; }
-    cont.innerHTML = schedine.map(s => {
+    cont.innerHTML = renderGruppiGiornata(schedine, renderSchedinaAdminCard);
+
+    function renderSchedinaAdminCard(s) {
       const legs = s.selezioni.map(sel => `${escapeHtml(sel.label_esito)} @ ${sel.quota.toFixed(2)}`).join(' + ');
       const azione = s.stato === 'in_corso'
         ? `<button class="mini-btn btn-elimina-schedina" data-id="${s.id}">Elimina (rimborsa)</button>`
         : `<span class="hint">${s.stato}${s.vincita ? ' — vinti ' + s.vincita + ' FM' : ''}</span>`;
       return `<div class="mercato-card">
-        <h3>#${s.id} ${escapeHtml(s.squadra)} — giornata ${s.giornata}</h3>
+        <h3>#${s.id} ${escapeHtml(s.squadra)}${s.giornata != null ? ' — giornata ' + s.giornata : ''}</h3>
         <div class="mercato-meta">${legs} = quota ${s.quota_totale.toFixed(2)} · puntati ${s.importo} FM</div>
         <div>${azione}</div>
       </div>`;
-    }).join('');
+    }
+
     all('.btn-elimina-schedina').forEach(btn => btn.addEventListener('click', async () => {
       if (!confirm('Eliminare questa schedina e rimborsare la puntata?')) return;
       const r = await post('/api/admin/elimina-schedina', { admin_password: adminPassword(), schedina_id: Number(btn.dataset.id) });
