@@ -118,12 +118,14 @@
 
   function renderMercati() {
     const cont = el('#lista-mercati');
-    const mercati = (stato.mercati || []).slice().sort((a, b) => {
+    // I mercati risolti spariscono da qui: restano visibili solo in "Le mie giocate", dove ogni
+    // squadra vede comunque le proprie schedine passate a prescindere dallo stato del mercato.
+    const mercati = (stato.mercati || []).filter(m => m.stato !== 'risolto').slice().sort((a, b) => {
       const rank = { aperto: 0, chiuso: 1, risolto: 2 };
       return (rank[a.stato] - rank[b.stato]) || (b.id - a.id);
     });
     if (!mercati.length) {
-      cont.innerHTML = '<p class="hint">Nessuna scommessa ancora creata. Chiedi all\'admin di pubblicarne una.</p>';
+      cont.innerHTML = '<p class="hint">Nessuna scommessa aperta al momento. Le giornate risolte le trovi in "Le mie giocate".</p>';
       return;
     }
     const giocate = giornateGiaGiocate();
