@@ -744,6 +744,7 @@ class Store:
             if esito['chiave'] in quote_per_squadra:
                 esito['quota'] = quote_per_squadra[esito['chiave']]
         self._log(f"Ricalcolate le quote del vincitore girone d'andata (mercato #{mercato['id']})")
+        self.save()
         return {'mercato_id': mercato['id'], 'quote': mercato['esiti']}
 
     def crea_mercato_custom(self, titolo, esiti, giornata=None, tipo='custom'):
@@ -1466,6 +1467,15 @@ class Handler(BaseHTTPRequestHandler):
                 if path == '/api/admin/pubblica-girone-andata':
                     r = STORE.pubblica_girone_andata(body.get('n_simulazioni'))
                     self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/aggiorna-quote-girone-andata':
+                    # ricalcolo forzato, per quando il mercato viene riaperto senza che nel
+                    # frattempo sia passato da un importa-punti (che lo farebbe da solo)
+                    r = STORE.aggiorna_quote_girone_andata()
+                    if r is None:
+                        self._send_json({'errore': "nessun mercato 'vincitore girone d'andata' aperto al momento"}, 400)
+                    else:
+                        self._send_json({'ok': True, **r})
                     return
                 if path == '/api/admin/notifica':
                     r = STORE.invia_notifica(body.get('squadre'), body.get('titolo'), body.get('testo'))

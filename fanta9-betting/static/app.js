@@ -751,6 +751,15 @@
       el('#btn-pubblica-girone-andata').classList.add('hidden');
       await ricarica();
     });
+    el('#btn-aggiorna-quote-girone-andata').addEventListener('click', async () => {
+      const cont = el('#aggiorna-girone-andata-risultato');
+      cont.innerHTML = '<p class="hint">Ricalcolo in corso…</p>';
+      const r = await post('/api/admin/aggiorna-quote-girone-andata', { admin_password: adminPassword() });
+      if (r.errore) { cont.innerHTML = `<p class="errore">${escapeHtml(r.errore)}</p>`; return; }
+      const righe = r.quote.map(q => `<li>${escapeHtml(q.chiave)} — quota <b>${q.quota}</b></li>`).join('');
+      cont.innerHTML = `<p class="hint">Quote aggiornate sul mercato #${r.mercato_id}:</p><ul>${righe}</ul>`;
+      await ricarica();
+    });
   }
 
   function initCustom() {
