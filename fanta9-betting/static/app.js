@@ -218,6 +218,21 @@
     return carrelloSchedina.reduce((tot, s) => tot * s.quota, 1);
   }
 
+  // La regola della lega: la schedina di una giornata va giocata su TUTTE le partite di quella
+  // giornata (il vincitore girone d'andata, giornata=null, fa eccezione: resta una selezione singola).
+  function mercatiGiornata(giornata) {
+    if (giornata == null) return [];
+    return (stato.mercati || []).filter(m => m.tipo === '1x2' && m.giornata === giornata);
+  }
+
+  function schedinaCompleta() {
+    if (!carrelloSchedina.length) return false;
+    const giornata = carrelloSchedina[0].giornata;
+    if (giornata == null) return true; // girone d'andata: una sola selezione, sempre "completa"
+    const totali = mercatiGiornata(giornata);
+    return !totali.length || carrelloSchedina.length === totali.length;
+  }
+
   function renderSchedinaBarra() {
     const barra = el('#barra-schedina');
     if (!carrelloSchedina.length) { barra.classList.add('hidden'); return; }
@@ -245,6 +260,20 @@
     }
     el('#schedina-giornata').textContent = carrelloSchedina.length ? carrelloSchedina[0].giornata : '-';
     el('#schedina-quota-totale').textContent = quotaTotaleCarrello().toFixed(2);
+
+    const progressoEl = el('#schedina-progresso');
+    const giornata = carrelloSchedina.length ? carrelloSchedina[0].giornata : null;
+    const totali = mercatiGiornata(giornata);
+    if (giornata != null && totali.length) {
+      progressoEl.textContent = `Selezionate ${carrelloSchedina.length} di ${totali.length} partite della giornata ${giornata} — vanno giocate tutte per confermare.`;
+    } else {
+      progressoEl.textContent = '';
+    }
+    const completa = schedinaCompleta();
+    const btnConferma = el('#btn-conferma-schedina');
+    btnConferma.disabled = !completa;
+    btnConferma.textContent = completa ? 'Conferma schedina' : 'Seleziona tutte le partite';
+
     aggiornaVincitaPotenzialeSchedina();
   }
 
@@ -1058,6 +1087,7 @@
       erroreEl.textContent = '';
       if (!identita || identita.tipo !== 'squadra') { erroreEl.textContent = 'Scegli prima la tua squadra.'; return; }
       if (!carrelloSchedina.length) { erroreEl.textContent = 'Aggiungi almeno una selezione.'; return; }
+      if (!schedinaCompleta()) { erroreEl.textContent = 'Vanno giocate tutte le partite della giornata per confermare la schedina.'; return; }
       if (!importo || importo <= 0) { erroreEl.textContent = 'Indica quanti fantamilioni puntare.'; return; }
       const giornata = carrelloSchedina[0].giornata;
       const selezioni = carrelloSchedina.map(s => ({ mercato_id: s.mercato_id, esito: s.esito }));

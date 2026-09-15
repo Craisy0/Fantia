@@ -938,6 +938,14 @@ class Store:
             dettaglio.append({'mercato_id': mercato_id, 'titolo_mercato': m['titolo'],
                                'esito': esito, 'label_esito': esito_info['label'], 'quota': esito_info['quota']})
 
+        if giornata is not None:
+            mercati_giornata = [m for m in self.state['mercati']
+                                 if m.get('tipo') == '1x2' and m['giornata'] == giornata]
+            mancanti = [m['titolo'] for m in mercati_giornata if m['id'] not in mercati_usati]
+            if mancanti:
+                return {'errore': 'la schedina deve includere tutte le partite della giornata: mancano ' +
+                                   ', '.join(mancanti)}
+
         saldo = self.state['saldi'].get(squadra, 0)
         if importo > saldo:
             return {'errore': f'fantamilioni insufficienti (saldo attuale: {saldo})'}

@@ -91,6 +91,9 @@ button.primario, #btn-conferma-identita, #btn-pubblica-h2h, #btn-pubblica-custom
 button.primario:hover, #btn-conferma-identita:hover, #btn-pubblica-h2h:hover, #btn-pubblica-custom:hover, #btn-conferma-import:hover:not(:disabled) {
   background: var(--accent);
 }
+button.primario:disabled, #btn-conferma-identita:disabled, #btn-pubblica-h2h:disabled, #btn-pubblica-custom:disabled, #btn-conferma-import:disabled {
+  background: var(--bg-card-2); border-color: var(--border); color: var(--text-dim);
+}
 
 .hidden { display: none !important; }
 .errore { color: var(--danger); font-size: 0.9em; }
