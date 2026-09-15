@@ -182,8 +182,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 .giocata-riepilogo .valore.persa { color: var(--danger); }
 .giocata-riepilogo .valore.in_corso { color: var(--gold); }
 
-.giocata-card.stato-persa .giocata-sel-esito,
-.giocata-card.stato-persa .giocata-sel-mercato { opacity: 0.6; }
+.giocata-sel.sel-vinta { border-left: 3px solid var(--accent); padding-left: 0.6em; margin-left: -0.6em; }
+.giocata-sel.sel-persa { border-left: 3px solid var(--danger); padding-left: 0.6em; margin-left: -0.6em; }
+.giocata-sel.sel-vinta .giocata-sel-esito { color: var(--accent); }
+.giocata-sel.sel-persa .giocata-sel-esito { color: var(--danger); }
 
 .classifica-riga {
   display: flex; align-items: center; gap: 0.9em; padding: 0.7em 0.9em; margin-bottom: 0.5em;

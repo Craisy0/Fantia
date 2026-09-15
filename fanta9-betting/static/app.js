@@ -268,15 +268,27 @@
 
   const ETICHETTE_STATO_SCHEDINA = { in_corso: 'In corso', vinta: 'Vinta', persa: 'Persa' };
 
+  function esitoSelezione(sel) {
+    // Guarda il mercato vero (stato.mercati arriva sempre pieno da /api/state, mercati risolti
+    // inclusi) per capire se QUESTA specifica selezione ha vinto o perso, indipendentemente
+    // dall'esito complessivo della schedina (che puo' contenere piu' selezioni).
+    const mercato = (stato.mercati || []).find(m => m.id === sel.mercato_id);
+    if (!mercato || mercato.stato !== 'risolto') return null;
+    return mercato.esito_vincente === sel.esito ? 'vinta' : 'persa';
+  }
+
   function renderizzaSchedinaCard(s) {
-    const selezioniHtml = s.selezioni.map(sel => `
-      <div class="giocata-sel">
+    const selezioniHtml = s.selezioni.map(sel => {
+      const esito = esitoSelezione(sel);
+      return `
+      <div class="giocata-sel${esito ? ' sel-' + esito : ''}">
         <div class="giocata-sel-info">
           <span class="giocata-sel-esito">${escapeHtml(sel.label_esito)}</span>
           <span class="giocata-sel-mercato">${escapeHtml(sel.titolo_mercato)}</span>
         </div>
         <span class="giocata-sel-quota">${sel.quota.toFixed(2)}</span>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     let etichettaEsito, valoreEsito, classeEsito;
     if (s.stato === 'vinta') {
