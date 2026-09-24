@@ -47,26 +47,49 @@ Per provarla al volo dal computer, senza telefono: `npm run web` (si apre nel br
 Se in futuro aggiorni Expo, usa `npx expo install --fix` per riallineare le versioni delle
 librerie (non modificarle a mano in `package.json`), e `npx expo-doctor` per un controllo.
 
-## 4. Se vuoi un'app vera e propria installabile (senza passare da Expo Go ogni volta)
+## 4. App installabile su Android (APK) — senza computer acceso e senza Expo Go
 
-Serve un account gratuito su **expo.dev**, poi:
+Il file `eas.json` è già pronto: il profilo `preview` produce un **.apk** da installare
+direttamente sui telefoni Android. La build gira sui server di Expo (gratis, con un po' di
+coda), non serve Android Studio.
+
+**Prima di fare la build, configura Firebase (sezione 2)**: le chiavi vengono "cotte"
+dentro l'APK. Se le lasci vuote, ogni telefono avrà solo i suoi dati e non vi vedrete a vicenda.
+
+Una volta sola:
 
 ```
 npm install -g eas-cli
-eas login
-eas build --platform android --profile preview
-eas build --platform ios --profile preview
+eas login          # account gratuito su expo.dev
+eas init           # collega il progetto al tuo account (conferma con Y)
 ```
 
-Per iOS, la build genera comunque un file installabile solo tramite TestFlight o un
-account sviluppatore Apple (a pagamento, 99$/anno) se vuoi installarlo direttamente senza
-Expo Go — è una limitazione di Apple, non di Expo. Su Android invece il file `.apk` che
-ottieni si installa liberamente, nessun account a pagamento richiesto.
+`eas init` aggiunge a `app.json` l'id del progetto: fai commit di quella modifica.
+
+Ogni volta che vuoi una nuova versione:
+
+```
+npm run build:apk
+```
+
+Alla prima build ti chiede di generare la chiave di firma Android: rispondi **Y** (la
+conserva Expo, tienila sempre la stessa, altrimenti gli aggiornamenti non si installano
+sopra la versione vecchia). Dopo 10-20 minuti ottieni un **link e un QR code**: aprilo dal
+telefono Android, scarica l'APK e installalo (Android chiede di consentire l'installazione
+da "origini sconosciute" per il browser: è normale). Lo stesso link lo puoi girare al gruppo.
+
+Per aggiornare l'app: rifai `npm run build:apk` e reinstallate l'APK nuovo sopra quello
+vecchio (i dati su Firebase restano).
+
+**iPhone**: Apple non permette di installare app fuori dall'App Store senza un account
+sviluppatore a pagamento (99$/anno, poi `eas build --platform ios` + TestFlight). Chi ha
+l'iPhone può continuare a usare Expo Go come nella sezione 3.
 
 ## Struttura del progetto
 
 ```
 App.js                      punto d'ingresso, carica i font
+eas.json                    profili di build EAS (preview = APK Android)
 src/
   firebaseConfig.js          ← qui vanno le tue chiavi Firebase
   firebase.js                 inizializzazione Firebase
