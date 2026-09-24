@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "PokéNav",
+    "slug": "pokenav-ionia",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#e2382b"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ionia.pokenav"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#e2382b"
+      },
+      "package": "com.ionia.pokenav"
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    }
+  }
+}
