@@ -120,7 +120,7 @@ function MapView({ mapState, selectedLoc, setSelectedLoc }) {
   return (
     <ScrollView contentContainerStyle={styles.pad}>
       <View style={styles.mapWrap}>
-        <Svg width="100%" height={200} viewBox="0 0 400 260">
+        <Svg width="100%" height={200} viewBox="0 0 420 260">
           <Ellipse cx={95} cy={150} rx={95} ry={88} fill="#c9dccb" />
           <Ellipse cx={305} cy={150} rx={105} ry={95} fill="#c9dccb" />
           <Path d="M110,150 C150,140 250,140 285,150" stroke="#b9c4bd" strokeWidth={4} fill="none" strokeDasharray="2 6" />
@@ -152,7 +152,7 @@ function MapView({ mapState, selectedLoc, setSelectedLoc }) {
 
 const styles = StyleSheet.create({
   outer: { flex: 1, backgroundColor: '#0f1420', alignItems: 'center', justifyContent: 'center', padding: 16 },
-  content: { minHeight: 380 },
+  content: { flex: 1 },
   grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'center', alignItems: 'center', padding: 20 },
   pad: { padding: 14 },
   dexGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

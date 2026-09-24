@@ -324,7 +324,7 @@ function MapAdminView() {
 
 const styles = StyleSheet.create({
   outer: { flex: 1, backgroundColor: '#0f1420', alignItems: 'center', justifyContent: 'center', padding: 16 },
-  content: { minHeight: 380 },
+  content: { flex: 1 },
   grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'center', alignItems: 'center', padding: 20 },
   pad: { padding: 14, paddingBottom: 30 },
   sectionTitle: { fontSize: 10, fontFamily: 'Nunito_700Bold', color: '#8c98b3', letterSpacing: 1, marginTop: 10, marginBottom: 6 },
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   listRowText: { fontFamily: 'Nunito_600SemiBold', color: '#eef3fb', fontSize: 13 },
   row: { flexDirection: 'row', gap: 8, marginBottom: 10, alignItems: 'center' },
   input: { flex: 1, backgroundColor: '#232a3d', color: '#eef3fb', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, fontFamily: 'Nunito_400Regular', fontSize: 13, borderWidth: 2, borderColor: 'rgba(255,255,255,0.12)' },
-  chipsRow: { flexGrow: 0, paddingHorizontal: 14, paddingVertical: 8 },
+  chipsRow: { flexGrow: 0, flexShrink: 0, paddingHorizontal: 14, paddingVertical: 8 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14 },
   chipText: { fontFamily: 'Baloo2_600SemiBold', fontSize: 12 },
   noPlayersHint: { color: '#8c98b3', fontFamily: 'Nunito_400Regular', fontSize: 12, paddingVertical: 8 },

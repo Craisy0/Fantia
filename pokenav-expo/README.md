@@ -7,9 +7,10 @@ per ogni giocatore, pannello di controllo per il Master.
 ## 1. Requisiti sul tuo computer
 
 - [Node.js](https://nodejs.org) (versione 18 o superiore)
-- L'app **Expo Go** installata sul telefono (Android: Play Store: iPhone: App Store) —
+- L'app **Expo Go** installata sul telefono (Android: Play Store; iPhone: App Store) —
   è gratuita, ed è quella che permette di far girare l'app da telefono senza pubblicarla
-  su nessuno store.
+  su nessuno store. Il progetto usa **Expo SDK 57**, cioè la versione supportata
+  dall'Expo Go attuale sugli store: tenete Expo Go aggiornato.
 
 ## 2. Collega un database condiviso (Firebase — gratis)
 
@@ -40,6 +41,11 @@ Si apre una pagina col **QR code**. Ognuno (tu e i tuoi amici):
 Tutti devono essere sulla **stessa rete Wi-Fi** del computer che ha lanciato `expo start`
 (oppure, se siete in posti diversi, avvia con `npx expo start --tunnel` — più lento ma
 funziona ovunque).
+
+Per provarla al volo dal computer, senza telefono: `npm run web` (si apre nel browser).
+
+Se in futuro aggiorni Expo, usa `npx expo install --fix` per riallineare le versioni delle
+librerie (non modificarle a mano in `package.json`), e `npx expo-doctor` per un controllo.
 
 ## 4. Se vuoi un'app vera e propria installabile (senza passare da Expo Go ogni volta)
 

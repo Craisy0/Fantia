@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db, FIREBASE_ENABLED } from './firebase';
 import { defaultUnlockedMap } from './data/locations';
 
@@ -40,22 +40,17 @@ export function subscribePlayers(callback) {
       callback(data.list || []);
     });
   }
-  local.listeners.players.push(() => callback(local.players));
+  const fn = () => callback(local.players);
+  local.listeners.players.push(fn);
   callback(local.players);
   return () => {
-    local.listeners.players = local.listeners.players.filter((f) => f);
+    local.listeners.players = local.listeners.players.filter((f) => f !== fn);
   };
 }
 
 export async function addPlayerName(name) {
   if (FIREBASE_ENABLED) {
-    const ref = doc(db, 'party', 'players');
-    const snap = await getDoc(ref);
-    const list = snap.exists() ? snap.data().list || [] : [];
-    if (!list.includes(name)) {
-      list.push(name);
-      await setDoc(ref, { list });
-    }
+    await setDoc(doc(db, 'party', 'players'), { list: arrayUnion(name) }, { merge: true });
     return;
   }
   if (!local.players.includes(name)) {
@@ -66,10 +61,7 @@ export async function addPlayerName(name) {
 
 export async function removePlayerName(name) {
   if (FIREBASE_ENABLED) {
-    const ref = doc(db, 'party', 'players');
-    const snap = await getDoc(ref);
-    const list = (snap.exists() ? snap.data().list || [] : []).filter((p) => p !== name);
-    await setDoc(ref, { list });
+    await setDoc(doc(db, 'party', 'players'), { list: arrayRemove(name) }, { merge: true });
     return;
   }
   local.players = local.players.filter((p) => p !== name);
@@ -129,10 +121,11 @@ export function subscribeMapState(callback) {
       callback(snap.exists() ? snap.data() : defaultMapState());
     });
   }
-  local.listeners.map.push(() => callback(local.mapState));
+  const fn = () => callback(local.mapState);
+  local.listeners.map.push(fn);
   callback(local.mapState);
   return () => {
-    local.listeners.map = local.listeners.map.filter((f) => f);
+    local.listeners.map = local.listeners.map.filter((f) => f !== fn);
   };
 }
 

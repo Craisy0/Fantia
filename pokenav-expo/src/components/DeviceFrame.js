@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PeekCreature from './PeekCreature';
 
 export default function DeviceFrame({ theme, children }) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <LinearGradient
         colors={[theme.caseTop, theme.caseBottom]}
         start={{ x: 0.15, y: 0 }}
@@ -24,8 +26,9 @@ export default function DeviceFrame({ theme, children }) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { width: '100%', maxWidth: 480, alignSelf: 'center' },
+  wrap: { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center' },
   case: {
+    flex: 1,
     borderRadius: 38,
     paddingHorizontal: 14,
     paddingTop: 16,
@@ -44,6 +47,6 @@ const styles = StyleSheet.create({
     marginTop: 26,
     borderRadius: 20,
     overflow: 'hidden',
-    minHeight: 460,
+    flex: 1,
   },
 });
