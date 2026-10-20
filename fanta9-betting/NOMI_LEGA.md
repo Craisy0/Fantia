@@ -8,7 +8,7 @@ a destra. Confermato dall'utente il 2026-09-15.
 | Cri     | One Pisa |
 | Ale     | 420 Smoke |
 | Giammi  | Aston Birra |
-| Cucca   | Bobby Malena |
+| Cucca   | Los Duros Duros (ex Bobby Malena, rinominata dal 14/10/2026 circa) |
 | Giorgio | FC Briaconi |
 | Nando   | FC Pensiunited |
 | Rota    | FC Young Girls |
