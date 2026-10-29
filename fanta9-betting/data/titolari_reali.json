@@ -1,5 +1,5 @@
 {
- "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti.",
+ "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti. Aggiornato il 2026-10-29 con 11 correzioni verificate via ricerca web (vedi PROCESSO_GIRONE_ANDATA.md): Thuram, Calhanoglu (INT), McTominay (NAP), Pulisic (MIL), Douvikas (COM), Soulè, Castro S. (ROM), Krstovic (ATA), Simeone (TOR), Esposito Se., Thorstvedt (SAS).",
  "ATA": {
   "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
   "titolari": [
@@ -45,6 +45,10 @@
    },
    {
     "nome": "Gaetano",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Krstovic",
     "ruolo": "A"
    }
   ]
@@ -192,6 +196,10 @@
    },
    {
     "nome": "Kean",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Douvikas",
     "ruolo": "A"
    }
   ]
@@ -389,6 +397,14 @@
    {
     "nome": "Martinez L.",
     "ruolo": "A"
+   },
+   {
+    "nome": "Thuram",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Calhanoglu",
+    "ruolo": "C"
    }
   ]
  },
@@ -585,6 +601,10 @@
    {
     "nome": "Ramos G.",
     "ruolo": "A"
+   },
+   {
+    "nome": "Pulisic",
+    "ruolo": "C"
    }
   ]
  },
@@ -683,6 +703,10 @@
    {
     "nome": "Santos A.",
     "ruolo": "A"
+   },
+   {
+    "nome": "McTominay",
+    "ruolo": "C"
    }
   ]
  },
@@ -781,6 +805,14 @@
    {
     "nome": "Mora",
     "ruolo": "A"
+   },
+   {
+    "nome": "Soulè",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Castro S.",
+    "ruolo": "A"
    }
   ]
  },
@@ -830,6 +862,14 @@
    {
     "nome": "Laurientè",
     "ruolo": "A"
+   },
+   {
+    "nome": "Esposito Se.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Thorstvedt",
+    "ruolo": "C"
    }
   ]
  },
@@ -878,6 +918,10 @@
    },
    {
     "nome": "Adams C.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Simeone",
     "ruolo": "A"
    }
   ]
