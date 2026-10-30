@@ -22,11 +22,11 @@
     "margine_bookmaker": 1.25,
     "lambda_default": 1.3,
     "max_gol_simulati": 12,
-    "pareggio_base": 0.35,
+    "pareggio_base": 0.18,
     "pareggio_decadimento": 1.5,
     "vincita_massima_per_scommessa": 30,
-    "quota_soglia_tassa": 2.99,
-    "quota_massima": 3.2,
+    "quota_soglia_tassa": 3.5,
+    "quota_massima": 4.5,
     "quota_tassa_scala": 8.0
   },
   "girone_andata": {
