@@ -743,6 +743,7 @@ class Store:
         for esito in mercato['esiti']:
             if esito['chiave'] in quote_per_squadra:
                 esito['quota'] = quote_per_squadra[esito['chiave']]
+        mercato['esiti'].sort(key=lambda e: e['quota'])  # sempre dal piu' favorito al meno
         self._log(f"Ricalcolate le quote del vincitore girone d'andata (mercato #{mercato['id']})")
         self.save()
         return {'mercato_id': mercato['id'], 'quote': mercato['esiti']}
