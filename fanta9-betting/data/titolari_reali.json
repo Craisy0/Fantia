@@ -1,5 +1,5 @@
 {
- "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti. Aggiornato il 2026-10-29 con 11 correzioni verificate via ricerca web (vedi PROCESSO_GIRONE_ANDATA.md): Thuram, Calhanoglu (INT), McTominay (NAP), Pulisic (MIL), Douvikas (COM), Soulè, Castro S. (ROM), Krstovic (ATA), Simeone (TOR), Esposito Se., Thorstvedt (SAS).",
+ "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti. Aggiornato il 2026-10-29 con 11 correzioni verificate via ricerca web (vedi PROCESSO_GIRONE_ANDATA.md): Thuram, Calhanoglu (INT), McTominay (NAP), Pulisic (MIL), Douvikas (COM), Soulè, Castro S. (ROM), Krstovic (ATA), Simeone (TOR), Esposito Se., Thorstvedt (SAS). Aggiornato il 2026-11-03: NAP (-Lobotka infortunato, -Vergara, -Santos A. fuori XI, +De Bruyne), ROM (-Svilar infortunato).",
  "ATA": {
   "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
   "titolari": [
@@ -658,7 +658,7 @@
   ]
  },
  "NAP": {
-  "fonte": "formazione ufficiale giornata 3 (Inter-Napoli 3-2, 05/09/2026)",
+  "fonte": "formazione ufficiale giornata 3 (Inter-Napoli 3-2, 05/09/2026) | aggiornato 03/11/2026: -Lobotka (infortunio caviglia, out ~fine dicembre), -Vergara, -Santos A. (fuori XI), +De Bruyne (gia titolare, confermato in formazione giornata 10 Juventus-Napoli)",
   "titolari": [
    {
     "nome": "Meret",
@@ -685,14 +685,6 @@
     "ruolo": "C"
    },
    {
-    "nome": "Lobotka",
-    "ruolo": "C"
-   },
-   {
-    "nome": "Vergara",
-    "ruolo": "C"
-   },
-   {
     "nome": "Politano",
     "ruolo": "A"
    },
@@ -701,11 +693,11 @@
     "ruolo": "A"
    },
    {
-    "nome": "Santos A.",
-    "ruolo": "A"
+    "nome": "McTominay",
+    "ruolo": "C"
    },
    {
-    "nome": "McTominay",
+    "nome": "De Bruyne",
     "ruolo": "C"
    }
   ]
@@ -760,12 +752,8 @@
   ]
  },
  "ROM": {
-  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
+  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026) | aggiornato 03/11/2026: -Svilar (infortunio, out fino a dopo la sosta di novembre 2026)",
   "titolari": [
-   {
-    "nome": "Svilar",
-    "ruolo": "P"
-   },
    {
     "nome": "Mancini",
     "ruolo": "D"
