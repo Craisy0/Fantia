@@ -40,20 +40,44 @@ ricerche giocatore per giocatore (molto piu' efficiente su ~150-170 nomi):
    media (diagnosi concreta anche se i tempi di rientro sono incerti); lasciare chi ha
    solo un generico "da valutare" senza diagnosi, e segnalarlo come da ricontrollare al
    giro successivo.
-2. **Fantamedia reale stagionale** (non il prezzo di un listone): una pagina con la
-   classifica/tabella fantamedia di TUTTA la Serie A 2026/27 in corso (es.
-   fantacalcio.it/statistiche-serie-a o fantacalcio.dev/stagioni/2026-27/fantamedia-migliore
-   — spesso i dati sono incorporati nell'HTML grezzo, leggibili via curl anche quando il
-   fetch "normale" restituisce poco). Calibrare una curva quotazione->fantamedia-attesa
-   PER RUOLO (portieri/difensori/centrocampisti/trequartisti/attaccanti separati, non una
-   curva unica: altrimenti un portiere sembra sempre un flop rispetto a un attaccante) usando
-   solo giocatori con un campione di partite decente, poi correggere `quotazione_mantra`
-   di chi si scosta nettamente (es. >=0.70 punti di fantamedia) dall'attesa della propria
-   fascia. Diffidare dei campioni piccoli (<6-7 presenze): correggere con piu' cautela.
-   Controllare sempre, per i rialzi, se nascondono in realta' un infortunio recente (il
-   prezzo/fantamedia puo' riflettere ancora il rendimento pre-infortunio) — in tal caso la
+2. **Fantamedia reale stagionale** (non il prezzo di un listone): usare SEMPRE
+   https://www.fantacalcio.it/statistiche-serie-a/2026-27/italia/medie — e' una pagina
+   statica (niente login necessario per leggerla, serve solo per il tasto "Scarica"
+   Excel, da non usare) con la tabella COMPLETA di tutti i ~600 giocatori di Serie A
+   incorporata nell'HTML grezzo (leggibile via curl, elementi `<tr class="player-row"
+   data-filter-keywords="Nome" ...>` con colonne `sq`/`pg`/`mv`/`mfv`/`gol`/`ass`).
+   **Non usare classifiche "top fantamedia"** (es. fantacalcio.dev/fantamedia-migliore):
+   quelle includono solo chi rende bene, quindi "non trovato" per un giocatore mediocre
+   o con poche presenze sembra un buco nei dati ma e' solo un artefatto della fonte
+   sbagliata (scoperto il 2026-11-09 su Goncalves P., Cissè A., Santos A. — tutti e tre
+   avevano dati reali, solo sotto la soglia della classifica usata). Dopo il fetch,
+   decodificare le entita' HTML nei nomi (es. `&#xE8;` -> `è`) prima di fare il match.
+   Calibrare una curva quotazione->fantamedia-attesa PER RUOLO (portieri/difensori/
+   centrocampisti/trequartisti/attaccanti separati, non una curva unica: altrimenti un
+   portiere sembra sempre un flop rispetto a un attaccante) usando solo giocatori con un
+   campione di partite decente, poi correggere `quotazione_mantra` di chi si scosta
+   nettamente (es. >=0.70 punti di fantamedia) dall'attesa della propria fascia.
+   Diffidare dei campioni piccoli (<6-7 presenze): correggere con piu' cautela, o lasciare
+   la quotazione invariata se il campione e' troppo piccolo per fidarsi. Controllare
+   sempre, per i rialzi, se nascondono in realta' un infortunio recente (il prezzo/
+   fantamedia puo' riflettere ancora il rendimento pre-infortunio) — in tal caso la
    correzione giusta e' il punto 1 (togliere dai titolari), non alzare la quotazione
    (vedi caso Raimondo, 2026-11-09).
+
+**Persistenza dei dati raccolti**: la sandbox di lavoro (scratchpad) viene svuotata ad
+ogni riavvio del container, quindi i file grezzi scaricati durante la ricerca (HTML,
+JSON intermedi) vanno considerati PERSI tra una sessione e l'altra — non fare mai
+affidamento sul fatto di poterli riaprire in futuro. Per questo, il dataset completo
+scaricato al punto 2 va salvato anche come file versionato nel repository,
+`data/fantamedia_reale_cache.json` (stessa cartella di `titolari_reali.json` e
+`rose_gotta.json`), con dentro la data e l'URL di provenienza. Questo file:
+- NON alimenta direttamente il motore di proiezione (quello usa solo
+  `titolari_reali.json` e la `quotazione_mantra` in `rose_gotta.json`) — serve da
+  riferimento/cache per i controlli futuri e per mostrare all'utente da dove vengono i
+  numeri quando li chiede.
+- Va RISCARICATO E SOVRASCRITTO (non accumulato) ad ogni ricalcolo del girone d'andata,
+  perche' i dati di fantamedia cambiano giornata per giornata — un dato vecchio di una
+  settimana e' meglio buttarlo e riprenderlo fresco piuttosto che fidarsene.
 
 Mostrare all'utente le modifiche proposte (diff) prima di applicarle a
 `data/titolari_reali.json` o `data/rose_gotta.json` — non sovrascrivere questi file
