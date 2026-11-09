@@ -151,7 +151,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 8,
-   "quotazione_mantra": 7
+   "quotazione_mantra": 11
   },
   {
    "nome": "Gnonto",
@@ -183,7 +183,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 18,
-   "quotazione_mantra": 17
+   "quotazione_mantra": 24
   },
   {
    "nome": "Colombo",
@@ -361,7 +361,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 16,
-   "quotazione_mantra": 15
+   "quotazione_mantra": 20
   },
   {
    "nome": "De Bruyne",
@@ -369,7 +369,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T",
    "quotazione": 17,
-   "quotazione_mantra": 16
+   "quotazione_mantra": 21
   },
   {
    "nome": "Pulisic",
@@ -377,7 +377,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T,A",
    "quotazione": 23,
-   "quotazione_mantra": 21
+   "quotazione_mantra": 26
   },
   {
    "nome": "Pellegrino M.",
@@ -579,7 +579,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 15,
-   "quotazione_mantra": 16
+   "quotazione_mantra": 19
   },
   {
    "nome": "Dybala",
@@ -741,7 +741,7 @@
    "ruolo": "A",
    "ruoli_mantra": "W,A",
    "quotazione": 8,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 14
   },
   {
    "nome": "Conceicao",
@@ -773,7 +773,7 @@
    "ruolo": "A",
    "ruoli_mantra": "T,A",
    "quotazione": 7,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 14
   },
   {
    "nome": "Raimondo",
@@ -983,7 +983,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 9,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 16
   },
   {
    "nome": "Malen",
@@ -1153,7 +1153,7 @@
    "ruolo": "C",
    "ruoli_mantra": "C,T",
    "quotazione": 13,
-   "quotazione_mantra": 13
+   "quotazione_mantra": 17
   },
   {
    "nome": "Mbangula",
@@ -1193,7 +1193,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 12,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 18
   },
   {
    "nome": "Soulè",
@@ -1201,7 +1201,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 15,
-   "quotazione_mantra": 16
+   "quotazione_mantra": 19
   },
   {
    "nome": "Esposito Se.",
@@ -1307,7 +1307,7 @@
    "ruolo": "D",
    "ruoli_mantra": "E,W",
    "quotazione": 31,
-   "quotazione_mantra": 30
+   "quotazione_mantra": 18
   },
   {
    "nome": "Moreira",
@@ -1315,7 +1315,7 @@
    "ruolo": "C",
    "ruoli_mantra": "E,W",
    "quotazione": 11,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 18
   },
   {
    "nome": "Chukwueze",
@@ -1379,7 +1379,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 13,
-   "quotazione_mantra": 12
+   "quotazione_mantra": 6
   },
   {
    "nome": "Bowie",
@@ -1417,7 +1417,7 @@
  "Cri": [
   {
    "nome": "Provedel",
-   "club": "INT",
+   "club": "LAZ",
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 1,
@@ -1565,7 +1565,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W",
    "quotazione": 10,
-   "quotazione_mantra": 10
+   "quotazione_mantra": 16
   },
   {
    "nome": "Vergara",
@@ -1605,7 +1605,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 14,
-   "quotazione_mantra": 13
+   "quotazione_mantra": 18
   },
   {
    "nome": "Romero D.",
@@ -1767,7 +1767,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,T",
    "quotazione": 11,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 19
   },
   {
    "nome": "Vlasic",
@@ -1775,7 +1775,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T",
    "quotazione": 13,
-   "quotazione_mantra": 12
+   "quotazione_mantra": 16
   },
   {
    "nome": "Douvikas",
@@ -1783,7 +1783,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 21,
-   "quotazione_mantra": 21
+   "quotazione_mantra": 26
   },
   {
    "nome": "Simeone",
@@ -1791,7 +1791,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 14,
-   "quotazione_mantra": 14
+   "quotazione_mantra": 19
   },
   {
    "nome": "Thuram",
@@ -1799,7 +1799,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 28,
-   "quotazione_mantra": 28
+   "quotazione_mantra": 33
   },
   {
    "nome": "Scamacca",
@@ -1937,7 +1937,7 @@
    "ruolo": "C",
    "ruoli_mantra": "M,C",
    "quotazione": 8,
-   "quotazione_mantra": 9
+   "quotazione_mantra": 18
   },
   {
    "nome": "Zielinski",

@@ -1,5 +1,5 @@
 {
- "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti. Aggiornato il 2026-10-29 con 11 correzioni verificate via ricerca web (vedi PROCESSO_GIRONE_ANDATA.md): Thuram, Calhanoglu (INT), McTominay (NAP), Pulisic (MIL), Douvikas (COM), Soulè, Castro S. (ROM), Krstovic (ATA), Simeone (TOR), Esposito Se., Thorstvedt (SAS). Aggiornato il 2026-11-03: NAP (-Lobotka infortunato, -Vergara, -Santos A. fuori XI, +De Bruyne), ROM (-Svilar infortunato).",
+ "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti. Aggiornato il 2026-10-29 con 11 correzioni verificate via ricerca web (vedi PROCESSO_GIRONE_ANDATA.md): Thuram, Calhanoglu (INT), McTominay (NAP), Pulisic (MIL), Douvikas (COM), Soulè, Castro S. (ROM), Krstovic (ATA), Simeone (TOR), Esposito Se., Thorstvedt (SAS). Aggiornato il 2026-11-03: NAP (-Lobotka infortunato, -Vergara, -Santos A. fuori XI, +De Bruyne), ROM (-Svilar infortunato). Aggiornato il 2026-11-09: ROM (+Gollini, titolare confermato per infortunio Svilar), FRO (-Raimondo, infortunio lungo).",
  "ATA": {
   "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
   "titolari": [
@@ -254,7 +254,7 @@
   ]
  },
  "FRO": {
-  "fonte": "probabile formazione giornata 4 (vs Genoa)",
+  "fonte": "probabile formazione giornata 4 (vs Genoa) | aggiornato 09/11/2026: -Raimondo (lesione multilegamentosa caviglia, out 5-6 settimane, rientro atteso meta dicembre/gennaio)",
   "titolari": [
    {
     "nome": "Palmisani",
@@ -294,10 +294,6 @@
    },
    {
     "nome": "Kvernadze",
-    "ruolo": "A"
-   },
-   {
-    "nome": "Raimondo",
     "ruolo": "A"
    }
   ]
@@ -752,8 +748,12 @@
   ]
  },
  "ROM": {
-  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026) | aggiornato 03/11/2026: -Svilar (infortunio, out fino a dopo la sosta di novembre 2026)",
+  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026) | aggiornato 03/11/2026: -Svilar (infortunio, out fino a dopo la sosta di novembre 2026) | aggiornato 09/11/2026: +Gollini (titolare confermato da inizio ottobre per infortunio di Svilar, frattura, rientro atteso ~21/11)",
   "titolari": [
+   {
+    "nome": "Gollini",
+    "ruolo": "P"
+   },
    {
     "nome": "Mancini",
     "ruolo": "D"
