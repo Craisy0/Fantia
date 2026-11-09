@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gottabet</title>
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="icon" href="/static/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0f1720">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +20,7 @@
   <header class="topbar">
     <div class="brand">⚽ <span id="nome-lega">Gottabet</span> <small>lega GOTTA</small></div>
     <div class="identita">
-      <button id="btn-notifiche" class="link-btn hidden" aria-label="Notifiche" title="Notifiche">🔔</button>
+      <button id="btn-notifiche" class="link-btn hidden" aria-label="Notifiche" title="Notifiche">🔕</button>
       <span id="badge-squadra" class="badge">Chi sei?</span>
       <span id="badge-saldo" class="badge saldo"></span>
       <button id="btn-cambia-identita" class="link-btn">cambia</button>
@@ -128,6 +133,9 @@ Cucca; 58.1; 6.4
         <button id="btn-calcola-girone-andata">Calcola quote</button>
         <div id="girone-andata-risultato"></div>
         <button id="btn-pubblica-girone-andata" class="hidden">Pubblica come scommessa</button>
+        <p class="hint">Se il mercato è già pubblicato e aperto, usa questo per ricalcolarne le quote con i dati più recenti (es. dopo averlo riaperto senza passare da un nuovo import punteggi, che lo farebbe da solo):</p>
+        <button id="btn-aggiorna-quote-girone-andata">Ricalcola quote mercato aperto</button>
+        <div id="aggiorna-girone-andata-risultato"></div>
 
         <hr>
 
@@ -208,7 +216,9 @@ Cucca; 58.1; 6.4
 
   <div id="modal-schedina" class="modal">
     <div class="modal-box modal-schedina-box">
+      <button id="btn-chiudi-schedina" class="btn-chiudi-modal" aria-label="Chiudi" title="Chiudi">×</button>
       <h2>La tua schedina — Giornata <span id="schedina-giornata"></span></h2>
+      <p id="schedina-progresso" class="hint"></p>
       <div id="schedina-selezioni"></div>
       <p class="hint">Quota totale: <b id="schedina-quota-totale">1.00</b></p>
       <input type="number" id="schedina-importo" min="1" step="1" placeholder="Quanti fantamilioni punti?">
@@ -218,7 +228,14 @@ Cucca; 58.1; 6.4
         <button id="btn-svuota-schedina">Svuota</button>
         <button id="btn-conferma-schedina" class="primario">Conferma schedina</button>
       </div>
-      <button id="btn-chiudi-schedina" class="link-btn">chiudi</button>
+    </div>
+  </div>
+
+  <div id="modal-scheda-squadra" class="modal">
+    <div class="modal-box modal-scheda-box">
+      <button id="btn-chiudi-scheda" class="btn-chiudi-modal" aria-label="Chiudi" title="Chiudi">×</button>
+      <h2 id="scheda-titolo">Squadra</h2>
+      <div id="scheda-contenuto"></div>
     </div>
   </div>
 

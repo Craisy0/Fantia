@@ -118,12 +118,14 @@
 
   function renderMercati() {
     const cont = el('#lista-mercati');
-    const mercati = (stato.mercati || []).slice().sort((a, b) => {
+    // I mercati risolti spariscono da qui: restano visibili solo in "Le mie giocate", dove ogni
+    // squadra vede comunque le proprie schedine passate a prescindere dallo stato del mercato.
+    const mercati = (stato.mercati || []).filter(m => m.stato !== 'risolto').slice().sort((a, b) => {
       const rank = { aperto: 0, chiuso: 1, risolto: 2 };
       return (rank[a.stato] - rank[b.stato]) || (b.id - a.id);
     });
     if (!mercati.length) {
-      cont.innerHTML = '<p class="hint">Nessuna scommessa ancora creata. Chiedi all\'admin di pubblicarne una.</p>';
+      cont.innerHTML = '<p class="hint">Nessuna scommessa aperta al momento. Le giornate risolte le trovi in "Le mie giocate".</p>';
       return;
     }
     const giocate = giornateGiaGiocate();
@@ -216,6 +218,21 @@
     return carrelloSchedina.reduce((tot, s) => tot * s.quota, 1);
   }
 
+  // La regola della lega: la schedina di una giornata va giocata su TUTTE le partite di quella
+  // giornata (il vincitore girone d'andata, giornata=null, fa eccezione: resta una selezione singola).
+  function mercatiGiornata(giornata) {
+    if (giornata == null) return [];
+    return (stato.mercati || []).filter(m => m.tipo === '1x2' && m.giornata === giornata);
+  }
+
+  function schedinaCompleta() {
+    if (!carrelloSchedina.length) return false;
+    const giornata = carrelloSchedina[0].giornata;
+    if (giornata == null) return true; // girone d'andata: una sola selezione, sempre "completa"
+    const totali = mercatiGiornata(giornata);
+    return !totali.length || carrelloSchedina.length === totali.length;
+  }
+
   function renderSchedinaBarra() {
     const barra = el('#barra-schedina');
     if (!carrelloSchedina.length) { barra.classList.add('hidden'); return; }
@@ -243,6 +260,20 @@
     }
     el('#schedina-giornata').textContent = carrelloSchedina.length ? carrelloSchedina[0].giornata : '-';
     el('#schedina-quota-totale').textContent = quotaTotaleCarrello().toFixed(2);
+
+    const progressoEl = el('#schedina-progresso');
+    const giornata = carrelloSchedina.length ? carrelloSchedina[0].giornata : null;
+    const totali = mercatiGiornata(giornata);
+    if (giornata != null && totali.length) {
+      progressoEl.textContent = `Selezionate ${carrelloSchedina.length} di ${totali.length} partite della giornata ${giornata} — vanno giocate tutte per confermare.`;
+    } else {
+      progressoEl.textContent = '';
+    }
+    const completa = schedinaCompleta();
+    const btnConferma = el('#btn-conferma-schedina');
+    btnConferma.disabled = !completa;
+    btnConferma.textContent = completa ? 'Conferma schedina' : 'Seleziona tutte le partite';
+
     aggiornaVincitaPotenzialeSchedina();
   }
 
@@ -266,47 +297,61 @@
 
   const ETICHETTE_STATO_SCHEDINA = { in_corso: 'In corso', vinta: 'Vinta', persa: 'Persa' };
 
+  function esitoSelezione(sel) {
+    // Guarda il mercato vero (stato.mercati arriva sempre pieno da /api/state, mercati risolti
+    // inclusi) per capire se QUESTA specifica selezione ha vinto o perso, indipendentemente
+    // dall'esito complessivo della schedina (che puo' contenere piu' selezioni).
+    const mercato = (stato.mercati || []).find(m => m.id === sel.mercato_id);
+    if (!mercato || mercato.stato !== 'risolto') return null;
+    return mercato.esito_vincente === sel.esito ? 'vinta' : 'persa';
+  }
+
+  function renderizzaSchedinaCard(s) {
+    const selezioniHtml = s.selezioni.map(sel => {
+      const esito = esitoSelezione(sel);
+      return `
+      <div class="giocata-sel${esito ? ' sel-' + esito : ''}">
+        <div class="giocata-sel-info">
+          <span class="giocata-sel-esito">${escapeHtml(sel.label_esito)}</span>
+          <span class="giocata-sel-mercato">${escapeHtml(sel.titolo_mercato)}</span>
+        </div>
+        <span class="giocata-sel-quota">${sel.quota.toFixed(2)}</span>
+      </div>`;
+    }).join('');
+
+    let etichettaEsito, valoreEsito, classeEsito;
+    if (s.stato === 'vinta') {
+      etichettaEsito = 'Vincita'; valoreEsito = `${s.vincita} FM`; classeEsito = 'vinta';
+    } else if (s.stato === 'persa') {
+      etichettaEsito = 'Vincita'; valoreEsito = '0 FM'; classeEsito = 'persa';
+    } else {
+      let potenziale = Math.floor(s.importo * s.quota_totale);
+      const tetto = stato.vincita_massima_per_scommessa;
+      if (tetto != null) potenziale = Math.min(potenziale, Math.floor(tetto));
+      etichettaEsito = 'Potenziale'; valoreEsito = `${potenziale} FM`; classeEsito = 'in_corso';
+    }
+
+    return `<div class="giocata-card stato-${s.stato}">
+      <div class="giocata-head">
+        <span class="giocata-giornata">${s.giornata != null ? 'Giornata ' + s.giornata : 'Libera'}</span>
+        <span class="giocata-badge ${s.stato}">${ETICHETTE_STATO_SCHEDINA[s.stato]}</span>
+      </div>
+      <div class="giocata-selezioni">${selezioniHtml}</div>
+      <div class="giocata-riepilogo">
+        <div><span class="hint">Puntata</span><b>${s.importo} FM</b></div>
+        <div><span class="hint">Quota</span><b>${s.quota_totale.toFixed(2)}</b></div>
+        <div><span class="hint">${etichettaEsito}</span><b class="valore ${classeEsito}">${valoreEsito}</b></div>
+      </div>
+    </div>`;
+  }
+
   function renderGiocate() {
     const cont = el('#lista-giocate');
     const identita = identitaAttuale();
     if (!identita || identita.tipo !== 'squadra') { cont.innerHTML = '<p class="hint">Scegli prima la tua squadra.</p>'; return; }
     const schedine = (stato.mie_schedine || []).slice().sort((a, b) => b.id - a.id);
     if (!schedine.length) { cont.innerHTML = '<p class="hint">Non hai ancora giocato nessuna schedina.</p>'; return; }
-    cont.innerHTML = schedine.map(s => {
-      const selezioniHtml = s.selezioni.map(sel => `
-        <div class="giocata-sel">
-          <div class="giocata-sel-info">
-            <span class="giocata-sel-esito">${escapeHtml(sel.label_esito)}</span>
-            <span class="giocata-sel-mercato">${escapeHtml(sel.titolo_mercato)}</span>
-          </div>
-          <span class="giocata-sel-quota">${sel.quota.toFixed(2)}</span>
-        </div>`).join('');
-
-      let etichettaEsito, valoreEsito, classeEsito;
-      if (s.stato === 'vinta') {
-        etichettaEsito = 'Vincita'; valoreEsito = `${s.vincita} FM`; classeEsito = 'vinta';
-      } else if (s.stato === 'persa') {
-        etichettaEsito = 'Vincita'; valoreEsito = '0 FM'; classeEsito = 'persa';
-      } else {
-        let potenziale = Math.floor(s.importo * s.quota_totale);
-        const tetto = stato.vincita_massima_per_scommessa;
-        if (tetto != null) potenziale = Math.min(potenziale, Math.floor(tetto));
-        etichettaEsito = 'Potenziale'; valoreEsito = `${potenziale} FM`; classeEsito = 'in_corso';
-      }
-
-      return `<div class="giocata-card stato-${s.stato}">
-        <div class="giocata-head">
-          <span class="giocata-giornata">Giornata ${s.giornata}</span>
-          <span class="giocata-badge ${s.stato}">${ETICHETTE_STATO_SCHEDINA[s.stato]}</span>
-        </div>
-        <div class="giocata-selezioni">${selezioniHtml}</div>
-        <div class="giocata-riepilogo">
-          <div><span class="hint">Puntata</span><b>${s.importo} FM</b></div>
-          <div><span class="hint">Quota</span><b>${s.quota_totale.toFixed(2)}</b></div>
-          <div><span class="hint">${etichettaEsito}</span><b class="valore ${classeEsito}">${valoreEsito}</b></div>
-        </div>
-      </div>`;
-    }).join('');
+    cont.innerHTML = schedine.map(renderizzaSchedinaCard).join('');
   }
 
   // ---------------------------------------------------------------------
@@ -322,23 +367,102 @@
       const pos = i + 1;
       const medaglia = MEDAGLIE[pos];
       const classeMedaglia = pos <= 3 ? ` medaglia-${pos}` : '';
-      return `<div class="classifica-riga${classeMedaglia}">
+      return `<div class="classifica-riga${classeMedaglia}" data-squadra="${escapeHtml(r.squadra)}" role="button">
         <span class="classifica-pos">${medaglia || pos}</span>
         <span class="classifica-squadra">${escapeHtml(r.squadra)}</span>
         <span class="classifica-saldo">${r.saldo.toFixed(0)} <small>FM</small></span>
       </div>`;
     }).join('');
+    all('.classifica-riga').forEach(riga => {
+      riga.addEventListener('click', () => apriSchedaSquadra(riga.dataset.squadra));
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Scheda squadra pubblica (statistiche + andamento saldo + storico schedine)
+  // ---------------------------------------------------------------------
+
+  function sparklineSvg(punti) {
+    if (punti.length < 2) return '<p class="hint">Non c\'è ancora abbastanza storico per un grafico.</p>';
+    const larghezza = 400, altezza = 90, margine = 6;
+    const valori = punti.map(p => p.saldo);
+    const min = Math.min(...valori), max = Math.max(...valori);
+    const scalaX = (i) => margine + (i / (punti.length - 1)) * (larghezza - margine * 2);
+    const scalaY = (v) => max === min ? altezza / 2
+      : altezza - margine - ((v - min) / (max - min)) * (altezza - margine * 2);
+    const coordinate = punti.map((p, i) => `${scalaX(i).toFixed(1)},${scalaY(p.saldo).toFixed(1)}`).join(' ');
+    const ultimo = punti[punti.length - 1];
+    const colore = ultimo.saldo >= punti[0].saldo ? 'var(--accent)' : 'var(--danger)';
+    return `<svg class="sparkline" viewBox="0 0 ${larghezza} ${altezza}" preserveAspectRatio="none">
+      <polyline points="${coordinate}" fill="none" stroke="${colore}" stroke-width="2.5"
+        stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+  }
+
+  async function apriSchedaSquadra(squadra) {
+    el('#scheda-titolo').textContent = squadra;
+    el('#scheda-contenuto').innerHTML = '<p class="hint">Carico…</p>';
+    el('#modal-scheda-squadra').classList.add('open');
+    const dati = await get('/api/statistiche?squadra=' + encodeURIComponent(squadra));
+    if (dati.errore) { el('#scheda-contenuto').innerHTML = `<p class="errore">${escapeHtml(dati.errore)}</p>`; return; }
+    const c = dati.conteggi;
+    const schedineHtml = dati.schedine.length
+      ? dati.schedine.slice().reverse().map(renderizzaSchedinaCard).join('')
+      : '<p class="hint">Nessuna schedina giocata finora.</p>';
+    el('#scheda-contenuto').innerHTML = `
+      <div class="scheda-stats">
+        <div class="scheda-stat"><b>${dati.saldo_attuale.toFixed(0)}</b><span>Saldo (FM)</span></div>
+        <div class="scheda-stat"><b>${c.vinte}-${c.perse}-${c.in_corso}</b><span>Vinte-Perse-In corso</span></div>
+        <div class="scheda-stat"><b>${dati.quota_media != null ? dati.quota_media.toFixed(2) : '—'}</b><span>Quota media</span></div>
+        <div class="scheda-stat"><b>${dati.totale_puntato.toFixed(0)}</b><span>Totale puntato (FM)</span></div>
+      </div>
+      <p class="hint">Andamento saldo</p>
+      <div class="scheda-sparkline">${sparklineSvg(dati.storico_saldo)}</div>
+      <p class="hint">Storico schedine</p>
+      ${schedineHtml}
+    `;
   }
 
   // ---------------------------------------------------------------------
   // Tab "Admin"
   // ---------------------------------------------------------------------
 
+  // Raggruppa una lista di mercati/schedine per giornata (le voci senza giornata, es. il
+  // vincitore girone d'andata, finiscono in un gruppo "Scommesse speciali" a parte). Ogni
+  // giornata nuova pubblicata genera automaticamente un nuovo gruppo, senza bisogno di
+  // configurazione: il gruppo esiste solo se c'e' almeno una voce con quella giornata.
+  function raggruppaPerGiornata(voci) {
+    const gruppi = new Map();
+    voci.forEach(v => {
+      const chiave = v.giornata == null ? '__speciali__' : v.giornata;
+      if (!gruppi.has(chiave)) gruppi.set(chiave, { giornata: v.giornata, voci: [] });
+      gruppi.get(chiave).voci.push(v);
+    });
+    return Array.from(gruppi.values()).sort((a, b) => {
+      if (a.giornata == null) return 1;
+      if (b.giornata == null) return -1;
+      return b.giornata - a.giornata;
+    });
+  }
+
+  function renderGruppiGiornata(voci, renderVoce) {
+    const gruppi = raggruppaPerGiornata(voci);
+    return gruppi.map((g, i) => {
+      const titolo = g.giornata == null ? 'Scommesse speciali' : `Giornata ${g.giornata}`;
+      return `<details class="gruppo-giornata"${i === 0 ? ' open' : ''}>
+        <summary>${escapeHtml(titolo)} <span class="gruppo-conteggio">${g.voci.length}</span></summary>
+        <div class="gruppo-contenuto">${g.voci.map(renderVoce).join('')}</div>
+      </details>`;
+    }).join('');
+  }
+
   function renderAdminMercati() {
     const cont = el('#admin-mercati-lista');
     const mercati = (stato.mercati || []).slice().sort((a, b) => b.id - a.id);
     if (!mercati.length) { cont.innerHTML = '<p class="hint">Nessun mercato creato.</p>'; return; }
-    cont.innerHTML = mercati.map(m => {
+    cont.innerHTML = renderGruppiGiornata(mercati, renderMercatoAdminCard);
+
+    function renderMercatoAdminCard(m) {
       const esitiOpts = m.esiti.map(e => `<option value="${escapeHtml(e.chiave)}">${escapeHtml(e.label)}</option>`).join('');
       const azioni = m.stato === 'risolto' ? '<span class="hint">risolto</span>' : `
         <button class="mini-btn btn-chiudi-riapri" data-id="${m.id}" data-chiudi="${m.stato === 'aperto'}">${m.stato === 'aperto' ? 'Chiudi' : 'Riapri'}</button>
@@ -351,7 +475,7 @@
         <div class="mercato-meta">${m.esiti.map(e => `${escapeHtml(e.label)}: ${e.quota.toFixed(2)}`).join(' · ')}${m.esito_vincente ? ' · vincente: ' + escapeHtml(m.esito_vincente) : ''}</div>
         <div>${azioni}</div>
       </div>`;
-    }).join('');
+    }
 
     all('.btn-chiudi-riapri').forEach(btn => btn.addEventListener('click', async () => {
       const chiudi = btn.dataset.chiudi === 'true';
@@ -406,17 +530,20 @@
     const cont = el('#admin-schedine-lista');
     schedine = schedine.slice().sort((a, b) => b.id - a.id);
     if (!schedine.length) { cont.innerHTML = '<p class="hint">Nessuna schedina giocata.</p>'; return; }
-    cont.innerHTML = schedine.map(s => {
+    cont.innerHTML = renderGruppiGiornata(schedine, renderSchedinaAdminCard);
+
+    function renderSchedinaAdminCard(s) {
       const legs = s.selezioni.map(sel => `${escapeHtml(sel.label_esito)} @ ${sel.quota.toFixed(2)}`).join(' + ');
       const azione = s.stato === 'in_corso'
         ? `<button class="mini-btn btn-elimina-schedina" data-id="${s.id}">Elimina (rimborsa)</button>`
         : `<span class="hint">${s.stato}${s.vincita ? ' — vinti ' + s.vincita + ' FM' : ''}</span>`;
       return `<div class="mercato-card">
-        <h3>#${s.id} ${escapeHtml(s.squadra)} — giornata ${s.giornata}</h3>
+        <h3>#${s.id} ${escapeHtml(s.squadra)}${s.giornata != null ? ' — giornata ' + s.giornata : ''}</h3>
         <div class="mercato-meta">${legs} = quota ${s.quota_totale.toFixed(2)} · puntati ${s.importo} FM</div>
         <div>${azione}</div>
       </div>`;
-    }).join('');
+    }
+
     all('.btn-elimina-schedina').forEach(btn => btn.addEventListener('click', async () => {
       if (!confirm('Eliminare questa schedina e rimborsare la puntata?')) return;
       const r = await post('/api/admin/elimina-schedina', { admin_password: adminPassword(), schedina_id: Number(btn.dataset.id) });
@@ -687,6 +814,15 @@
       el('#btn-pubblica-girone-andata').classList.add('hidden');
       await ricarica();
     });
+    el('#btn-aggiorna-quote-girone-andata').addEventListener('click', async () => {
+      const cont = el('#aggiorna-girone-andata-risultato');
+      cont.innerHTML = '<p class="hint">Ricalcolo in corso…</p>';
+      const r = await post('/api/admin/aggiorna-quote-girone-andata', { admin_password: adminPassword() });
+      if (r.errore) { cont.innerHTML = `<p class="errore">${escapeHtml(r.errore)}</p>`; return; }
+      const righe = r.quote.map(q => `<li>${escapeHtml(q.chiave)} — quota <b>${q.quota}</b></li>`).join('');
+      cont.innerHTML = `<p class="hint">Quote aggiornate sul mercato #${r.mercato_id}:</p><ul>${righe}</ul>`;
+      await ricarica();
+    });
   }
 
   function initCustom() {
@@ -803,7 +939,7 @@
   async function aggiornaBottoneNotifiche() {
     const btn = el('#btn-notifiche');
     const sub = await sottoscrizioneAttuale();
-    btn.textContent = sub ? '🔕' : '🔔';
+    btn.textContent = sub ? '🔔' : '🔕';
     const etichetta = sub ? 'Disattiva notifiche' : 'Attiva notifiche';
     btn.setAttribute('aria-label', etichetta);
     btn.setAttribute('title', etichetta);
@@ -837,9 +973,13 @@
     // l'utente noti e prema il bottone campanella: se accetta e' attivo da subito, se rifiuta (o
     // il browser non ripropone piu' la richiesta) resta disattivato senza disturbare oltre.
     if (tentativoAutoNotificheFatto) return;
-    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+    if (typeof Notification === 'undefined' || Notification.permission === 'denied') return;
     const sub = await sottoscrizioneAttuale();
     if (sub) return;
+    // Se il permesso e' gia' concesso da prima (es. dopo un reset del server che ha cancellato
+    // solo la sottoscrizione salvata li', non il permesso del browser) non ricompare nessun
+    // popup - il browser non lo ripropone mai una volta deciso - quindi si ri-sottoscrive da
+    // sola in silenzio, senza dover ridisturbare l'utente con nulla.
     tentativoAutoNotificheFatto = true;
     try { await attivaNotifiche(true); } catch (e) { /* silenzioso: nessun disturbo se fallisce */ }
   }
@@ -856,15 +996,35 @@
 
   function initPush() {
     if (!pushSupportato()) return;
+    // Registra il service worker a ogni apertura del sito, non solo quando ci si iscrive: e'
+    // questo che fa controllare al browser se /sw.js e' cambiato (es. nuova icona) - altrimenti,
+    // per chi e' gia' iscritto da prima, il codice non lo richiamava mai piu' e restava bloccato
+    // sulla versione vecchia finche' non ri-attivava le notifiche da zero.
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
     el('#btn-notifiche').addEventListener('click', async () => {
       const sub = await sottoscrizioneAttuale();
       if (sub) {
-        await disattivaNotifiche();
+        // Il browser pensa di avere gia' una sottoscrizione attiva: puo' essere vera, o "orfana"
+        // (creata nel browser ma mai arrivata al server, es. per un problema di rete). Invece di
+        // disattivarla alla cieca, prima la ri-sincronizza col server (innocuo se era gia' a
+        // posto) e lo dice chiaramente, cosi' non sparisce piu' in silenzio.
+        try {
+          const identita = identitaAttuale();
+          const r = await post('/api/push/sottoscrivi', { token: identita.token, subscription: sub.toJSON() });
+          if (r.errore) { alert('Notifiche: ' + r.errore); return; }
+          if (!confirm('Le notifiche sono attive su questo dispositivo. Vuoi disattivarle?')) return;
+          await disattivaNotifiche();
+          alert('Notifiche disattivate su questo dispositivo.');
+        } catch (e) {
+          alert('Errore con le notifiche: ' + (e && e.message ? e.message : e));
+        }
       } else {
         try {
           await attivaNotifiche();
+          const sub2 = await sottoscrizioneAttuale();
+          alert(sub2 ? 'Notifiche attivate!' : 'Le notifiche non risultano attive: riprova, o controlla che siano consentite nelle impostazioni del sito nel browser.');
         } catch (e) {
-          alert('Non è stato possibile attivare le notifiche su questo dispositivo/browser.');
+          alert('Non è stato possibile attivare le notifiche: ' + (e && e.message ? e.message : e));
         }
       }
     });
@@ -927,6 +1087,7 @@
       erroreEl.textContent = '';
       if (!identita || identita.tipo !== 'squadra') { erroreEl.textContent = 'Scegli prima la tua squadra.'; return; }
       if (!carrelloSchedina.length) { erroreEl.textContent = 'Aggiungi almeno una selezione.'; return; }
+      if (!schedinaCompleta()) { erroreEl.textContent = 'Vanno giocate tutte le partite della giornata per confermare la schedina.'; return; }
       if (!importo || importo <= 0) { erroreEl.textContent = 'Indica quanti fantamilioni puntare.'; return; }
       const giornata = carrelloSchedina[0].giornata;
       const selezioni = carrelloSchedina.map(s => ({ mercato_id: s.mercato_id, esito: s.esito }));
@@ -955,6 +1116,9 @@
     initPush();
     initAdminNotifiche();
     initSchedina();
+    el('#btn-chiudi-scheda').addEventListener('click', () => {
+      el('#modal-scheda-squadra').classList.remove('open');
+    });
     ricarica();
   });
 })();

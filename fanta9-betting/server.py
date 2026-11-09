@@ -743,7 +743,9 @@ class Store:
         for esito in mercato['esiti']:
             if esito['chiave'] in quote_per_squadra:
                 esito['quota'] = quote_per_squadra[esito['chiave']]
+        mercato['esiti'].sort(key=lambda e: e['quota'])  # sempre dal piu' favorito al meno
         self._log(f"Ricalcolate le quote del vincitore girone d'andata (mercato #{mercato['id']})")
+        self.save()
         return {'mercato_id': mercato['id'], 'quote': mercato['esiti']}
 
     def crea_mercato_custom(self, titolo, esiti, giornata=None, tipo='custom'):
@@ -824,6 +826,9 @@ class Store:
             if persa:
                 sch['stato'] = 'persa'
                 sch['vincita'] = 0
+                self._invia_push_a_squadra(sch['squadra'], 'Gottabet',
+                                            f"Schedina persa: hai puntato {sch['importo']} FM, "
+                                            f"esito non arrivato.")
                 continue
             tutte_risolte = all(self._trova_mercato(sel['mercato_id'])
                                  and self._trova_mercato(sel['mercato_id'])['stato'] == 'risolto'
@@ -836,6 +841,9 @@ class Store:
                 sch['stato'] = 'vinta'
                 sch['vincita'] = vincita
                 self.state['saldi'][sch['squadra']] = round(self.state['saldi'].get(sch['squadra'], 0) + vincita, 2)
+                self._invia_push_a_squadra(sch['squadra'], 'Gottabet',
+                                            f"Schedina vinta! +{vincita} FM (puntati {sch['importo']} "
+                                            f"@ {sch['quota_totale']})")
 
         self._log(f"Risolto mercato #{mercato['id']} ({mercato['titolo']}): vince '{esito_vincente}'")
 
@@ -930,6 +938,14 @@ class Store:
             quota_totale *= esito_info['quota']
             dettaglio.append({'mercato_id': mercato_id, 'titolo_mercato': m['titolo'],
                                'esito': esito, 'label_esito': esito_info['label'], 'quota': esito_info['quota']})
+
+        if giornata is not None:
+            mercati_giornata = [m for m in self.state['mercati']
+                                 if m.get('tipo') == '1x2' and m['giornata'] == giornata]
+            mancanti = [m['titolo'] for m in mercati_giornata if m['id'] not in mercati_usati]
+            if mancanti:
+                return {'errore': 'la schedina deve includere tutte le partite della giornata: mancano ' +
+                                   ', '.join(mancanti)}
 
         saldo = self.state['saldi'].get(squadra, 0)
         if importo > saldo:
@@ -1085,6 +1101,63 @@ class Store:
         righe.sort(key=lambda r: -r['saldo'])
         return righe
 
+    # -- scheda squadra pubblica (statistiche + storico saldo + schedine) --
+
+    def statistiche_squadra(self, squadra):
+        """Scheda pubblica di una squadra: conteggi, quota media, storico saldo ricostruito
+        dagli eventi reali (piazzata/vinta/persa/correzione) e lo storico completo delle
+        schedine. Non richiede password admin: consultabile da chiunque."""
+        if squadra not in self.squadre():
+            return {'errore': 'squadra non valida'}
+        schedine = [s for s in self.state['schedine'] if s['squadra'] == squadra]
+        schedine.sort(key=lambda s: s['id'])
+
+        vinte = sum(1 for s in schedine if s['stato'] == 'vinta')
+        perse = sum(1 for s in schedine if s['stato'] == 'persa')
+        in_corso = sum(1 for s in schedine if s['stato'] == 'in_corso')
+        totale_puntato = round(sum(s['importo'] for s in schedine), 2)
+        totale_vinto = round(sum(s['vincita'] or 0 for s in schedine if s['stato'] == 'vinta'), 2)
+        quota_media = round(sum(s['quota_totale'] for s in schedine) / len(schedine), 2) if schedine else None
+
+        eventi = []
+        for s in schedine:
+            eventi.append({'ts': s['creata_il'], 'delta': -s['importo'], 'evento': f"Schedina #{s['id']} giocata"})
+            if s['stato'] == 'vinta':
+                ts_risoluzione = None
+                for sel in s['selezioni']:
+                    m = self._trova_mercato(sel['mercato_id'])
+                    if m and m.get('risolto_il'):
+                        if ts_risoluzione is None or m['risolto_il'] > ts_risoluzione:
+                            ts_risoluzione = m['risolto_il']
+                eventi.append({'ts': ts_risoluzione or s['creata_il'], 'delta': s['vincita'],
+                                'evento': f"Schedina #{s['id']} vinta"})
+        for voce in self.state.get('log', []):
+            m = re.match(rf"^Correzione saldo {re.escape(squadra)}: ([+-]\d+(?:\.\d+)?) FM \((.+)\)$",
+                         voce.get('testo', ''))
+            if m:
+                eventi.append({'ts': voce['ts'], 'delta': float(m.group(1)),
+                                'evento': f"Correzione saldo ({m.group(2)})"})
+        eventi.sort(key=lambda e: e['ts'])
+
+        saldo_iniziale = self.config['lega']['saldo_iniziale']
+        storico_saldo = [{'ts': None, 'saldo': saldo_iniziale, 'evento': 'Saldo iniziale'}]
+        corrente = saldo_iniziale
+        for e in eventi:
+            corrente = round(corrente + e['delta'], 2)
+            storico_saldo.append({'ts': e['ts'], 'saldo': corrente, 'evento': e['evento']})
+
+        return {
+            'ok': True,
+            'squadra': squadra,
+            'saldo_attuale': self.state['saldi'].get(squadra, 0),
+            'conteggi': {'vinte': vinte, 'perse': perse, 'in_corso': in_corso},
+            'quota_media': quota_media,
+            'totale_puntato': totale_puntato,
+            'totale_vinto': totale_vinto,
+            'storico_saldo': storico_saldo,
+            'schedine': schedine,
+        }
+
     # -- amministrazione ---------------------------------------------------
 
     def rinomina_squadre(self, nuove_squadre, rename_map):
@@ -1228,12 +1301,17 @@ class Handler(BaseHTTPRequestHandler):
             # default del service worker copre tutto il sito e non solo /static/.
             self._send_file(os.path.join(STATIC_DIR, 'sw.js'), 'application/javascript; charset=utf-8')
             return
+        if path == '/favicon.ico':
+            # alcuni browser lo richiedono qui per abitudine, oltre al <link rel="icon"> in testa
+            self._send_file(os.path.join(STATIC_DIR, 'favicon.ico'), 'image/x-icon')
+            return
         if path.startswith('/static/'):
             rel = path[len('/static/'):]
             full = os.path.join(STATIC_DIR, rel)
             ext = os.path.splitext(full)[1]
             ctype = {'.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
-                     '.png': 'image/png', '.svg': 'image/svg+xml'}.get(ext, 'application/octet-stream')
+                     '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+                     '.json': 'application/manifest+json'}.get(ext, 'application/octet-stream')
             self._send_file(full, ctype)
             return
 
@@ -1260,6 +1338,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if path == '/api/classifica':
                 self._send_json(STORE.classifica())
+                return
+            if path == '/api/statistiche':
+                squadra = (qs.get('squadra') or [None])[0]
+                r = STORE.statistiche_squadra(squadra)
+                self._send_json(r, 200 if r.get('ok') else 400)
                 return
             if path == '/api/log':
                 self._send_json(STORE.state.get('log', [])[-100:])
@@ -1393,6 +1476,15 @@ class Handler(BaseHTTPRequestHandler):
                 if path == '/api/admin/pubblica-girone-andata':
                     r = STORE.pubblica_girone_andata(body.get('n_simulazioni'))
                     self._send_json(r, 200 if r.get('ok') else 400)
+                    return
+                if path == '/api/admin/aggiorna-quote-girone-andata':
+                    # ricalcolo forzato, per quando il mercato viene riaperto senza che nel
+                    # frattempo sia passato da un importa-punti (che lo farebbe da solo)
+                    r = STORE.aggiorna_quote_girone_andata()
+                    if r is None:
+                        self._send_json({'errore': "nessun mercato 'vincitore girone d'andata' aperto al momento"}, 400)
+                    else:
+                        self._send_json({'ok': True, **r})
                     return
                 if path == '/api/admin/notifica':
                     r = STORE.invia_notifica(body.get('squadre'), body.get('titolo'), body.get('testo'))
