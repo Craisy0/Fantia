@@ -21,25 +21,39 @@ dettagliata e aggiornata di:
    titolari: un giocatore in panchina oggi puo' diventare titolare domani, e in ogni caso
    una quotazione aggiornata serve a cogliere subito il cambio di titolarita'.
 
-**Metodo verificato il 2026-11-09 per il punto 2** (fonte: listone Mantra di
-fantacalcio-online.com, si ricalcola dopo ogni giornata pesando 60% rendimento reale vs
-costo, 20% mercato di lega, 20% schierabilita' attesa):
-- Il listone FCO usa una scala diversa (sistematicamente ~1.6x piu' alta per i non
-  portieri, ~1.0-1.3x per i portieri) rispetto a `quotazione_mantra` — questo scarto di
-  base e' pura differenza di scala, NON segnale di rendimento, e va normalizzato (dividere
-  il valore FCO fresco per ~1.6, o ~1.15 per i portieri) prima di confrontarlo 1:1.
-- Il vero segnale da correggere e' il RESIDUO rispetto a questa tendenza generale: un
-  giocatore il cui valore FCO normalizzato si discosta di molto (es. >=30-40%) dal valore
-  statico attuale, in piu' o in meno, e' il caso da aggiornare in `quotazione_mantra`.
-  Chi segue semplicemente il trend medio non va toccato.
-- Una fonte di rendimento isolata (es. una sola statistica di media voto) puo' contraddire
-  il segnale FCO (che pesa anche mercato reale e schierabilita' attesa, non solo voti
-  recenti) — in caso di conflitto tra fonti, non applicare la correzione e segnalarlo
-  all'utente invece di scegliere arbitrariamente (vedi caso Kolo Muani, 2026-11-09).
-- Controllare sempre se un forte rialzo di valore nasconde in realta' un infortunio
-  recente (il prezzo puo' riflettere ancora il rendimento pre-infortunio) — in tal caso la
-  correzione giusta e' togliere il giocatore dai titolari (punto 1), non alzargli la
-  quotazione (vedi caso Raimondo, 2026-11-09).
+**Metodo (rivisto il 2026-11-09, seconda passata nella stessa giornata)**: il primo
+tentativo — confrontare `quotazione_mantra` con il listone Mantra di
+fantacalcio-online.com (FCO), normalizzato per lo scarto di scala sistemico (~1.6x) — si
+e' rivelato insufficiente: ha lasciato passare Lautaro Martinez (infortunato da un mese,
+ancora segnato titolare) e Gonçalo Ramos (prezzo FCO gonfiato da cartellino/reputazione
+nonostante un rendimento reale scarso, 2-3 gol in 11 presenze). Il prezzo di mercato FCO
+pesa anche "mercato di lega" e "schierabilita' attesa", non solo il rendimento recente,
+quindi puo' mascherare sia infortuni che flop. Usare invece, per ciascun ricalcolo, DUE
+controlli diretti e separati — ciascuno fatto con UNA fetch su una pagina aggregata, non
+ricerche giocatore per giocatore (molto piu' efficiente su ~150-170 nomi):
+
+1. **Indisponibilita'** (sempre, su TUTTI i titolari attuali, non solo i sospetti): una
+   pagina aggregata con l'elenco completo di infortunati/squalificati di tutta la Serie A
+   (es. fantacalcio.it/indisponibili-serie-a, o sosfanta/calciodangolo equivalenti),
+   fetchata una volta sola e incrociata con l'elenco dei titolari rosterati. Rimuovere da
+   `titolari_reali.json` chi risulta infortunato/squalificato con affidabilita' alta o
+   media (diagnosi concreta anche se i tempi di rientro sono incerti); lasciare chi ha
+   solo un generico "da valutare" senza diagnosi, e segnalarlo come da ricontrollare al
+   giro successivo.
+2. **Fantamedia reale stagionale** (non il prezzo di un listone): una pagina con la
+   classifica/tabella fantamedia di TUTTA la Serie A 2026/27 in corso (es.
+   fantacalcio.it/statistiche-serie-a o fantacalcio.dev/stagioni/2026-27/fantamedia-migliore
+   — spesso i dati sono incorporati nell'HTML grezzo, leggibili via curl anche quando il
+   fetch "normale" restituisce poco). Calibrare una curva quotazione->fantamedia-attesa
+   PER RUOLO (portieri/difensori/centrocampisti/trequartisti/attaccanti separati, non una
+   curva unica: altrimenti un portiere sembra sempre un flop rispetto a un attaccante) usando
+   solo giocatori con un campione di partite decente, poi correggere `quotazione_mantra`
+   di chi si scosta nettamente (es. >=0.70 punti di fantamedia) dall'attesa della propria
+   fascia. Diffidare dei campioni piccoli (<6-7 presenze): correggere con piu' cautela.
+   Controllare sempre, per i rialzi, se nascondono in realta' un infortunio recente (il
+   prezzo/fantamedia puo' riflettere ancora il rendimento pre-infortunio) — in tal caso la
+   correzione giusta e' il punto 1 (togliere dai titolari), non alzare la quotazione
+   (vedi caso Raimondo, 2026-11-09).
 
 Mostrare all'utente le modifiche proposte (diff) prima di applicarle a
 `data/titolari_reali.json` o `data/rose_gotta.json` — non sovrascrivere questi file
