@@ -23,7 +23,7 @@
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 7,
-   "quotazione_mantra": 7
+   "quotazione_mantra": 4
   },
   {
    "nome": "Pavlovic",
@@ -111,7 +111,7 @@
    "ruolo": "C",
    "ruoli_mantra": "M,C",
    "quotazione": 10,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 14
   },
   {
    "nome": "Oulai",
@@ -151,7 +151,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 8,
-   "quotazione_mantra": 7
+   "quotazione_mantra": 11
   },
   {
    "nome": "Gnonto",
@@ -167,7 +167,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T",
    "quotazione": 20,
-   "quotazione_mantra": 19
+   "quotazione_mantra": 25
   },
   {
    "nome": "Odgaard",
@@ -183,7 +183,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 18,
-   "quotazione_mantra": 17
+   "quotazione_mantra": 27
   },
   {
    "nome": "Colombo",
@@ -191,7 +191,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 11,
-   "quotazione_mantra": 10
+   "quotazione_mantra": 8
   },
   {
    "nome": "Yildiz",
@@ -361,7 +361,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 16,
-   "quotazione_mantra": 15
+   "quotazione_mantra": 20
   },
   {
    "nome": "De Bruyne",
@@ -369,7 +369,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T",
    "quotazione": 17,
-   "quotazione_mantra": 16
+   "quotazione_mantra": 21
   },
   {
    "nome": "Pulisic",
@@ -377,7 +377,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T,A",
    "quotazione": 23,
-   "quotazione_mantra": 21
+   "quotazione_mantra": 26
   },
   {
    "nome": "Pellegrino M.",
@@ -393,7 +393,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 17,
-   "quotazione_mantra": 18
+   "quotazione_mantra": 14
   },
   {
    "nome": "Berardi",
@@ -401,7 +401,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 19,
-   "quotazione_mantra": 20
+   "quotazione_mantra": 16
   }
  ],
  "Nando": [
@@ -555,7 +555,7 @@
    "ruolo": "C",
    "ruoli_mantra": "C,T",
    "quotazione": 7,
-   "quotazione_mantra": 7
+   "quotazione_mantra": 10
   },
   {
    "nome": "Ghedjemis",
@@ -579,7 +579,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 15,
-   "quotazione_mantra": 16
+   "quotazione_mantra": 19
   },
   {
    "nome": "Dybala",
@@ -587,7 +587,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 16,
-   "quotazione_mantra": 17
+   "quotazione_mantra": 21
   },
   {
    "nome": "Woltemade",
@@ -613,7 +613,7 @@
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 10,
-   "quotazione_mantra": 10
+   "quotazione_mantra": 7
   },
   {
    "nome": "Pinsoglio",
@@ -637,7 +637,7 @@
    "ruolo": "D",
    "ruoli_mantra": "Dc",
    "quotazione": 8,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 6
   },
   {
    "nome": "Heggem",
@@ -661,7 +661,7 @@
    "ruolo": "D",
    "ruoli_mantra": "Ds,E",
    "quotazione": 7,
-   "quotazione_mantra": 7
+   "quotazione_mantra": 11
   },
   {
    "nome": "Kamara H.",
@@ -685,7 +685,7 @@
    "ruolo": "C",
    "ruoli_mantra": "M,C",
    "quotazione": 7,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 10
   },
   {
    "nome": "Bernabè",
@@ -741,7 +741,7 @@
    "ruolo": "A",
    "ruoli_mantra": "W,A",
    "quotazione": 8,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 18
   },
   {
    "nome": "Conceicao",
@@ -773,7 +773,7 @@
    "ruolo": "A",
    "ruoli_mantra": "T,A",
    "quotazione": 7,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 18
   },
   {
    "nome": "Raimondo",
@@ -789,7 +789,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 24,
-   "quotazione_mantra": 24
+   "quotazione_mantra": 15
   },
   {
    "nome": "Esposito F.P.",
@@ -831,7 +831,7 @@
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 9,
-   "quotazione_mantra": 9
+   "quotazione_mantra": 6
   },
   {
    "nome": "Balerdi",
@@ -895,7 +895,7 @@
    "ruolo": "D",
    "ruoli_mantra": "E",
    "quotazione": 3,
-   "quotazione_mantra": 3
+   "quotazione_mantra": 6
   },
   {
    "nome": "Cacciamani",
@@ -983,7 +983,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 9,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 19
   },
   {
    "nome": "Malen",
@@ -991,7 +991,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 37,
-   "quotazione_mantra": 37
+   "quotazione_mantra": 40
   },
   {
    "nome": "Kevin Carlos",
@@ -999,7 +999,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 12,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 9
   },
   {
    "nome": "Davis K.",
@@ -1007,7 +1007,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 19,
-   "quotazione_mantra": 19
+   "quotazione_mantra": 13
   }
  ],
  "Ale": [
@@ -1025,7 +1025,7 @@
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 1,
-   "quotazione_mantra": 1
+   "quotazione_mantra": 4
   },
   {
    "nome": "Svilar",
@@ -1121,7 +1121,7 @@
    "ruolo": "C",
    "ruoli_mantra": "M,C",
    "quotazione": 11,
-   "quotazione_mantra": 12
+   "quotazione_mantra": 10
   },
   {
    "nome": "Da Cunha",
@@ -1153,7 +1153,7 @@
    "ruolo": "C",
    "ruoli_mantra": "C,T",
    "quotazione": 13,
-   "quotazione_mantra": 13
+   "quotazione_mantra": 17
   },
   {
    "nome": "Mbangula",
@@ -1185,7 +1185,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 25,
-   "quotazione_mantra": 25
+   "quotazione_mantra": 19
   },
   {
    "nome": "Pinamonti",
@@ -1193,7 +1193,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 12,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 18
   },
   {
    "nome": "Soulè",
@@ -1201,7 +1201,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 15,
-   "quotazione_mantra": 16
+   "quotazione_mantra": 19
   },
   {
    "nome": "Esposito Se.",
@@ -1307,7 +1307,7 @@
    "ruolo": "D",
    "ruoli_mantra": "E,W",
    "quotazione": 31,
-   "quotazione_mantra": 30
+   "quotazione_mantra": 13
   },
   {
    "nome": "Moreira",
@@ -1315,7 +1315,7 @@
    "ruolo": "C",
    "ruoli_mantra": "E,W",
    "quotazione": 11,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 24
   },
   {
    "nome": "Chukwueze",
@@ -1355,7 +1355,7 @@
    "ruolo": "C",
    "ruoli_mantra": "C,T",
    "quotazione": 22,
-   "quotazione_mantra": 22
+   "quotazione_mantra": 28
   },
   {
    "nome": "Rowe",
@@ -1379,7 +1379,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,A",
    "quotazione": 13,
-   "quotazione_mantra": 12
+   "quotazione_mantra": 6
   },
   {
    "nome": "Bowie",
@@ -1395,7 +1395,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 9,
-   "quotazione_mantra": 8
+   "quotazione_mantra": 13
   },
   {
    "nome": "Adams C.",
@@ -1403,7 +1403,7 @@
    "ruolo": "A",
    "ruoli_mantra": "A",
    "quotazione": 12,
-   "quotazione_mantra": 13
+   "quotazione_mantra": 18
   },
   {
    "nome": "Yeboah J.",
@@ -1417,7 +1417,7 @@
  "Cri": [
   {
    "nome": "Provedel",
-   "club": "INT",
+   "club": "LAZ",
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 1,
@@ -1533,7 +1533,7 @@
    "ruolo": "C",
    "ruoli_mantra": "M,C",
    "quotazione": 13,
-   "quotazione_mantra": 14
+   "quotazione_mantra": 11
   },
   {
    "nome": "Zambo Anguissa",
@@ -1565,7 +1565,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W",
    "quotazione": 10,
-   "quotazione_mantra": 10
+   "quotazione_mantra": 16
   },
   {
    "nome": "Vergara",
@@ -1581,7 +1581,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 27,
-   "quotazione_mantra": 27
+   "quotazione_mantra": 17
   },
   {
    "nome": "Varela G.",
@@ -1605,7 +1605,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 14,
-   "quotazione_mantra": 13
+   "quotazione_mantra": 18
   },
   {
    "nome": "Romero D.",
@@ -1639,7 +1639,7 @@
    "ruolo": "P",
    "ruoli_mantra": "Por",
    "quotazione": 11,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 15
   },
   {
    "nome": "Ostigard",
@@ -1687,7 +1687,7 @@
    "ruolo": "D",
    "ruoli_mantra": "Ds,E",
    "quotazione": 9,
-   "quotazione_mantra": 9
+   "quotazione_mantra": 12
   },
   {
    "nome": "Couto",
@@ -1751,7 +1751,7 @@
    "ruolo": "C",
    "ruoli_mantra": "C,T",
    "quotazione": 26,
-   "quotazione_mantra": 26
+   "quotazione_mantra": 21
   },
   {
    "nome": "Bernardeschi",
@@ -1759,7 +1759,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,T",
    "quotazione": 10,
-   "quotazione_mantra": 10
+   "quotazione_mantra": 14
   },
   {
    "nome": "Mastantuono",
@@ -1767,7 +1767,7 @@
    "ruolo": "C",
    "ruoli_mantra": "W,T",
    "quotazione": 11,
-   "quotazione_mantra": 11
+   "quotazione_mantra": 19
   },
   {
    "nome": "Vlasic",
@@ -1775,7 +1775,7 @@
    "ruolo": "C",
    "ruoli_mantra": "T",
    "quotazione": 13,
-   "quotazione_mantra": 12
+   "quotazione_mantra": 16
   },
   {
    "nome": "Douvikas",
@@ -1783,7 +1783,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 21,
-   "quotazione_mantra": 21
+   "quotazione_mantra": 26
   },
   {
    "nome": "Simeone",
@@ -1791,7 +1791,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 14,
-   "quotazione_mantra": 14
+   "quotazione_mantra": 19
   },
   {
    "nome": "Thuram",
@@ -1799,7 +1799,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 28,
-   "quotazione_mantra": 28
+   "quotazione_mantra": 33
   },
   {
    "nome": "Scamacca",
@@ -1807,7 +1807,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 19,
-   "quotazione_mantra": 18
+   "quotazione_mantra": 14
   },
   {
    "nome": "Lang",
@@ -1937,7 +1937,7 @@
    "ruolo": "C",
    "ruoli_mantra": "M,C",
    "quotazione": 8,
-   "quotazione_mantra": 9
+   "quotazione_mantra": 24
   },
   {
    "nome": "Zielinski",
@@ -2017,7 +2017,7 @@
    "ruolo": "A",
    "ruoli_mantra": "Pc",
    "quotazione": 29,
-   "quotazione_mantra": 29
+   "quotazione_mantra": 25
   }
  ]
 }

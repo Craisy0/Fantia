@@ -1,5 +1,5 @@
 {
- "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti.",
+ "_descrizione": "Formazione titolare reale (statica, congelata) di ciascun club di Serie A 2026/27, raccolta e incrociata contro le rose GOTTA (nessuna discrepanza residua). Non si aggiorna giornata per giornata: rappresenta lo scatto di partenza usato per tutta la simulazione del girone d'andata, finche' non viene sostituita a mano con dati piu' recenti. Aggiornato il 2026-10-29 con 11 correzioni verificate via ricerca web (vedi PROCESSO_GIRONE_ANDATA.md): Thuram, Calhanoglu (INT), McTominay (NAP), Pulisic (MIL), Douvikas (COM), Soulè, Castro S. (ROM), Krstovic (ATA), Simeone (TOR), Esposito Se., Thorstvedt (SAS). Aggiornato il 2026-11-03: NAP (-Lobotka infortunato, -Vergara, -Santos A. fuori XI, +De Bruyne), ROM (-Svilar infortunato). Aggiornato il 2026-11-09: ROM (+Gollini, titolare confermato per infortunio Svilar), FRO (-Raimondo, infortunio lungo). Aggiornato il 2026-11-09 (controllo sistematico indisponibili su tutti i 166 titolari, fonte fantacalcio.it/indisponibili-serie-a): -Martinez L. (INT), -Di Lorenzo (NAP), -Locatelli, -Kalulu (JUV), -Gaetano (ATA), -Zaccagni (LAZ), -Miranda J. (BOL), -Saelemaekers (MIL), -Kean (COM), -Romero D. (PAR), tutti per infortunio confermato.",
  "ATA": {
   "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
   "titolari": [
@@ -44,7 +44,7 @@
     "ruolo": "A"
    },
    {
-    "nome": "Gaetano",
+    "nome": "Krstovic",
     "ruolo": "A"
    }
   ]
@@ -66,10 +66,6 @@
    },
    {
     "nome": "Theate",
-    "ruolo": "D"
-   },
-   {
-    "nome": "Miranda J.",
     "ruolo": "D"
    },
    {
@@ -191,7 +187,7 @@
     "ruolo": "A"
    },
    {
-    "nome": "Kean",
+    "nome": "Douvikas",
     "ruolo": "A"
    }
   ]
@@ -246,7 +242,7 @@
   ]
  },
  "FRO": {
-  "fonte": "probabile formazione giornata 4 (vs Genoa)",
+  "fonte": "probabile formazione giornata 4 (vs Genoa) | aggiornato 09/11/2026: -Raimondo (lesione multilegamentosa caviglia, out 5-6 settimane, rientro atteso meta dicembre/gennaio)",
   "titolari": [
    {
     "nome": "Palmisani",
@@ -286,10 +282,6 @@
    },
    {
     "nome": "Kvernadze",
-    "ruolo": "A"
-   },
-   {
-    "nome": "Raimondo",
     "ruolo": "A"
    }
   ]
@@ -387,8 +379,12 @@
     "ruolo": "A"
    },
    {
-    "nome": "Martinez L.",
+    "nome": "Thuram",
     "ruolo": "A"
+   },
+   {
+    "nome": "Calhanoglu",
+    "ruolo": "C"
    }
   ]
  },
@@ -398,10 +394,6 @@
    {
     "nome": "Vicario",
     "ruolo": "P"
-   },
-   {
-    "nome": "Kalulu",
-    "ruolo": "D"
    },
    {
     "nome": "Bremer",
@@ -414,10 +406,6 @@
    {
     "nome": "Celik",
     "ruolo": "D"
-   },
-   {
-    "nome": "Locatelli",
-    "ruolo": "C"
    },
    {
     "nome": "Douglas Luiz",
@@ -482,10 +470,6 @@
    },
    {
     "nome": "Pinamonti",
-    "ruolo": "A"
-   },
-   {
-    "nome": "Zaccagni",
     "ruolo": "A"
    }
   ]
@@ -559,10 +543,6 @@
     "ruolo": "D"
    },
    {
-    "nome": "Saelemaekers",
-    "ruolo": "C"
-   },
-   {
     "nome": "Musah",
     "ruolo": "C"
    },
@@ -585,6 +565,10 @@
    {
     "nome": "Ramos G.",
     "ruolo": "A"
+   },
+   {
+    "nome": "Pulisic",
+    "ruolo": "C"
    }
   ]
  },
@@ -638,15 +622,11 @@
   ]
  },
  "NAP": {
-  "fonte": "formazione ufficiale giornata 3 (Inter-Napoli 3-2, 05/09/2026)",
+  "fonte": "formazione ufficiale giornata 3 (Inter-Napoli 3-2, 05/09/2026) | aggiornato 03/11/2026: -Lobotka (infortunio caviglia, out ~fine dicembre), -Vergara, -Santos A. (fuori XI), +De Bruyne (gia titolare, confermato in formazione giornata 10 Juventus-Napoli)",
   "titolari": [
    {
     "nome": "Meret",
     "ruolo": "P"
-   },
-   {
-    "nome": "Di Lorenzo",
-    "ruolo": "D"
    },
    {
     "nome": "Rrahmani",
@@ -665,14 +645,6 @@
     "ruolo": "C"
    },
    {
-    "nome": "Lobotka",
-    "ruolo": "C"
-   },
-   {
-    "nome": "Vergara",
-    "ruolo": "C"
-   },
-   {
     "nome": "Politano",
     "ruolo": "A"
    },
@@ -681,8 +653,12 @@
     "ruolo": "A"
    },
    {
-    "nome": "Santos A.",
-    "ruolo": "A"
+    "nome": "McTominay",
+    "ruolo": "C"
+   },
+   {
+    "nome": "De Bruyne",
+    "ruolo": "C"
    }
   ]
  },
@@ -728,18 +704,14 @@
    {
     "nome": "El Bilal Touré",
     "ruolo": "A"
-   },
-   {
-    "nome": "Romero D.",
-    "ruolo": "A"
    }
   ]
  },
  "ROM": {
-  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026)",
+  "fonte": "formazione ufficiale giornata 3 (Roma-Atalanta 2-1, 05/09/2026) | aggiornato 03/11/2026: -Svilar (infortunio, out fino a dopo la sosta di novembre 2026) | aggiornato 09/11/2026: +Gollini (titolare confermato da inizio ottobre per infortunio di Svilar, frattura, rientro atteso ~21/11)",
   "titolari": [
    {
-    "nome": "Svilar",
+    "nome": "Gollini",
     "ruolo": "P"
    },
    {
@@ -780,6 +752,14 @@
    },
    {
     "nome": "Mora",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Soulè",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Castro S.",
     "ruolo": "A"
    }
   ]
@@ -830,6 +810,14 @@
    {
     "nome": "Laurientè",
     "ruolo": "A"
+   },
+   {
+    "nome": "Esposito Se.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Thorstvedt",
+    "ruolo": "C"
    }
   ]
  },
@@ -878,6 +866,10 @@
    },
    {
     "nome": "Adams C.",
+    "ruolo": "A"
+   },
+   {
+    "nome": "Simeone",
     "ruolo": "A"
    }
   ]
