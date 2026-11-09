@@ -29,6 +29,8 @@ CONFIG_PATH = os.path.join(APP_DIR, "config.json")
 CALENDARIO_PATH = os.path.join(DATA_DIR, "calendario.json")
 ROSE_GOTTA_PATH = os.path.join(DATA_DIR, "rose_gotta.json")
 TITOLARI_REALI_PATH = os.path.join(DATA_DIR, "titolari_reali.json")
+INDISPONIBILI_PATH = os.path.join(DATA_DIR, "indisponibili.json")
+FANTAMEDIA_REALE_PATH = os.path.join(DATA_DIR, "fantamedia_reale_cache.json")
 CALENDARIO_SERIE_A_PATH = os.path.join(DATA_DIR, "calendario_serie_a.json")
 STATS_SERIE_A_PATH = os.path.join(DATA_DIR, "stats_serie_a.json")
 
@@ -180,19 +182,38 @@ class Store:
         # dati statici per il modello a livello giocatore del mercato "Vincitore girone d'andata"
         self.rose_gotta = load_json(ROSE_GOTTA_PATH) if os.path.exists(ROSE_GOTTA_PATH) else {}
         self.titolari_reali = load_json(TITOLARI_REALI_PATH) if os.path.exists(TITOLARI_REALI_PATH) else {}
+        self.indisponibili = load_json(INDISPONIBILI_PATH) if os.path.exists(INDISPONIBILI_PATH) else {}
+        self.fantamedia_reale = load_json(FANTAMEDIA_REALE_PATH) if os.path.exists(FANTAMEDIA_REALE_PATH) else {}
         self.calendario_serie_a = load_json(CALENDARIO_SERIE_A_PATH) if os.path.exists(CALENDARIO_SERIE_A_PATH) else {}
         self.stats_serie_a = load_json(STATS_SERIE_A_PATH) if os.path.exists(STATS_SERIE_A_PATH) else {}
         self._prepara_modello_giocatori()
 
     def _prepara_modello_giocatori(self):
-        """Indici derivati dai dati statici (titolare -> club/ruolo reale, medie di lega) usati dal
-        modello a livello giocatore. Ricalcolati a ogni reload_config, non a ogni chiamata."""
-        self._titolare_index = {}
-        for club, dati in self.titolari_reali.items():
-            if club.startswith('_'):
+        """Indici derivati dai dati statici/cache (indisponibili, fantamedia reale, medie di lega)
+        usati dal modello a livello giocatore. Ricalcolati a ogni reload_config, non a ogni chiamata.
+        L'eleggibilita' di un giocatore non si basa piu' su uno snapshot manuale di chi e' titolare
+        (troppo soggetto a restare vecchio): conta solo se ha presenze reali (data/fantamedia_reale_cache.json)
+        e non e' nella lista negativa degli indisponibili (data/indisponibili.json)."""
+        self._indisponibili_set = {
+            (g['club'], g['nome']) for g in self.indisponibili.get('giocatori', [])
+        }
+        self._fantamedia_index = {}
+        for g in self.fantamedia_reale.get('giocatori', []):
+            self._fantamedia_index[(g['squadra'], g['nome'])] = g
+        # fantamedia attesa 'di base' per ruolo (prior per lo shrinkage sui campioni piccoli),
+        # calcolata sui soli giocatori con un minimo di partite per non farla sporcare da outlier
+        # di 1-2 presenze.
+        somma_per_ruolo = {}
+        conteggio_per_ruolo = {}
+        for g in self.fantamedia_reale.get('giocatori', []):
+            if g['presenze'] < 3:
                 continue
-            for p in dati.get('titolari', []):
-                self._titolare_index[p['nome']] = (club, p['ruolo'])
+            ruolo = g['ruolo_classic'].upper()
+            somma_per_ruolo[ruolo] = somma_per_ruolo.get(ruolo, 0) + g['fantamedia']
+            conteggio_per_ruolo[ruolo] = conteggio_per_ruolo.get(ruolo, 0) + 1
+        self._prior_fantamedia_ruolo = {
+            ruolo: somma_per_ruolo[ruolo] / conteggio_per_ruolo[ruolo] for ruolo in somma_per_ruolo
+        }
         club_stats = {k: v for k, v in self.stats_serie_a.items() if not k.startswith('_')}
         partite_tot = sum(v['partite_giocate'] for v in club_stats.values()) or 1
         self._media_lega_fatti_pp = sum(v['gol_fatti'] for v in club_stats.values()) / partite_tot
@@ -560,10 +581,19 @@ class Store:
         f_att = 1.0 + (f_att - 1.0) * peso
         f_dif = 1.0 + (f_dif - 1.0) * peso
         if ruolo == 'A':
-            return f_att
-        if ruolo in ('P', 'D'):
-            return f_dif
-        return (f_att + f_dif) / 2  # C
+            fattore = f_att
+        elif ruolo in ('P', 'D'):
+            fattore = f_dif
+        else:
+            fattore = (f_att + f_dif) / 2  # C
+        # Smorzamento addizionale (esponente < 1): il fattore era tarato per pesare una
+        # quotazione_mantra su scala larga (1-40); da quando il punteggio base del giocatore e'
+        # la fantamedia reale (scala stretta, ~4-9 per quasi tutti), lo stesso fattore grezzo ha
+        # troppo peso relativo e puo' scavalcare un giocatore nettamente piu' forte solo per un
+        # abbinamento fortunato (es. un panchinario con poche presenze sopra un top player con
+        # avversario piu' ostico). Verificato il 2026-11-09 sul caso Cucca.
+        esponente = self.config.get('girone_andata', {}).get('fattore_avversario_esponente', 1.0)
+        return fattore ** esponente if fattore > 0 else fattore
 
     def _avversario_reale(self, club, giornata_serie_a):
         for m in self.calendario_serie_a.get(str(giornata_serie_a), []):
@@ -573,10 +603,25 @@ class Store:
                 return m['casa']
         return None
 
+    def _punteggio_reale_giocatore(self, club, nome, ruolo):
+        """Fantamedia reale del giocatore (data/fantamedia_reale_cache.json), corretta con uno
+        shrinkage verso la media di ruolo quando il campione di partite e' piccolo (altrimenti un
+        giocatore con fantamedia alta su 2-3 presenze pesa come un titolare fisso da 10 presenze,
+        mentre e' solo rumore statistico). Ritorna None se il giocatore non ha presenze reali
+        registrate (quindi non sta effettivamente giocando)."""
+        dati = self._fantamedia_index.get((club, nome))
+        if not dati or dati['presenze'] < 2:
+            return None
+        k = self.config.get('girone_andata', {}).get('fantamedia_k_presenze', 5)
+        prior = self._prior_fantamedia_ruolo.get(ruolo, dati['fantamedia'])
+        presenze = dati['presenze']
+        return (presenze * dati['fantamedia'] + k * prior) / (presenze + k)
+
     def punti_proiettati_giocatori(self, squadra_gotta, giornata):
         """Miglior 11 (1 portiere migliore + 10 di movimento migliori) tra i giocatori della rosa
-        che sono titolari reali (statico) nel proprio club quella giornata, pesati per la
-        difficolta' del loro avversario reale. Ritorna None se manca un dato indispensabile
+        che hanno presenze reali in stagione e non sono infortunati/squalificati, pesati per
+        fantamedia reale (corretta per il numero di presenze, vedi _punteggio_reale_giocatore) e
+        per la difficolta' del loro avversario reale. Ritorna None se manca un dato indispensabile
         (calendario Serie A o rosa non disponibili per quella giornata/squadra)."""
         giornata_serie_a = giornata + 3  # GOTTA parte dalla 4a giornata di Serie A
         if str(giornata_serie_a) not in self.calendario_serie_a:
@@ -587,17 +632,18 @@ class Store:
         candidati = []
         for giocatore in rosa:
             nome = giocatore['nome']
-            info = self._titolare_index.get(nome)
-            if not info:
+            club = giocatore['club']
+            ruolo = giocatore['ruolo']
+            if (club, nome) in self._indisponibili_set:
                 continue
-            club, ruolo = info
-            if club != giocatore['club']:
-                continue  # incongruenza rosa/club reale, salta per sicurezza
+            punteggio_base = self._punteggio_reale_giocatore(club, nome, ruolo)
+            if punteggio_base is None:
+                continue
             avversario = self._avversario_reale(club, giornata_serie_a)
             if avversario is None:
                 continue
             fattore = self._fattore_avversario_giocatore(ruolo, avversario)
-            candidati.append({'ruolo': ruolo, 'punteggio': giocatore['quotazione_mantra'] * fattore})
+            candidati.append({'ruolo': ruolo, 'punteggio': punteggio_base * fattore})
         if not candidati:
             return None
         portieri = sorted((c for c in candidati if c['ruolo'] == 'P'), key=lambda c: -c['punteggio'])

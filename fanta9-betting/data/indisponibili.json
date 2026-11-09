@@ -1,0 +1,17 @@
+{
+ "_descrizione": "Lista negativa (non positiva) dei giocatori di Serie A attualmente indisponibili (infortunio/squalifica confermati), usata dal modello a livello giocatore del girone d'andata per escluderli dal calcolo anche se hanno fantamedia reale buona. Sostituisce il vecchio concetto di 'titolari_reali.json' positivo (lista di chi e' titolare): ora l'eleggibilita' di un giocatore si basa sui dati reali in data/fantamedia_reale_cache.json (presenze + fantamedia), non su uno snapshot manuale di chi gioca titolare. Questa lista va invece ricontrollata e aggiornata ad ogni ricalcolo del girone d'andata (vedi PROCESSO_GIRONE_ANDATA.md) incrociando un elenco aggregato di indisponibili di tutta la Serie A.",
+ "giocatori": [
+  {"nome": "Martinez L.", "club": "INT", "motivo": "infortunio muscolare flessori, rientro atteso meta' novembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Di Lorenzo", "club": "NAP", "motivo": "lesione distrattiva adduttore, tentativo di recupero da fine novembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Locatelli", "club": "JUV", "motivo": "rottura menisco esterno, operato, rientro possibile da febbraio 2027", "aggiornato": "2026-11-09"},
+  {"nome": "Kalulu", "club": "JUV", "motivo": "lesione muscolare ischiocrurali, rientro atteso fine novembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Gaetano", "club": "ATA", "motivo": "distrazione adduttori, rientro atteso fine novembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Zaccagni", "club": "LAZ", "motivo": "lesione quadricipite, rientro atteso fine novembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Miranda J.", "club": "BOL", "motivo": "lesione bicipite femorale, rientro atteso fine novembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Saelemaekers", "club": "MIL", "motivo": "operato alla caviglia destra, stop lungo (fonti discordanti su rientro)", "aggiornato": "2026-11-09"},
+  {"nome": "Kean", "club": "COM", "motivo": "fastidio alla tibia, recupero possibile da inizio dicembre 2026", "aggiornato": "2026-11-09"},
+  {"nome": "Romero D.", "club": "PAR", "motivo": "lussazione acromion-claveare spalla destra", "aggiornato": "2026-11-09"},
+  {"nome": "Raimondo", "club": "FRO", "motivo": "lesione multilegamentosa caviglia, rientro atteso meta' dicembre 2026/gennaio 2027", "aggiornato": "2026-11-09"},
+  {"nome": "Svilar", "club": "ROM", "motivo": "infortunio, rientro atteso dopo la sosta di novembre 2026", "aggiornato": "2026-11-09"}
+ ]
+}
