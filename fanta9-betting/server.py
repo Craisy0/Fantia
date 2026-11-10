@@ -629,6 +629,15 @@ class Store:
         rosa = self.rose_gotta.get(squadra_gotta)
         if not rosa:
             return None
+        candidati = self._candidati_squadra(squadra_gotta, giornata_serie_a)
+        if not candidati:
+            return None
+        return self._migliore_formazione(candidati)[0]
+
+    def _candidati_squadra(self, squadra_gotta, giornata_serie_a):
+        rosa = self.rose_gotta.get(squadra_gotta)
+        if not rosa:
+            return []
         candidati = []
         for giocatore in rosa:
             nome = giocatore['nome']
@@ -643,46 +652,90 @@ class Store:
             if avversario is None:
                 continue
             fattore = self._fattore_avversario_giocatore(ruolo, avversario)
-            candidati.append({'nome': nome, 'ruolo': ruolo, 'punteggio': punteggio_base * fattore})
-        if not candidati:
-            return None
-        return self._migliore_formazione(candidati)[0]
+            ruoli_mantra = {r.strip() for r in (giocatore.get('ruoli_mantra') or '').split(',') if r.strip()}
+            candidati.append({'nome': nome, 'club': club, 'ruolo': ruolo, 'ruoli_mantra': ruoli_mantra,
+                               'punteggio': punteggio_base * fattore})
+        return candidati
 
-    # Moduli classici validi (difensori-centrocampisti-attaccanti, sempre 10 + 1 portiere):
-    # un vero allenatore non schiera semplicemente i migliori 11 a prescindere dal ruolo, ma
-    # il modulo che massimizza il punteggio con i giocatori a disposizione in quel ruolo.
-    FORMAZIONI_VALIDE = [(3, 4, 3), (3, 5, 2), (4, 3, 3), (4, 4, 2), (4, 5, 1), (5, 3, 2), (5, 4, 1)]
+    # Moduli Mantra: ogni slot richiede uno specifico ruolo Mantra reale (non il generico
+    # classic D/C/A) - un giocatore puo' riempire uno slot solo se il suo campo ruoli_mantra lo
+    # consente. Alcuni slot accettano piu' ruoli affini (es. terzino Dd anche da un E con doppio
+    # ruolo "Dd,E"), ma restano comunque granulari: un centrocampista puro (M/C) non puo' coprire
+    # un trequartista (T) o un'ala (W), e viceversa.
+    FORMAZIONI_MANTRA = {
+        '3-4-3':    [{'Dc', 'B'}] * 3 + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'W', 'A'}, {'Pc'}, {'W', 'A'}],
+        '3-4-1-2':  [{'Dc', 'B'}] * 3 + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'T'}] + [{'Pc'}] * 2,
+        '3-5-2':    [{'Dc', 'B'}] * 3 + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'Pc'}] * 2,
+        '4-3-3':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}] * 3 + [{'W', 'A'}, {'Pc'}, {'W', 'A'}],
+        '4-4-2':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'W', 'A'}, {'M', 'C'}, {'M', 'C'}, {'W', 'A'}] + [{'Pc'}] * 2,
+        '4-3-1-2':  [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}] * 3 + [{'T'}] + [{'Pc'}] * 2,
+        '4-2-3-1':  [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}, {'M', 'C'}] + [{'T'}, {'W', 'A'}, {'W', 'A'}] + [{'Pc'}],
+        '5-3-2':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}] * 3 + [{'Pc'}] * 2,
+        '5-4-1':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'Pc'}],
+    }
+
+    def _assegna_modulo(self, candidati, slot_ruoli):
+        """Assegna i giocatori (gia' esclusi i portieri) agli slot di un modulo Mantra, uno slot
+        alla volta partendo da quello con MENO giocatori eleggibili rimasti (i ruoli piu' rari si
+        assegnano per primi, altrimenti un giocatore versatile finisce occupato in uno slot che
+        poteva coprire solo lui, lasciando scoperto un ruolo raro). Non e' l'ottimo matematico
+        garantito, ma per 10 slot e una rosa di ~24 giocatori e' un'approssimazione solida.
+        Ritorna None se non tutti gli slot trovano un giocatore eleggibile."""
+        disponibili = list(candidati)
+        slot_rimasti = list(enumerate(slot_ruoli))
+        assegnati = [None] * len(slot_ruoli)
+        while slot_rimasti:
+            def eleggibili(slot):
+                _, ruoli = slot
+                return [c for c in disponibili if c['ruoli_mantra'] & ruoli]
+            slot_rimasti.sort(key=lambda slot: len(eleggibili(slot)))
+            idx, ruoli = slot_rimasti.pop(0)
+            scelte = eleggibili((idx, ruoli))
+            if not scelte:
+                return None
+            migliore = max(scelte, key=lambda c: c['punteggio'])
+            assegnati[idx] = migliore
+            disponibili.remove(migliore)
+        return assegnati
 
     def _migliore_formazione(self, candidati):
-        """candidati: lista di {'nome', 'ruolo', 'punteggio'}. Prova ogni modulo classico valido
-        (vedi FORMAZIONI_VALIDE) prendendo i migliori D/C/A disponibili per quel modulo, e sceglie
-        il modulo che da' il punteggio totale piu' alto - non necessariamente quello con piu'
-        giocatori forti in assoluto, ma quello che la rosa puo' davvero schierare. Ritorna
-        (punteggio_totale, modulo_scelto ('d-c-a' o None), undici_scelto)."""
-        per_ruolo = {'P': [], 'D': [], 'C': [], 'A': []}
-        for c in candidati:
+        """candidati: lista di {'nome', 'club', 'ruolo', 'ruoli_mantra', 'punteggio'}. Prova ogni
+        modulo Mantra (FORMAZIONI_MANTRA) assegnando i giocatori per slot con _assegna_modulo, e
+        sceglie il modulo che da' il punteggio totale piu' alto tra quelli che la rosa puo'
+        davvero schierare (ruolo per ruolo, non solo per conteggio). Se nessun modulo Mantra e'
+        fattibile (rosa troppo corta in qualche ruolo specifico), ripiega sul vecchio criterio
+        classico D/C/A come rete di sicurezza. Ritorna (punteggio_totale, modulo, undici)."""
+        portieri = sorted((c for c in candidati if c['ruolo'] == 'P'), key=lambda c: -c['punteggio'])
+        if not portieri:
+            return 0.0, None, []
+        portiere = portieri[0]
+        movimento = [c for c in candidati if c['ruolo'] != 'P']
+        migliore = None
+        for modulo, slot_ruoli in self.FORMAZIONI_MANTRA.items():
+            assegnati = self._assegna_modulo(movimento, slot_ruoli)
+            if assegnati is None:
+                continue
+            undici = [portiere] + assegnati
+            totale = sum(x['punteggio'] for x in undici)
+            if migliore is None or totale > migliore[0]:
+                migliore = (totale, modulo, undici)
+        if migliore is not None:
+            return migliore
+        # nessun modulo Mantra fattibile: ripiego sul criterio classico D/C/A (meno fedele ai
+        # ruoli reali, ma garantisce comunque una proiezione invece di restituire zero).
+        per_ruolo = {'D': [], 'C': [], 'A': []}
+        for c in movimento:
             if c['ruolo'] in per_ruolo:
                 per_ruolo[c['ruolo']].append(c)
         for ruolo in per_ruolo:
             per_ruolo[ruolo].sort(key=lambda c: -c['punteggio'])
-        if not per_ruolo['P']:
-            return 0.0, None, []
-        portiere = per_ruolo['P'][0]
-        migliore = None
-        for (d, c, a) in self.FORMAZIONI_VALIDE:
+        for (d, c, a) in [(3, 4, 3), (3, 5, 2), (4, 3, 3), (4, 4, 2), (4, 5, 1), (5, 3, 2), (5, 4, 1)]:
             if len(per_ruolo['D']) < d or len(per_ruolo['C']) < c or len(per_ruolo['A']) < a:
-                continue  # la rosa non ha abbastanza giocatori in quel ruolo per questo modulo
+                continue
             undici = [portiere] + per_ruolo['D'][:d] + per_ruolo['C'][:c] + per_ruolo['A'][:a]
-            totale = sum(x['punteggio'] for x in undici)
-            if migliore is None or totale > migliore[0]:
-                migliore = (totale, f'{d}-{c}-{a}', undici)
-        if migliore is None:
-            # rosa troppo corta in qualche ruolo per qualunque modulo classico valido: ripiego
-            # sui migliori 10 di movimento disponibili, segnalando che non e' un modulo standard.
-            movimento = sorted((c for c in candidati if c['ruolo'] != 'P'), key=lambda c: -c['punteggio'])[:10]
-            undici = [portiere] + movimento
-            return sum(x['punteggio'] for x in undici), 'adattato (rosa corta)', undici
-        return migliore
+            return sum(x['punteggio'] for x in undici), f'{d}-{c}-{a} (classic, nessun modulo Mantra valido)', undici
+        undici = [portiere] + sorted(movimento, key=lambda c: -c['punteggio'])[:10]
+        return sum(x['punteggio'] for x in undici), 'adattato (rosa corta)', undici
 
     def formazione_scelta(self, squadra_gotta, giornata):
         """Come punti_proiettati_giocatori, ma espone il modulo e gli undici giocatori scelti
@@ -690,28 +743,13 @@ class Store:
         giornata_serie_a = giornata + 3
         if str(giornata_serie_a) not in self.calendario_serie_a:
             return None
-        rosa = self.rose_gotta.get(squadra_gotta)
-        if not rosa:
-            return None
-        candidati = []
-        for giocatore in rosa:
-            nome, club, ruolo = giocatore['nome'], giocatore['club'], giocatore['ruolo']
-            if (club, nome) in self._indisponibili_set:
-                continue
-            punteggio_base = self._punteggio_reale_giocatore(club, nome, ruolo)
-            if punteggio_base is None:
-                continue
-            avversario = self._avversario_reale(club, giornata_serie_a)
-            if avversario is None:
-                continue
-            fattore = self._fattore_avversario_giocatore(ruolo, avversario)
-            candidati.append({'nome': nome, 'club': club, 'ruolo': ruolo,
-                               'punteggio': punteggio_base * fattore})
+        candidati = self._candidati_squadra(squadra_gotta, giornata_serie_a)
         if not candidati:
             return None
         totale, modulo, undici = self._migliore_formazione(candidati)
         return {'totale': round(totale, 2), 'modulo': modulo,
-                'undici': [{'nome': x['nome'], 'ruolo': x['ruolo'], 'punteggio': round(x['punteggio'], 2)}
+                'undici': [{'nome': x['nome'], 'ruolo': x['ruolo'],
+                            'ruoli_mantra': sorted(x['ruoli_mantra']), 'punteggio': round(x['punteggio'], 2)}
                            for x in undici]}
 
     def stima_lambda_giocatori(self, squadra, giornata):
