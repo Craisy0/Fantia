@@ -657,21 +657,22 @@ class Store:
                                'punteggio': punteggio_base * fattore})
         return candidati
 
-    # Moduli Mantra: ogni slot richiede uno specifico ruolo Mantra reale (non il generico
-    # classic D/C/A) - un giocatore puo' riempire uno slot solo se il suo campo ruoli_mantra lo
-    # consente. Alcuni slot accettano piu' ruoli affini (es. terzino Dd anche da un E con doppio
-    # ruolo "Dd,E"), ma restano comunque granulari: un centrocampista puro (M/C) non puo' coprire
-    # un trequartista (T) o un'ala (W), e viceversa.
+    # Moduli Mantra ufficiali con gli slot esatti (fonte: regolamento Mantra fantacalcio.it,
+    # "Tabella sostituzioni per schema 2024-2025" - solo le alternative "ok" senza malus, non
+    # quelle "-1" fuori ruolo). Non esistono moduli con difesa a 5 nel Mantra ufficiale (solo
+    # 3 o 4): 5-3-2/5-4-1 tolti, aggiunti quelli mancanti (3-4-2-1, 3-5-1-1, 4-1-4-1, 4-4-1-1).
     FORMAZIONI_MANTRA = {
-        '3-4-3':    [{'Dc', 'B'}] * 3 + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'W', 'A'}, {'Pc'}, {'W', 'A'}],
-        '3-4-1-2':  [{'Dc', 'B'}] * 3 + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'T'}] + [{'Pc'}] * 2,
-        '3-5-2':    [{'Dc', 'B'}] * 3 + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'Pc'}] * 2,
-        '4-3-3':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}] * 3 + [{'W', 'A'}, {'Pc'}, {'W', 'A'}],
-        '4-4-2':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'W', 'A'}, {'M', 'C'}, {'M', 'C'}, {'W', 'A'}] + [{'Pc'}] * 2,
-        '4-3-1-2':  [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}] * 3 + [{'T'}] + [{'Pc'}] * 2,
-        '4-2-3-1':  [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}, {'M', 'C'}] + [{'T'}, {'W', 'A'}, {'W', 'A'}] + [{'Pc'}],
-        '5-3-2':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'M', 'C'}] * 3 + [{'Pc'}] * 2,
-        '5-4-1':    [{'Dd', 'E'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Dc', 'B'}, {'Ds', 'E'}] + [{'E', 'B'}, {'M', 'C'}, {'M', 'C'}, {'E', 'B'}] + [{'Pc'}],
+        '3-4-3':   [{'Dc'}, {'Dc'}, {'Dc', 'B'}, {'E'}, {'M', 'C'}, {'C'}, {'E'}, {'W', 'A'}, {'A', 'Pc'}, {'W', 'A'}],
+        '3-4-1-2': [{'Dc'}, {'Dc'}, {'Dc', 'B'}, {'E'}, {'M', 'C'}, {'C'}, {'E'}, {'T'}, {'A', 'Pc'}, {'A', 'Pc'}],
+        '3-4-2-1': [{'Dc'}, {'Dc'}, {'Dc', 'B'}, {'E'}, {'M'}, {'M', 'C'}, {'E', 'W'}, {'T'}, {'T', 'A'}, {'A', 'Pc'}],
+        '3-5-2':   [{'Dc'}, {'Dc'}, {'Dc', 'B'}, {'E'}, {'M'}, {'M', 'C'}, {'C'}, {'E', 'W'}, {'A', 'Pc'}, {'A', 'Pc'}],
+        '3-5-1-1': [{'Dc'}, {'Dc'}, {'Dc', 'B'}, {'E', 'W'}, {'M'}, {'M'}, {'C'}, {'E', 'W'}, {'T', 'A'}, {'A', 'Pc'}],
+        '4-3-3':   [{'Ds'}, {'Dc'}, {'Dc'}, {'Dd'}, {'M'}, {'M', 'C'}, {'C'}, {'W', 'A'}, {'A', 'Pc'}, {'W', 'A'}],
+        '4-3-1-2': [{'Ds'}, {'Dc'}, {'Dc'}, {'Dd'}, {'M'}, {'M', 'C'}, {'C'}, {'T'}, {'T', 'A', 'Pc'}, {'A', 'Pc'}],
+        '4-4-2':   [{'Ds'}, {'Dc'}, {'Dc'}, {'Dd'}, {'E'}, {'M', 'C'}, {'C'}, {'E', 'W'}, {'A', 'Pc'}, {'A', 'Pc'}],
+        '4-1-4-1': [{'Ds'}, {'Dc'}, {'Dc'}, {'Dd'}, {'M'}, {'C', 'T'}, {'T'}, {'E', 'W'}, {'W'}, {'A', 'Pc'}],
+        '4-4-1-1': [{'Ds'}, {'Dc'}, {'Dc'}, {'Dd'}, {'E', 'W'}, {'M'}, {'C'}, {'E', 'W'}, {'T', 'A'}, {'A', 'Pc'}],
+        '4-2-3-1': [{'Ds'}, {'Dc'}, {'Dc'}, {'Dd'}, {'M'}, {'M', 'C'}, {'W', 'T'}, {'T'}, {'W', 'A'}, {'A', 'Pc'}],
     }
 
     def _assegna_modulo(self, candidati, slot_ruoli):
@@ -729,7 +730,7 @@ class Store:
                 per_ruolo[c['ruolo']].append(c)
         for ruolo in per_ruolo:
             per_ruolo[ruolo].sort(key=lambda c: -c['punteggio'])
-        for (d, c, a) in [(3, 4, 3), (3, 5, 2), (4, 3, 3), (4, 4, 2), (4, 5, 1), (5, 3, 2), (5, 4, 1)]:
+        for (d, c, a) in [(3, 4, 3), (3, 5, 2), (4, 3, 3), (4, 4, 2), (4, 5, 1)]:
             if len(per_ruolo['D']) < d or len(per_ruolo['C']) < c or len(per_ruolo['A']) < a:
                 continue
             undici = [portiere] + per_ruolo['D'][:d] + per_ruolo['C'][:c] + per_ruolo['A'][:a]
