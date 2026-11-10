@@ -38,7 +38,7 @@
     "quota_tassa_scala": 15.0,
     "smorzamento_partite": 5,
     "fantamedia_k_presenze": 5,
-    "fattore_avversario_esponente": 0.25
+    "fattore_avversario_esponente": 0.2
   },
   "formula_gol": {
     "_descrizione": "Punti fantacalcio -> gol equivalenti: sotto soglia = 0 gol, alla soglia = 1 gol, poi +1 gol ogni 'ogni_punti' punti aggiuntivi.",
