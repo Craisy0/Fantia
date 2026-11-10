@@ -643,13 +643,76 @@ class Store:
             if avversario is None:
                 continue
             fattore = self._fattore_avversario_giocatore(ruolo, avversario)
-            candidati.append({'ruolo': ruolo, 'punteggio': punteggio_base * fattore})
+            candidati.append({'nome': nome, 'ruolo': ruolo, 'punteggio': punteggio_base * fattore})
         if not candidati:
             return None
-        portieri = sorted((c for c in candidati if c['ruolo'] == 'P'), key=lambda c: -c['punteggio'])
-        movimento = sorted((c for c in candidati if c['ruolo'] != 'P'), key=lambda c: -c['punteggio'])
-        undici = ([portieri[0]] + movimento[:10]) if portieri else sorted(candidati, key=lambda c: -c['punteggio'])[:11]
-        return sum(c['punteggio'] for c in undici)
+        return self._migliore_formazione(candidati)[0]
+
+    # Moduli classici validi (difensori-centrocampisti-attaccanti, sempre 10 + 1 portiere):
+    # un vero allenatore non schiera semplicemente i migliori 11 a prescindere dal ruolo, ma
+    # il modulo che massimizza il punteggio con i giocatori a disposizione in quel ruolo.
+    FORMAZIONI_VALIDE = [(3, 4, 3), (3, 5, 2), (4, 3, 3), (4, 4, 2), (4, 5, 1), (5, 3, 2), (5, 4, 1)]
+
+    def _migliore_formazione(self, candidati):
+        """candidati: lista di {'nome', 'ruolo', 'punteggio'}. Prova ogni modulo classico valido
+        (vedi FORMAZIONI_VALIDE) prendendo i migliori D/C/A disponibili per quel modulo, e sceglie
+        il modulo che da' il punteggio totale piu' alto - non necessariamente quello con piu'
+        giocatori forti in assoluto, ma quello che la rosa puo' davvero schierare. Ritorna
+        (punteggio_totale, modulo_scelto ('d-c-a' o None), undici_scelto)."""
+        per_ruolo = {'P': [], 'D': [], 'C': [], 'A': []}
+        for c in candidati:
+            if c['ruolo'] in per_ruolo:
+                per_ruolo[c['ruolo']].append(c)
+        for ruolo in per_ruolo:
+            per_ruolo[ruolo].sort(key=lambda c: -c['punteggio'])
+        if not per_ruolo['P']:
+            return 0.0, None, []
+        portiere = per_ruolo['P'][0]
+        migliore = None
+        for (d, c, a) in self.FORMAZIONI_VALIDE:
+            if len(per_ruolo['D']) < d or len(per_ruolo['C']) < c or len(per_ruolo['A']) < a:
+                continue  # la rosa non ha abbastanza giocatori in quel ruolo per questo modulo
+            undici = [portiere] + per_ruolo['D'][:d] + per_ruolo['C'][:c] + per_ruolo['A'][:a]
+            totale = sum(x['punteggio'] for x in undici)
+            if migliore is None or totale > migliore[0]:
+                migliore = (totale, f'{d}-{c}-{a}', undici)
+        if migliore is None:
+            # rosa troppo corta in qualche ruolo per qualunque modulo classico valido: ripiego
+            # sui migliori 10 di movimento disponibili, segnalando che non e' un modulo standard.
+            movimento = sorted((c for c in candidati if c['ruolo'] != 'P'), key=lambda c: -c['punteggio'])[:10]
+            undici = [portiere] + movimento
+            return sum(x['punteggio'] for x in undici), 'adattato (rosa corta)', undici
+        return migliore
+
+    def formazione_scelta(self, squadra_gotta, giornata):
+        """Come punti_proiettati_giocatori, ma espone il modulo e gli undici giocatori scelti
+        (per mostrare all'utente la 'vera squadra', non solo il totale)."""
+        giornata_serie_a = giornata + 3
+        if str(giornata_serie_a) not in self.calendario_serie_a:
+            return None
+        rosa = self.rose_gotta.get(squadra_gotta)
+        if not rosa:
+            return None
+        candidati = []
+        for giocatore in rosa:
+            nome, club, ruolo = giocatore['nome'], giocatore['club'], giocatore['ruolo']
+            if (club, nome) in self._indisponibili_set:
+                continue
+            punteggio_base = self._punteggio_reale_giocatore(club, nome, ruolo)
+            if punteggio_base is None:
+                continue
+            avversario = self._avversario_reale(club, giornata_serie_a)
+            if avversario is None:
+                continue
+            fattore = self._fattore_avversario_giocatore(ruolo, avversario)
+            candidati.append({'nome': nome, 'club': club, 'ruolo': ruolo,
+                               'punteggio': punteggio_base * fattore})
+        if not candidati:
+            return None
+        totale, modulo, undici = self._migliore_formazione(candidati)
+        return {'totale': round(totale, 2), 'modulo': modulo,
+                'undici': [{'nome': x['nome'], 'ruolo': x['ruolo'], 'punteggio': round(x['punteggio'], 2)}
+                           for x in undici]}
 
     def stima_lambda_giocatori(self, squadra, giornata):
         punti = self.punti_proiettati_giocatori(squadra, giornata)
