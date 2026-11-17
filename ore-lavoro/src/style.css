@@ -2,19 +2,25 @@
   --bg: #f3f4f7; --card: #ffffff; --text: #171a21; --muted: #667085; --line: #e4e7ec;
   --accent: #2f6fed; --accent-soft: #e6eefd; --on-accent: #ffffff;
   --ok: #12805c; --ok-soft: #e3f4ed; --warn: #b26a00; --warn-soft: #fdf1dc;
-  --danger: #c4320a; --danger-soft: #fdebe5;
+  --danger: #c4320a; --danger-soft: #fdebe5; --on-danger: #ffffff; --knob: #ffffff;
   --ferie: #2f9e6e; --permesso: #d98a00; --malattia: #d1495b;
   --top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
   --bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
-  color-scheme: light dark;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f1218; --card: #191d26; --text: #eef0f4; --muted: #98a2b3; --line: #2a303c;
     --accent: #6b9bff; --accent-soft: #1c2a47; --on-accent: #0b1020;
     --ok: #4cc79a; --ok-soft: #12302a; --warn: #f0b24a; --warn-soft: #3a2b10;
-    --danger: #ff7a59; --danger-soft: #3b1c14;
+    --danger: #ff7a59; --danger-soft: #3b1c14; --on-danger: #2a0d05; color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+    --bg: #0f1218; --card: #191d26; --text: #eef0f4; --muted: #98a2b3; --line: #2a303c;
+    --accent: #6b9bff; --accent-soft: #1c2a47; --on-accent: #0b1020;
+    --ok: #4cc79a; --ok-soft: #12302a; --warn: #f0b24a; --warn-soft: #3a2b10;
+    --danger: #ff7a59; --danger-soft: #3b1c14; --on-danger: #2a0d05; color-scheme: dark;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -31,7 +37,8 @@ small { color: var(--muted); font-size: 13px; }
 
 #view {
   max-width: 560px; margin: 0 auto;
-  padding: calc(var(--top) + 16px) 16px calc(var(--bottom) + 88px);
+  padding-block: calc(var(--top) + 16px) calc(var(--bottom) + 88px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: flex; flex-direction: column; gap: 14px;
 }
 
@@ -69,7 +76,7 @@ small { color: var(--muted); font-size: 13px; }
 .btn.primary { background: var(--accent); color: var(--on-accent); }
 .btn.ghost { background: var(--accent-soft); color: var(--accent); }
 .punch .btn.ghost { background: var(--card); color: var(--text); }
-.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger { background: var(--danger); color: var(--on-danger); }
 .btn.danger-ghost { background: var(--danger-soft); color: var(--danger); }
 .btn:active, .row:active, .cell:active, .icon:active { opacity: .7; }
 
@@ -138,7 +145,7 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1
 .input-unit { display: flex; align-items: center; gap: 6px; }
 .input-unit em { font-style: normal; color: var(--muted); font-size: 13px; }
 .switch { appearance: none; width: 50px; height: 30px; border-radius: 15px; background: var(--line); position: relative; flex-shrink: 0; transition: background .15s; }
-.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--knob); transition: transform .15s; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
 .switch:checked { background: var(--accent); }
 .switch:checked::after { transform: translateX(20px); }
 .version { text-align: center; color: var(--muted); font-size: 12px; }
@@ -169,3 +176,12 @@ dialog .btn-row { margin-top: 10px; }
   font-size: 14px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s; z-index: 10;
 }
 #toast.show { opacity: 1; transform: none; }
+
+/* Conferme e backup */
+#confirm { margin: auto; width: calc(100% - 32px); max-width: 420px; border-radius: 22px; }
+.box { padding: 20px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.box p { white-space: pre-line; }
+.box textarea {
+  width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; user-select: text; resize: vertical;
+}

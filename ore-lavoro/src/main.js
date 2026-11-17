@@ -11,6 +11,7 @@ const native = Capacitor.isNativePlatform();
 const $ = (sel) => document.querySelector(sel);
 const view = $('#view');
 const sheet = $('#sheet');
+const box = $('#confirm');
 
 let state = store.load(localStorage);
 const today = dateKey(new Date());
@@ -40,7 +41,7 @@ function render() {
 
 let lastMinute = -1;
 function tick() {
-  if (ui.tab !== 'oggi' || sheet.open) return;
+  if (ui.tab !== 'oggi' || sheet.open || box.open) return;
   const now = new Date();
   // Una volta al minuto si ridisegna tutto: totali del giorno e cambio data.
   if (now.getMinutes() !== lastMinute) { lastMinute = now.getMinutes(); render(); return; }
@@ -61,9 +62,64 @@ function toast(text) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
+/** Finestra di conferma dentro la pagina. Risolve true se l'utente conferma. */
+function ask(text, okLabel = 'Conferma', danger = true) {
+  return new Promise((resolve) => {
+    box.innerHTML = `<div class="box"><p>${esc(text)}</p><div class="btn-row">
+      <button class="btn ghost" data-answer="no">Annulla</button>
+      <button class="btn ${danger ? 'danger' : 'primary'}" data-answer="yes">${okLabel}</button></div></div>`;
+    box.onclick = (e) => {
+      const a = e.target.closest('[data-answer]');
+      if (a) { box.close(); resolve(a.dataset.answer === 'yes'); }
+    };
+    box.oncancel = () => resolve(false);
+    box.showModal();
+  });
+}
+
+/** Sostituisce i dati con quelli di un backup, dopo conferma. */
+async function restore(text) {
+  try {
+    const next = store.importBackup(text);
+    const msg = `Il backup contiene ${next.shifts.length} turni, ${next.absences.length} assenze e ${next.payments.length} pagamenti.\n\nSostituire i dati attuali?`;
+    if (!(await ask(msg, 'Sostituisci'))) return;
+    state = next;
+    commit();
+    toast('Backup ripristinato.');
+  } catch (err) { toast(err.message); }
+}
+
+/** Nel browser non si possono salvare file: il backup si copia e si incolla come testo. */
+function backupBox(mode) {
+  const exporting = mode === 'export';
+  box.innerHTML = `<div class="box">
+    <h2>${exporting ? 'Esporta backup' : 'Ripristina backup'}</h2>
+    <p class="hint">${exporting ? 'Copia questo testo e conservalo (nota, email, file).' : 'Incolla qui il testo di un backup, oppure scegli un file.'}</p>
+    <textarea id="backup-text" rows="8" ${exporting ? 'readonly' : 'placeholder="{ ... }"'}></textarea>
+    <div class="btn-row">
+      <button class="btn ghost" data-box="close">Chiudi</button>
+      ${exporting ? '<button class="btn primary" data-box="copy">Copia</button>'
+    : '<button class="btn ghost" data-box="file">Scegli file</button><button class="btn primary" data-box="restore">Ripristina</button>'}
+    </div></div>`;
+  const area = box.querySelector('textarea');
+  if (exporting) area.value = store.exportBackup(state);
+  box.oncancel = null;
+  box.onclick = async (e) => {
+    const act = e.target.closest('[data-box]')?.dataset.box;
+    if (act === 'close') box.close();
+    if (act === 'file') { box.close(); $('#file').click(); }
+    if (act === 'restore') { box.close(); restore(area.value); }
+    if (act === 'copy') {
+      try { await navigator.clipboard.writeText(area.value); toast('Backup copiato.'); }
+      catch { area.focus(); area.select(); toast('Seleziona e copia il testo.'); }
+    }
+  };
+  box.showModal();
+}
+
 /** Salva, riallinea i promemoria e ridisegna. */
 function commit({ redraw = true } = {}) {
-  store.save(localStorage, state);
+  try { store.save(localStorage, state); } catch { toast('Salvataggio non riuscito: memoria non disponibile.'); }
   syncReminders(state);
   if (redraw) render();
 }
@@ -188,9 +244,9 @@ const actions = {
   'add-payment': () => paymentSheet(null),
   'edit-payment': (el) => paymentSheet(state.payments.find((x) => x.id === el.dataset.id)),
   'close-sheet': () => sheet.close(),
-  delete: (el) => {
+  delete: async (el) => {
     const form = el.closest('form');
-    if (!confirm('Eliminare questa registrazione?')) return;
+    if (!(await ask('Eliminare questa registrazione?', 'Elimina'))) return;
     store.remove(state, form.dataset.kind, form.dataset.id);
     sheet.close();
     commit();
@@ -202,14 +258,15 @@ const actions = {
     commit();
   },
   export: async () => {
+    if (!native) { backupBox('export'); return; }
     try {
       await exportFile(`ore-lavoro-${dateKey(new Date())}.json`, store.exportBackup(state));
     } catch (err) { toast(`Esportazione non riuscita: ${err.message}`); }
   },
-  import: () => $('#file').click(),
-  wipe: () => {
-    if (!confirm('Cancellare TUTTI i dati dell\'app? L\'operazione non si può annullare.')) return;
-    if (!confirm('Confermi? Turni, assenze, pagamenti e impostazioni verranno eliminati.')) return;
+  import: () => (native ? $('#file').click() : backupBox('import')),
+  wipe: async () => {
+    const msg = 'Cancellare TUTTI i dati dell\'app?\n\nTurni, assenze, pagamenti e impostazioni verranno eliminati. L\'operazione non si può annullare.';
+    if (!(await ask(msg, 'Cancella tutto'))) return;
     state = store.emptyState();
     commit();
     toast('Dati cancellati.');
@@ -248,24 +305,18 @@ $('#file').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   e.target.value = '';
   if (!file) return;
-  try {
-    const next = store.importBackup(await file.text());
-    const msg = `Il backup contiene ${next.shifts.length} turni, ${next.absences.length} assenze e ${next.payments.length} pagamenti.\n\nSostituire i dati attuali?`;
-    if (!confirm(msg)) return;
-    state = next;
-    commit();
-    toast('Backup ripristinato.');
-  } catch (err) { toast(err.message); }
+  restore(await file.text());
 });
 
 // ---- Ciclo di vita ---------------------------------------------------------
 
 setInterval(tick, 1000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheet.open) render(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheet.open && !box.open) render(); });
 
 if (native) {
   App.addListener('backButton', () => {
-    if (sheet.open) sheet.close();
+    if (box.open) { box.close(); box.dispatchEvent(new Event('cancel')); }
+    else if (sheet.open) sheet.close();
     else if (ui.tab !== 'oggi') actions.tab({ dataset: { tab: 'oggi' } });
     else App.minimizeApp();
   });
