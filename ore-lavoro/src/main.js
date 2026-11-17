@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import * as store from './core/store.js';
 import { dateKey, dayOf, timeOf, addDays, addMonths, monthKey } from './core/time.js';
-import { todayView, calendarView, summaryView, settingsView, liveClock, esc, ABSENCE_LABEL } from './ui/views.js';
+import { todayView, calendarView, summaryView, settingsView, esc, ABSENCE_LABEL } from './ui/views.js';
 import { syncReminders, askPermission } from './platform/notifications.js';
 import { exportFile } from './platform/files.js';
 
@@ -39,19 +39,14 @@ function render() {
   </button>`).join('');
 }
 
-let lastMinute = -1;
-function tick() {
-  if (ui.tab !== 'oggi' || sheet.open || box.open) return;
-  const now = new Date();
-  // Una volta al minuto si ridisegna tutto: totali del giorno e cambio data.
-  if (now.getMinutes() !== lastMinute) { lastMinute = now.getMinutes(); render(); return; }
-  const live = liveClock(state, now);
-  if (!live) return;
-  for (const [id, text] of [['live-clock', live.clock], ['live-pay', live.pay], ['live-pause', live.pause]]) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  }
-}
+// Cambio di giorno a schermo acceso: ridisegna una volta al minuto.
+let lastDay = dateKey(new Date());
+setInterval(() => {
+  const day = dateKey(new Date());
+  if (day === lastDay) return;
+  lastDay = day;
+  if (!sheet.open && !box.open) render();
+}, 60000);
 
 let toastTimer;
 function toast(text) {
@@ -124,11 +119,6 @@ function commit({ redraw = true } = {}) {
   if (redraw) render();
 }
 
-/** Esegue un'operazione sui dati mostrando l'eventuale errore all'utente. */
-function attempt(fn) {
-  try { fn(); return true; } catch (err) { toast(err.message); return false; }
-}
-
 // ---- Moduli ----------------------------------------------------------------
 
 const numberOf = (v) => (v === '' ? NaN : Number(String(v).replace(',', '.')));
@@ -151,17 +141,14 @@ const field = (label, input) => `<label class="field"><span>${label}</span>${inp
 
 function shiftSheet(shift, day) {
   const s = state.settings;
-  const open = shift && !shift.end;
-  const d = shift ? dayOf(shift.start) : day;
   const body = `
-    ${field('Giorno', `<input name="day" type="date" required value="${d}">`)}
+    ${field('Giorno', `<input name="day" type="date" required value="${shift ? dayOf(shift.start) : day}">`)}
     ${field('Inizio', `<input name="start" type="time" required value="${shift ? timeOf(shift.start) : ''}">`)}
-    ${open ? '' : field('Fine', `<input name="end" type="time" required value="${shift ? timeOf(shift.end) : ''}">`)}
-    ${field('Pausa (minuti)', `<input name="break" type="number" inputmode="numeric" min="0" step="1" value="${shift ? shift.breakMin : 0}">`)}
-    ${open ? '' : field(`Tariffa (${s.currency}/h)`, `<input name="rate" type="number" inputmode="decimal" min="0" step="0.01" value="${shift ? shift.rate : s.rate}">`)}
+    ${field('Fine', `<input name="end" type="time" required value="${shift ? timeOf(shift.end) : ''}">`)}
+    ${field(`Tariffa (${s.currency}/h)`, `<input name="rate" type="number" inputmode="decimal" min="0" step="0.01" value="${shift ? shift.rate : s.rate}">`)}
     ${field('Nota', `<input name="note" type="text" maxlength="80" value="${shift ? esc(shift.note) : ''}" placeholder="facoltativa">`)}
-    ${open ? '' : '<p class="hint">Se la fine è prima dell\'inizio, il turno termina il giorno dopo.</p>'}`;
-  openSheet(open ? 'Turno in corso' : shift ? 'Modifica turno' : 'Nuovo turno', body, { kind: 'shifts', id: shift?.id });
+    <p class="hint">Se la fine è prima dell'inizio, il turno termina il giorno dopo.</p>`;
+  openSheet(shift ? 'Modifica turno' : 'Nuovo turno', body, { kind: 'shifts', id: shift?.id });
 }
 
 function absenceSheet(absence, day) {
@@ -191,15 +178,8 @@ function submitSheet(form) {
   const kind = form.dataset.kind;
   if (kind === 'shifts') {
     const start = `${f.day}T${f.start}`;
-    const existing = id && state.shifts.find((x) => x.id === id);
-    if (existing && !existing.end) {
-      store.updateOpenShift(state, { start, breakMin: numberOf(f.break || '0'), note: f.note });
-    } else {
-      const endDay = f.end <= f.start ? addDays(f.day, 1) : f.day;
-      store.saveShift(state, {
-        id, start, end: `${endDay}T${f.end}`, breakMin: numberOf(f.break || '0'), rate: numberOf(f.rate), note: f.note,
-      });
-    }
+    const endDay = f.end <= f.start ? addDays(f.day, 1) : f.day;
+    store.saveShift(state, { id, start, end: `${endDay}T${f.end}`, rate: numberOf(f.rate), note: f.note });
     ui.day = f.day;
   } else if (kind === 'absences') {
     store.saveAbsence(state, { id, date: f.day, type: f.type, hours: numberOf(f.hours), paid: f.paid === 'on', note: f.note });
@@ -227,10 +207,6 @@ sheet.addEventListener('submit', (e) => {
 
 const actions = {
   tab: (el) => { ui.tab = el.dataset.tab; render(); view.scrollTop = 0; window.scrollTo(0, 0); },
-  'clock-in': () => attempt(() => store.clockIn(state)) && commit(),
-  'clock-out': () => attempt(() => store.clockOut(state)) && commit(),
-  'pause-start': () => attempt(() => store.startPause(state)) && commit(),
-  'pause-end': () => attempt(() => store.endPause(state)) && commit(),
   month: (el) => {
     ui.month = addMonths(ui.month, Number(el.dataset.step));
     ui.day = ui.month === monthKey(dateKey(new Date())) ? dateKey(new Date()) : `${ui.month}-01`;
@@ -310,7 +286,6 @@ $('#file').addEventListener('change', async (e) => {
 
 // ---- Ciclo di vita ---------------------------------------------------------
 
-setInterval(tick, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !sheet.open && !box.open) render(); });
 
 if (native) {

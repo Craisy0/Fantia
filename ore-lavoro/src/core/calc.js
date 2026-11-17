@@ -20,52 +20,39 @@ export function nightMinutes(start, end, nightStart = '22:00', nightEnd = '06:00
   return total / MIN;
 }
 
-/**
- * Minuti di un turno. Per un turno ancora aperto si usa `now` come fine.
- * La pausa non ha orari precisi, quindi i minuti notturni sono ridotti in
- * proporzione alla pausa (netto / lordo).
- */
-export function shiftMinutes(shift, settings, now = new Date()) {
+/** Minuti di un turno e quanti cadono nella fascia notturna. */
+export function shiftMinutes(shift, settings) {
   const start = parseStamp(shift.start);
-  const end = shift.end ? parseStamp(shift.end) : now;
-  const gross = Math.max(0, (end - start) / MIN);
-  let pause = shift.breakMin || 0;
-  if (!shift.end && shift.pauseStart) pause += Math.max(0, (now - parseStamp(shift.pauseStart)) / MIN);
-  const net = Math.max(0, gross - pause);
-  const night = gross > 0
-    ? nightMinutes(start, end, settings.nightStart, settings.nightEnd) * (net / gross) : 0;
-  return { gross, pause, net, night };
+  const end = parseStamp(shift.end);
+  return {
+    net: Math.max(0, (end - start) / MIN),
+    night: nightMinutes(start, end, settings.nightStart, settings.nightEnd),
+  };
 }
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
 /**
- * Riepilogo di un giorno. Lo straordinario è la parte di ore oltre la soglia
- * giornaliera, attribuita ai turni in ordine cronologico. Le maggiorazioni si
- * sommano sulla tariffa base del turno.
+ * Riepilogo di un giorno. Le maggiorazioni festiva e notturna si sommano
+ * sulla tariffa base del turno.
  */
-export function daySummary(state, day, now = new Date()) {
+export function daySummary(state, day) {
   const s = state.settings;
   const shifts = state.shifts.filter((x) => dayOf(x.start) === day)
     .sort((a, b) => a.start.localeCompare(b.start));
   const festive = isFestive(day, s.sundayFestive);
-  const threshold = s.overtimeAfterHours > 0 ? s.overtimeAfterHours * 60 : Infinity;
   const out = {
-    day, festive, netMin: 0, overtimeMin: 0, nightMin: 0, festiveMin: 0,
+    day, festive, netMin: 0, nightMin: 0, festiveMin: 0,
     workPay: 0, absencePay: 0, pay: 0, shifts: [], absences: [],
   };
   for (const shift of shifts) {
-    const m = shiftMinutes(shift, s, now);
-    const overtime = Math.max(0, Math.min(m.net, out.netMin + m.net - threshold));
-    const rate = shift.rate ?? s.rate;
-    const hourly = rate / 60;
+    const m = shiftMinutes(shift, s);
+    const hourly = (shift.rate ?? s.rate) / 60;
     const pay = m.net * hourly
-      + overtime * hourly * (s.overtimePct / 100)
       + (festive ? m.net * hourly * (s.festivePct / 100) : 0)
       + m.night * hourly * (s.nightPct / 100);
-    out.shifts.push({ shift, ...m, overtime, pay: round2(pay) });
+    out.shifts.push({ shift, ...m, pay: round2(pay) });
     out.netMin += m.net;
-    out.overtimeMin += overtime;
     out.nightMin += m.night;
     if (festive) out.festiveMin += m.net;
     out.workPay += pay;
@@ -81,19 +68,19 @@ export function daySummary(state, day, now = new Date()) {
 }
 
 /** Totali su un intervallo di giorni, estremi inclusi. */
-export function rangeSummary(state, from, to, now = new Date()) {
+export function rangeSummary(state, from, to) {
   const days = new Set();
   for (const x of state.shifts) { const d = dayOf(x.start); if (d >= from && d <= to) days.add(d); }
   for (const a of state.absences) if (a.date >= from && a.date <= to) days.add(a.date);
   const tot = {
-    from, to, netMin: 0, overtimeMin: 0, nightMin: 0, festiveMin: 0, workPay: 0, absencePay: 0,
+    from, to, netMin: 0, nightMin: 0, festiveMin: 0, workPay: 0, absencePay: 0,
     pay: 0, daysWorked: 0, shiftCount: 0,
     absences: { ferie: 0, permesso: 0, malattia: 0 }, absenceHours: 0, days: [],
   };
   for (const day of [...days].sort()) {
-    const d = daySummary(state, day, now);
+    const d = daySummary(state, day);
     tot.days.push(d);
-    tot.netMin += d.netMin; tot.overtimeMin += d.overtimeMin; tot.nightMin += d.nightMin;
+    tot.netMin += d.netMin; tot.nightMin += d.nightMin;
     tot.festiveMin += d.festiveMin; tot.workPay += d.workPay; tot.absencePay += d.absencePay;
     tot.shiftCount += d.shifts.length;
     if (d.shifts.length) tot.daysWorked += 1;
@@ -108,9 +95,9 @@ export function rangeSummary(state, from, to, now = new Date()) {
   return tot;
 }
 
-export function monthSummary(state, ym, now = new Date()) {
+export function monthSummary(state, ym) {
   const { from, to } = monthRange(ym);
-  const sum = rangeSummary(state, from, to, now);
+  const sum = rangeSummary(state, from, to);
   const target = state.settings.monthlyTargetHours * 60;
   sum.targetMin = target;
   sum.hoursBalanceMin = target > 0 ? sum.netMin - target : null;
@@ -119,13 +106,13 @@ export function monthSummary(state, ym, now = new Date()) {
   return sum;
 }
 
-export function weekSummary(state, monday, now = new Date()) {
-  return rangeSummary(state, monday, addDays(monday, 6), now);
+export function weekSummary(state, monday) {
+  return rangeSummary(state, monday, addDays(monday, 6));
 }
 
 /** Saldo paga complessivo: tutto il maturato meno tutti i pagamenti ricevuti. */
-export function payBalance(state, now = new Date()) {
-  const earned = rangeSummary(state, '0000-01-01', '9999-12-31', now).pay;
+export function payBalance(state) {
+  const earned = rangeSummary(state, '0000-01-01', '9999-12-31').pay;
   const paid = round2(state.payments.reduce((t, p) => t + p.amount, 0));
   return { earned, paid, due: round2(earned - paid) };
 }

@@ -20,8 +20,8 @@ Scelte tecniche e motivazione:
 
 ## 2. Requisiti
 
-Base: timbratura entrata/uscita con pause, inserimento e modifica manuale, storico, riepilogo
-settimanale e mensile.
+Base: inserimento e modifica manuale dei turni (inizio e fine), storico, riepilogo
+settimanale e mensile. Niente cronometro, pause o straordinari: dopo le prime prove sono stati tolti.
 
 Richiesti: calcolo guadagni · ferie, permessi, malattia · promemoria · backup · calendario · saldo.
 
@@ -29,10 +29,9 @@ Regole di calcolo:
 
 - Un turno appartiene al giorno in cui **inizia** (anche se passa la mezzanotte).
 - Ogni turno salva la **tariffa del momento**: cambiare tariffa non riscrive il passato.
-- Straordinario = ore oltre la soglia giornaliera, pagate con maggiorazione.
 - Maggiorazione festiva = domeniche e festività nazionali italiane (Pasquetta inclusa).
 - Maggiorazione notturna = minuti lavorati nella fascia notturna (predefinita 22–06).
-- Le maggiorazioni si **sommano** sulla tariffa base (es. straordinario notturno = base + 25% + 15%).
+- Le maggiorazioni si **sommano** sulla tariffa base (es. festivo notturno = base + 30% + 15%).
 - Saldo ore = ore lavorate − obiettivo mensile. Saldo paga = maturato − pagamenti ricevuti.
 
 ## 3. Architettura
@@ -42,7 +41,7 @@ src/
   core/      logica pura, senza DOM (testata)
     time.js      date, durate, formattazione
     holidays.js  festività italiane
-    calc.js      ore, straordinari, maggiorazioni, guadagni, riepiloghi, saldi
+    calc.js      ore, maggiorazioni, guadagni, riepiloghi, saldi
     store.js     stato, validazione, backup/ripristino, migrazioni
   platform/  ponte verso Android (con ripiego per browser)
     notifications.js   promemoria
@@ -62,7 +61,7 @@ Ogni punto si chiude con una revisione (test o prova a schermo) prima di passare
 | 2 | Struttura progetto + strumenti di build | `npm run build` |
 | 3 | Logica: tempo, festività, calcoli, saldi | test automatici |
 | 4 | Archivio dati, backup e ripristino | test automatici |
-| 5 | Schermata Oggi: timbratura, pause, turni del giorno | prova nel browser |
+| 5 | Schermata Oggi: totale del giorno, turni del giorno | prova nel browser |
 | 6 | Calendario + dettaglio giorno + assenze | prova nel browser |
 | 7 | Riepilogo: mese, guadagni, saldi, pagamenti | prova nel browser |
 | 8 | Impostazioni, promemoria, backup | prova nel browser |

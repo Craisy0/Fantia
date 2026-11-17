@@ -45,29 +45,21 @@ test('minuti notturni', () => {
 });
 
 test('giorno normale: 8 ore a 10 €/h = 80 €', () => {
-  const st = stateWith([{ start: '2026-11-17T08:00', end: '2026-11-17T17:00', breakMin: 60 }]);
+  const st = stateWith([{ start: '2026-11-17T08:00', end: '2026-11-17T16:00' }]);
   const d = daySummary(st, '2026-11-17');
   assert.equal(d.netMin, 480);
-  assert.equal(d.overtimeMin, 0);
   assert.equal(d.pay, 80);
 });
 
-test('straordinario oltre la soglia, anche su due turni', () => {
+test('più turni nello stesso giorno si sommano, senza maggiorazione oltre le 8 ore', () => {
   const st = stateWith([
     { start: '2026-11-17T06:00', end: '2026-11-17T12:00' },
     { start: '2026-11-17T13:00', end: '2026-11-17T17:00' },
   ]);
   const d = daySummary(st, '2026-11-17');
   assert.equal(d.netMin, 600);
-  assert.equal(d.overtimeMin, 120);
-  assert.equal(d.shifts[0].overtime, 0);
-  assert.equal(d.shifts[1].overtime, 120);
-  assert.equal(d.pay, 100 + 2 * 10 * 0.25);
-});
-
-test('soglia 0 disattiva lo straordinario', () => {
-  const st = stateWith([{ start: '2026-11-17T06:00', end: '2026-11-17T18:00' }], { overtimeAfterHours: 0 });
-  assert.equal(daySummary(st, '2026-11-17').overtimeMin, 0);
+  assert.equal(d.shifts.length, 2);
+  assert.equal(d.pay, 100);
 });
 
 test('festivo e notturno si sommano; il turno resta nel giorno di inizio', () => {
@@ -83,34 +75,10 @@ test('festivo e notturno si sommano; il turno resta nel giorno di inizio', () =>
   assert.equal(daySummary(xmas, '2026-12-25').pay, 52);
 });
 
-test('la pausa riduce i minuti notturni in proporzione', () => {
-  const st = stateWith([{ start: '2026-11-17T22:00', end: '2026-11-18T02:00', breakMin: 60 }]);
-  const d = daySummary(st, '2026-11-17');
-  assert.equal(d.netMin, 180);
-  assert.equal(d.nightMin, 180);
-});
-
 test('la tariffa salvata nel turno non cambia con le impostazioni', () => {
   const st = stateWith([{ start: '2026-11-17T08:00', end: '2026-11-17T10:00' }]);
   st.settings.rate = 20;
   assert.equal(daySummary(st, '2026-11-17').pay, 20);
-});
-
-test('timbratura con pausa', () => {
-  const st = store.emptyState();
-  store.clockIn(st, at('2026-11-17T08:00:10'));
-  assert.throws(() => store.clockIn(st, at('2026-11-17T08:01')));
-  store.startPause(st, at('2026-11-17T12:00'));
-  // a metà pausa il netto è fermo a 4 ore
-  assert.equal(Math.round(daySummary(st, '2026-11-17', at('2026-11-17T12:20:10')).netMin), 240);
-  store.endPause(st, at('2026-11-17T12:30'));
-  store.startPause(st, at('2026-11-17T16:50'));
-  const shift = store.clockOut(st, at('2026-11-17T17:00:10')); // uscita durante una pausa
-  assert.equal(shift.breakMin, 40);
-  assert.equal(shift.pauseStart, null);
-  assert.equal(Math.round(daySummary(st, '2026-11-17').netMin), 500);
-  assert.equal(store.openShift(st), null);
-  assert.throws(() => store.clockOut(st));
 });
 
 test('validazione dei turni manuali', () => {
@@ -118,7 +86,6 @@ test('validazione dei turni manuali', () => {
   const bad = (x, msg) => assert.throws(() => store.saveShift(st, { rate: 10, ...x }), msg);
   bad({ start: '2026-11-17T12:00', end: '2026-11-17T11:00' }, /dopo/);
   bad({ start: '2026-11-17T11:00', end: '2026-11-17T13:00' }, /sovrappone/);
-  bad({ start: '2026-11-18T08:00', end: '2026-11-18T09:00', breakMin: 60 }, /pausa/);
   bad({ start: '2026-11-18T08:00', end: '2026-11-19T09:00' }, /24 ore/);
   // turno adiacente ammesso; modifica dello stesso turno ammessa
   store.saveShift(st, { start: '2026-11-17T12:00', end: '2026-11-17T13:00', rate: 10 });
@@ -155,18 +122,17 @@ test('riepiloghi, assenze e saldi', () => {
 
 test('backup: andata e ritorno, file non validi rifiutati', () => {
   const st = stateWith([{ start: '2026-11-17T08:00', end: '2026-11-17T12:00', note: 'bar' }], { rate: 12.5 });
-  store.clockIn(st, at('2026-11-18T08:00'));
   store.savePayment(st, { date: '2026-11-30', amount: 50 });
   const back = store.importBackup(store.exportBackup(st));
   assert.deepEqual(back, st);
   assert.throws(() => store.importBackup('ciao'), /leggibile/);
   assert.throws(() => store.importBackup('{"a":1}'), /non è un backup/);
   assert.throws(() => store.importBackup(JSON.stringify({ version: 99, shifts: [] })), /più recente/);
-  assert.throws(() => store.importBackup(JSON.stringify({ shifts: [{ start: 'x' }] })), /non valido/);
+  assert.throws(() => store.importBackup(JSON.stringify({ shifts: [{ start: 'x', end: 'y' }] })), /non valido/);
   // un backup vecchio senza alcune impostazioni riceve i valori predefiniti
   const old = store.importBackup(JSON.stringify({ version: 1, settings: { rate: 9 }, shifts: [] }));
   assert.equal(old.settings.rate, 9);
-  assert.equal(old.settings.overtimePct, 25);
+  assert.equal(old.settings.festivePct, 30);
   assert.deepEqual(old.settings.reminder.days, [1, 2, 3, 4, 5]);
 });
 
@@ -179,4 +145,20 @@ test('salvataggio su storage e dati corrotti', () => {
   assert.deepEqual(store.load(storage), st);
   mem.set(store.STORAGE_KEY, '{rotto');
   assert.deepEqual(store.load(storage), store.emptyState());
+});
+
+test('backup della versione con timer: turni aperti scartati, campi vecchi ignorati', () => {
+  const old = store.importBackup(JSON.stringify({
+    version: 1,
+    settings: { rate: 11, overtimePct: 25, overtimeAfterHours: 8, longShiftHours: 10 },
+    shifts: [
+      { id: 'a', start: '2026-11-17T08:00', end: '2026-11-17T12:00', breakMin: 30, pauseStart: null, rate: 11, note: '' },
+      { id: 'b', start: '2026-11-18T08:00', end: null, breakMin: 0, pauseStart: null, rate: 11, note: '' },
+    ],
+  }));
+  assert.equal(old.shifts.length, 1);
+  assert.deepEqual(Object.keys(old.shifts[0]).sort(), ['end', 'id', 'note', 'rate', 'start']);
+  assert.equal('overtimePct' in old.settings, false);
+  assert.equal('longShiftHours' in old.settings, false);
+  assert.equal(old.settings.rate, 11);
 });

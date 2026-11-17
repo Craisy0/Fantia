@@ -1,14 +1,12 @@
 // Le quattro schermate. Ogni funzione restituisce HTML a partire dallo stato.
 import {
-  dateKey, dayOf, timeOf, addDays, weekStart, monthKey, monthRange, parseDay, parseStamp,
-  fmtDuration, fmtClock, fmtMoney, fmtDay, fmtMonth,
+  dateKey, dayOf, timeOf, addDays, weekStart, monthKey, monthRange, parseDay,
+  fmtDuration, fmtMoney, fmtDay, fmtMonth,
 } from '../core/time.js';
 import { holidayName } from '../core/holidays.js';
 import {
-  daySummary, weekSummary, monthSummary, rangeSummary, payBalance, vacationBalance, shiftMinutes,
-  weekdayIndex,
+  daySummary, weekSummary, monthSummary, rangeSummary, payBalance, vacationBalance, weekdayIndex,
 } from '../core/calc.js';
-import { openShift } from '../core/store.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -21,16 +19,13 @@ const hoursLabel = (h) => `${String(Math.round(h * 100) / 100).replace('.', ',')
 
 function shiftRow(item, currency) {
   const { shift } = item;
-  const end = shift.end ? timeOf(shift.end) : 'in corso';
-  const nextDay = shift.end && dayOf(shift.end) !== dayOf(shift.start) ? ' <small>+1</small>' : '';
+  const nextDay = dayOf(shift.end) !== dayOf(shift.start) ? ' <small>+1</small>' : '';
   const tags = [
-    item.pause >= 1 ? `pausa ${Math.round(item.pause)}m` : '',
-    item.overtime >= 1 ? `straord. ${fmtDuration(item.overtime)}` : '',
     item.night >= 1 ? `notte ${fmtDuration(item.night)}` : '',
     shift.note ? esc(shift.note) : '',
   ].filter(Boolean).join(' · ');
   return `<button class="row" data-action="edit-shift" data-id="${shift.id}">
-    <span class="row-main"><b>${timeOf(shift.start)} – ${end}${nextDay}</b>${tags ? `<small>${tags}</small>` : ''}</span>
+    <span class="row-main"><b>${timeOf(shift.start)} – ${timeOf(shift.end)}${nextDay}</b>${tags ? `<small>${tags}</small>` : ''}</span>
     <span class="row-side"><b>${fmtDuration(item.net)}</b><small>${fmtMoney(item.pay, currency)}</small></span>
   </button>`;
 }
@@ -67,56 +62,26 @@ function monthNav(ym) {
 
 // ---- Oggi ------------------------------------------------------------------
 
-/** Testi del cronometro: aggiornati ogni secondo senza ridisegnare tutto. */
-export function liveClock(state, now) {
-  const shift = openShift(state);
-  if (!shift) return null;
-  const m = shiftMinutes(shift, state.settings, now);
-  const d = daySummary(state, dayOf(shift.start), now);
-  const item = d.shifts.find((x) => x.shift.id === shift.id);
-  return {
-    clock: fmtClock(m.net * 60000),
-    pay: fmtMoney(item.pay, state.settings.currency),
-    pause: shift.pauseStart ? fmtClock(now - parseStamp(shift.pauseStart)) : '',
-  };
-}
-
 export function todayView(state, now) {
   const cur = state.settings.currency;
   const today = dateKey(now);
-  const shift = openShift(state);
-  const live = liveClock(state, now);
-  const d = daySummary(state, today, now);
+  const d = daySummary(state, today);
   const monday = weekStart(today);
-  const week = weekSummary(state, monday, now);
-  const month = monthSummary(state, monthKey(today), now);
+  const week = weekSummary(state, monday);
+  const month = monthSummary(state, monthKey(today));
   const festa = holidayName(today);
 
-  let punch;
-  if (!shift) {
-    punch = `<section class="punch">
-      <p class="status">Non sei in turno</p>
-      <p class="clock idle">00:00:00</p>
-      <button class="btn primary big" data-action="clock-in">Entra</button>
-    </section>`;
-  } else {
-    const paused = Boolean(shift.pauseStart);
-    const since = dayOf(shift.start) === today ? timeOf(shift.start) : `${fmtDay(dayOf(shift.start), { short: true })}, ${timeOf(shift.start)}`;
-    punch = `<section class="punch ${paused ? 'paused' : 'active'}">
-      <p class="status">${paused ? `In pausa da <span id="live-pause">${live.pause}</span>` : `In turno dalle ${since}`}</p>
-      <p class="clock" id="live-clock">${live.clock}</p>
-      <p class="earning" id="live-pay">${live.pay}</p>
-      <div class="btn-row">
-        <button class="btn ghost big" data-action="${paused ? 'pause-end' : 'pause-start'}">${paused ? 'Riprendi' : 'Pausa'}</button>
-        <button class="btn danger big" data-action="clock-out">Esci</button>
-      </div>
-    </section>`;
-  }
+  const punch = `<section class="punch">
+    <p class="status">${d.shifts.length ? 'Ore di oggi' : 'Nessun turno registrato oggi'}</p>
+    <p class="clock ${d.netMin >= 1 ? '' : 'idle'}">${fmtDuration(d.netMin)}</p>
+    <p class="earning">${fmtMoney(d.pay, cur)}</p>
+    <button class="btn primary big" data-action="add-shift" data-day="${today}">+ Aggiungi turno</button>
+  </section>`;
 
-  const max = Math.max(60, ...Array.from({ length: 7 }, (_, i) => daySummary(state, addDays(monday, i), now).netMin));
+  const max = Math.max(60, ...Array.from({ length: 7 }, (_, i) => daySummary(state, addDays(monday, i)).netMin));
   const bars = Array.from({ length: 7 }, (_, i) => {
     const day = addDays(monday, i);
-    const min = daySummary(state, day, now).netMin;
+    const min = daySummary(state, day).netMin;
     const label = 'LMMGVSD'[i];
     return `<div class="bar ${day === today ? 'today' : ''}">
       <small>${min >= 1 ? (min / 60).toFixed(1).replace('.', ',').replace(',0', '') : ''}</small>
@@ -129,7 +94,7 @@ export function todayView(state, now) {
     </header>
     ${punch}
     <section class="card">
-      <h2>Oggi <span>${fmtDuration(d.netMin)} · ${fmtMoney(d.pay, cur)}</span></h2>
+      <h2>Oggi</h2>
       ${dayList(d, cur, 'Nessun turno registrato oggi.')}
       ${addButtons(today)}
     </section>
@@ -156,7 +121,7 @@ export function calendarView(state, ui, now) {
   const cells = [];
   for (let i = 0; i < weekdayIndex(from); i += 1) cells.push('<span class="cell blank"></span>');
   for (let day = from; day <= to; day = addDays(day, 1)) {
-    const d = daySummary(state, day, now);
+    const d = daySummary(state, day);
     const cls = [
       'cell', day === today ? 'today' : '', day === ui.day ? 'selected' : '',
       d.festive ? 'festive' : '', d.netMin >= 1 ? 'worked' : '',
@@ -167,7 +132,7 @@ export function calendarView(state, ui, now) {
       <b>${parseDay(day).getDate()}</b><small>${hours}${dots}</small>
     </button>`);
   }
-  const d = daySummary(state, ui.day, now);
+  const d = daySummary(state, ui.day);
   const festa = holidayName(ui.day);
   return `${monthNav(ym)}
     <section class="card calendar">
@@ -190,9 +155,9 @@ export function summaryView(state, ui, now) {
   const cur = s.currency;
   const ym = ui.month;
   const year = ym.slice(0, 4);
-  const m = monthSummary(state, ym, now);
-  const y = rangeSummary(state, `${year}-01-01`, `${year}-12-31`, now);
-  const bal = payBalance(state, now);
+  const m = monthSummary(state, ym);
+  const y = rangeSummary(state, `${year}-01-01`, `${year}-12-31`);
+  const bal = payBalance(state);
   const vac = vacationBalance(state, year);
   const { from, to } = monthRange(ym);
   const payments = state.payments.filter((p) => p.date >= from && p.date <= to)
@@ -223,7 +188,6 @@ export function summaryView(state, ui, now) {
         ${stat('Guadagno', fmtMoney(m.pay, cur), 'wide')}
         ${stat('Giorni lavorati', m.daysWorked)}
         ${stat('Media al giorno', m.daysWorked ? fmtDuration(m.netMin / m.daysWorked) : '–')}
-        ${stat('Straordinari', fmtDuration(m.overtimeMin))}
         ${stat('Ore notturne', fmtDuration(m.nightMin))}
         ${stat('Ore festive', fmtDuration(m.festiveMin))}
         ${stat('Assenze retribuite', fmtMoney(m.absencePay, cur))}
@@ -279,8 +243,6 @@ export function settingsView(state, native) {
       <h2>Paga</h2>
       ${numField('rate', 'Tariffa oraria', `${s.currency}/h`, '0.01')}
       <p class="hint">La nuova tariffa vale per i turni che registri da ora in poi. Quelli già registrati mantengono la loro.</p>
-      ${numField('overtimeAfterHours', 'Straordinario dopo', 'h al giorno', '0.5')}
-      ${numField('overtimePct', 'Maggiorazione straordinario', '%')}
       ${numField('festivePct', 'Maggiorazione festivi', '%')}
       <label class="field"><span>Domenica come festivo</span>
         <input type="checkbox" class="switch" data-setting="sundayFestive" ${s.sundayFestive ? 'checked' : ''}></label>
@@ -288,7 +250,7 @@ export function settingsView(state, native) {
       <label class="field"><span>Fascia notturna</span>
         <span class="input-unit"><input type="time" data-setting="nightStart" value="${s.nightStart}">
         <em>–</em><input type="time" data-setting="nightEnd" value="${s.nightEnd}"></span></label>
-      <p class="hint">Metti 0 a una maggiorazione, o alla soglia dello straordinario, per non applicarla.</p>
+      <p class="hint">Metti 0 a una maggiorazione per non applicarla. Le maggiorazioni si sommano.</p>
     </section>
     <section class="card">
       <h2>Obiettivi e assenze</h2>
@@ -303,7 +265,6 @@ export function settingsView(state, native) {
       <label class="field"><span>Orario</span>
         <input type="time" data-setting="reminder.time" value="${s.reminder.time}"></label>
       <div class="field"><span>Giorni</span><span class="chips">${dayChips}</span></div>
-      ${numField('longShiftHours', 'Avvisami se il turno resta aperto oltre', 'h')}
       ${native ? '' : '<p class="hint">Le notifiche funzionano solo nell\'app installata sul telefono.</p>'}
     </section>
     <section class="card">

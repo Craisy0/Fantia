@@ -1,5 +1,5 @@
 // Stato dell'app: forma dei dati, operazioni, salvataggio e backup.
-import { toStamp, parseStamp, MIN } from './time.js';
+import { parseStamp, toStamp, MIN } from './time.js';
 
 export const VERSION = 1;
 export const STORAGE_KEY = 'ore-lavoro:v1';
@@ -8,12 +8,10 @@ export const ABSENCE_TYPES = ['ferie', 'permesso', 'malattia'];
 export function defaultSettings() {
   return {
     rate: 10, currency: '€',
-    overtimeAfterHours: 8, overtimePct: 25,
     festivePct: 30, sundayFestive: true,
     nightPct: 15, nightStart: '22:00', nightEnd: '06:00',
     monthlyTargetHours: 0, vacationDaysPerYear: 0, dayHours: 8,
     reminder: { enabled: false, time: '18:00', days: [1, 2, 3, 4, 5] },
-    longShiftHours: 10,
   };
 }
 
@@ -41,21 +39,17 @@ export function normalize(raw) {
   }
   if (raw.version > VERSION) throw new Error('Backup creato da una versione più recente dell\'app.');
   const base = defaultSettings();
-  const s = { ...base, ...(raw.settings || {}) };
-  s.reminder = { ...base.reminder, ...((raw.settings || {}).reminder || {}) };
-  for (const k of Object.keys(base)) if (typeof s[k] !== typeof base[k]) s[k] = base[k];
+  const given = raw.settings || {};
+  const s = {};
+  for (const k of Object.keys(base)) s[k] = typeof given[k] === typeof base[k] ? given[k] : base[k];
+  s.reminder = { ...base.reminder, ...(given.reminder || {}) };
 
-  const shifts = raw.shifts.map((x) => {
-    if (!STAMP.test(x.start) || (x.end != null && !STAMP.test(x.end))) throw new Error('Turno con orario non valido.');
-    if (x.end && x.end < x.start) throw new Error('Turno con fine precedente all\'inizio.');
-    return {
-      id: String(x.id || newId()), start: x.start, end: x.end || null,
-      breakMin: num(x.breakMin) ? x.breakMin : 0,
-      pauseStart: !x.end && STAMP.test(x.pauseStart || '') ? x.pauseStart : null,
-      rate: num(x.rate) ? x.rate : s.rate, note: String(x.note || ''),
-    };
+  // I turni "in corso" delle versioni precedenti (senza fine) vengono scartati.
+  const shifts = raw.shifts.filter((x) => x.end).map((x) => {
+    if (!STAMP.test(x.start) || !STAMP.test(x.end)) throw new Error('Turno con orario non valido.');
+    if (x.end < x.start) throw new Error('Turno con fine precedente all\'inizio.');
+    return { id: String(x.id || newId()), start: x.start, end: x.end, rate: num(x.rate) ? x.rate : s.rate, note: String(x.note || '') };
   });
-  if (shifts.filter((x) => !x.end).length > 1) throw new Error('Più di un turno aperto.');
   const absences = (raw.absences || []).map((a) => {
     if (!DAY.test(a.date) || !ABSENCE_TYPES.includes(a.type)) throw new Error('Assenza non valida.');
     return {
@@ -94,64 +88,20 @@ export function importBackup(text) {
   return normalize(raw);
 }
 
-// ---- Timbratura -----------------------------------------------------------
-
-export const openShift = (state) => state.shifts.find((x) => !x.end) || null;
-
-export function clockIn(state, now = new Date()) {
-  if (openShift(state)) throw new Error('C\'è già un turno in corso.');
-  const shift = {
-    id: newId(), start: toStamp(now), end: null, breakMin: 0, pauseStart: null,
-    rate: state.settings.rate, note: '',
-  };
-  state.shifts.push(shift);
-  return shift;
-}
-
-function closePause(shift, now) {
-  if (!shift.pauseStart) return;
-  shift.breakMin += Math.max(0, Math.round((now - parseStamp(shift.pauseStart)) / MIN));
-  shift.pauseStart = null;
-}
-
-export function startPause(state, now = new Date()) {
-  const shift = openShift(state);
-  if (!shift || shift.pauseStart) throw new Error('Nessun turno attivo da mettere in pausa.');
-  shift.pauseStart = toStamp(now);
-  return shift;
-}
-
-export function endPause(state, now = new Date()) {
-  const shift = openShift(state);
-  if (!shift || !shift.pauseStart) throw new Error('Nessuna pausa in corso.');
-  closePause(shift, now);
-  return shift;
-}
-
-export function clockOut(state, now = new Date()) {
-  const shift = openShift(state);
-  if (!shift) throw new Error('Nessun turno in corso.');
-  closePause(shift, now);
-  shift.end = toStamp(now);
-  return shift;
-}
-
 // ---- Inserimento e modifica manuale ---------------------------------------
 
 /** Altri turni che si sovrappongono a [start, end). */
 export function overlapping(state, start, end, ignoreId = null) {
-  return state.shifts.filter((x) => x.id !== ignoreId && x.start < end && (x.end || '9999') > start);
+  return state.shifts.filter((x) => x.id !== ignoreId && x.start < end && x.end > start);
 }
 
-export function saveShift(state, { id = null, start, end, breakMin = 0, rate, note = '' }) {
+export function saveShift(state, { id = null, start, end, rate, note = '' }) {
   if (!STAMP.test(start) || !STAMP.test(end)) throw new Error('Inserisci data e orari.');
   if (end <= start) throw new Error('La fine deve essere dopo l\'inizio.');
-  const gross = (parseStamp(end) - parseStamp(start)) / MIN;
-  if (gross > 24 * 60) throw new Error('Un turno non può durare più di 24 ore.');
-  if (!num(breakMin) || breakMin >= gross) throw new Error('La pausa deve essere più corta del turno.');
+  if ((parseStamp(end) - parseStamp(start)) / MIN > 24 * 60) throw new Error('Un turno non può durare più di 24 ore.');
   if (!num(rate)) throw new Error('Tariffa non valida.');
   if (overlapping(state, start, end, id).length) throw new Error('Si sovrappone a un altro turno.');
-  const data = { start, end, breakMin, pauseStart: null, rate, note: note.trim() };
+  const data = { start, end, rate, note: note.trim() };
   const existing = id && state.shifts.find((x) => x.id === id);
   if (existing) return Object.assign(existing, data);
   const shift = { id: newId(), ...data };
@@ -186,13 +136,3 @@ export function remove(state, kind, id) {
   state[kind] = state[kind].filter((x) => x.id !== id);
 }
 
-/** Corregge il turno in corso (es. timbratura dimenticata). */
-export function updateOpenShift(state, { start, breakMin = 0, note = '' }, now = new Date()) {
-  const shift = openShift(state);
-  if (!shift) throw new Error('Nessun turno in corso.');
-  if (!STAMP.test(start)) throw new Error('Inserisci data e ora di inizio.');
-  if (parseStamp(start) > now) throw new Error('L\'inizio non può essere nel futuro.');
-  if (!num(breakMin)) throw new Error('Pausa non valida.');
-  if (overlapping(state, start, toStamp(now), shift.id).length) throw new Error('Si sovrappone a un altro turno.');
-  return Object.assign(shift, { start, breakMin, note: note.trim() });
-}
