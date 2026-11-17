@@ -1,0 +1,38 @@
+name: Ore Lavoro - APK Android
+
+on:
+  push:
+    paths:
+      - 'ore-lavoro/**'
+      - '.github/workflows/ore-lavoro-apk.yml'
+  workflow_dispatch: {}
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ore-lavoro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ore-lavoro/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm test
+      - run: npm run android
+      - name: Compila l'APK
+        working-directory: ore-lavoro/android
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./gradlew assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ore-lavoro-apk
+          path: ore-lavoro/android/app/build/outputs/apk/release/app-release.apk
