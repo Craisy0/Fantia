@@ -1,7 +1,7 @@
 # Ore Lavoro
 
 App Android per conteggiare le ore lavorative a paga oraria: inserimento dei turni, calendario,
-guadagni con maggiorazioni festive e notturne, ferie/permessi/malattia, saldo ore e saldo paga, promemoria, backup.
+guadagni a tariffa oraria, saldo ore e saldo paga, promemoria, backup.
 
 I dati restano solo sul telefono. Il piano di progetto e le regole di calcolo sono in
 [PROGETTO.md](PROGETTO.md).

@@ -3,20 +3,17 @@ import { parseStamp, toStamp, MIN } from './time.js';
 
 export const VERSION = 1;
 export const STORAGE_KEY = 'ore-lavoro:v1';
-export const ABSENCE_TYPES = ['ferie', 'permesso', 'malattia'];
 
 export function defaultSettings() {
   return {
     rate: 10, currency: '€',
-    festivePct: 30, sundayFestive: true,
-    nightPct: 15, nightStart: '22:00', nightEnd: '06:00',
-    monthlyTargetHours: 0, vacationDaysPerYear: 0, dayHours: 8,
+    monthlyTargetHours: 0,
     reminder: { enabled: false, time: '18:00', days: [1, 2, 3, 4, 5] },
   };
 }
 
 export function emptyState() {
-  return { version: VERSION, settings: defaultSettings(), shifts: [], absences: [], payments: [] };
+  return { version: VERSION, settings: defaultSettings(), shifts: [], payments: [] };
 }
 
 let counter = 0;
@@ -44,25 +41,18 @@ export function normalize(raw) {
   for (const k of Object.keys(base)) s[k] = typeof given[k] === typeof base[k] ? given[k] : base[k];
   s.reminder = { ...base.reminder, ...(given.reminder || {}) };
 
-  // I turni "in corso" delle versioni precedenti (senza fine) vengono scartati.
+  // I turni "in corso" delle versioni precedenti (senza fine) vengono scartati; assenze e
+  // impostazioni che non esistono più vengono ignorate.
   const shifts = raw.shifts.filter((x) => x.end).map((x) => {
     if (!STAMP.test(x.start) || !STAMP.test(x.end)) throw new Error('Turno con orario non valido.');
     if (x.end < x.start) throw new Error('Turno con fine precedente all\'inizio.');
     return { id: String(x.id || newId()), start: x.start, end: x.end, rate: num(x.rate) ? x.rate : s.rate, note: String(x.note || '') };
   });
-  const absences = (raw.absences || []).map((a) => {
-    if (!DAY.test(a.date) || !ABSENCE_TYPES.includes(a.type)) throw new Error('Assenza non valida.');
-    return {
-      id: String(a.id || newId()), date: a.date, type: a.type,
-      hours: num(a.hours) ? a.hours : s.dayHours, paid: Boolean(a.paid),
-      rate: num(a.rate) ? a.rate : s.rate, note: String(a.note || ''),
-    };
-  });
   const payments = (raw.payments || []).map((p) => {
     if (!DAY.test(p.date) || !num(p.amount)) throw new Error('Pagamento non valido.');
     return { id: String(p.id || newId()), date: p.date, amount: p.amount, note: String(p.note || '') };
   });
-  return { version: VERSION, settings: s, shifts, absences, payments };
+  return { version: VERSION, settings: s, shifts, payments };
 }
 
 export function load(storage) {
@@ -95,30 +85,20 @@ export function overlapping(state, start, end, ignoreId = null) {
   return state.shifts.filter((x) => x.id !== ignoreId && x.start < end && x.end > start);
 }
 
-export function saveShift(state, { id = null, start, end, rate, note = '' }) {
+/**
+ * Salva un turno. Un turno nuovo prende la tariffa delle impostazioni di adesso;
+ * uno già esistente conserva la sua, così cambiare tariffa non riscrive il passato.
+ */
+export function saveShift(state, { id = null, start, end, note = '' }) {
   if (!STAMP.test(start) || !STAMP.test(end)) throw new Error('Inserisci data e orari.');
   if (end <= start) throw new Error('La fine deve essere dopo l\'inizio.');
   if ((parseStamp(end) - parseStamp(start)) / MIN > 24 * 60) throw new Error('Un turno non può durare più di 24 ore.');
-  if (!num(rate)) throw new Error('Tariffa non valida.');
   if (overlapping(state, start, end, id).length) throw new Error('Si sovrappone a un altro turno.');
-  const data = { start, end, rate, note: note.trim() };
   const existing = id && state.shifts.find((x) => x.id === id);
-  if (existing) return Object.assign(existing, data);
-  const shift = { id: newId(), ...data };
+  if (existing) return Object.assign(existing, { start, end, note: note.trim() });
+  const shift = { id: newId(), start, end, rate: state.settings.rate, note: note.trim() };
   state.shifts.push(shift);
   return shift;
-}
-
-export function saveAbsence(state, { id = null, date, type, hours, paid = false, note = '' }) {
-  if (!DAY.test(date)) throw new Error('Inserisci la data.');
-  if (!ABSENCE_TYPES.includes(type)) throw new Error('Tipo di assenza non valido.');
-  if (!num(hours) || hours <= 0 || hours > 24) throw new Error('Ore non valide.');
-  const data = { date, type, hours, paid: Boolean(paid), note: note.trim() };
-  const existing = id && state.absences.find((x) => x.id === id);
-  if (existing) return Object.assign(existing, data);
-  const absence = { id: newId(), rate: state.settings.rate, ...data };
-  state.absences.push(absence);
-  return absence;
 }
 
 export function savePayment(state, { id = null, date, amount, note = '' }) {

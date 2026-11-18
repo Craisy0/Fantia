@@ -35,6 +35,5 @@ export function holidayName(key) {
 
 export const isSunday = (key) => parseDay(key).getDay() === 0;
 
-export function isFestive(key, sundayFestive = true) {
-  return holidayName(key) !== null || (sundayFestive && isSunday(key));
-}
+/** Giorno da segnare in rosso: domenica o festività nazionale. */
+export const isFestive = (key) => holidayName(key) !== null || isSunday(key);

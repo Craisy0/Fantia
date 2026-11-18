@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import * as store from './core/store.js';
 import { dateKey, dayOf, timeOf, addDays, addMonths, monthKey } from './core/time.js';
-import { todayView, calendarView, summaryView, settingsView, esc, ABSENCE_LABEL } from './ui/views.js';
+import { todayView, calendarView, summaryView, settingsView, esc } from './ui/views.js';
 import { syncReminders, askPermission } from './platform/notifications.js';
 import { exportFile } from './platform/files.js';
 
@@ -76,7 +76,7 @@ function ask(text, okLabel = 'Conferma', danger = true) {
 async function restore(text) {
   try {
     const next = store.importBackup(text);
-    const msg = `Il backup contiene ${next.shifts.length} turni, ${next.absences.length} assenze e ${next.payments.length} pagamenti.\n\nSostituire i dati attuali?`;
+    const msg = `Il backup contiene ${next.shifts.length} turni e ${next.payments.length} pagamenti.\n\nSostituire i dati attuali?`;
     if (!(await ask(msg, 'Sostituisci'))) return;
     state = next;
     commit();
@@ -140,28 +140,13 @@ function openSheet(title, body, { kind, id = '' }) {
 const field = (label, input) => `<label class="field"><span>${label}</span>${input}</label>`;
 
 function shiftSheet(shift, day) {
-  const s = state.settings;
   const body = `
     ${field('Giorno', `<input name="day" type="date" required value="${shift ? dayOf(shift.start) : day}">`)}
     ${field('Inizio', `<input name="start" type="time" required value="${shift ? timeOf(shift.start) : ''}">`)}
     ${field('Fine', `<input name="end" type="time" required value="${shift ? timeOf(shift.end) : ''}">`)}
-    ${field(`Tariffa (${s.currency}/h)`, `<input name="rate" type="number" inputmode="decimal" min="0" step="0.01" value="${shift ? shift.rate : s.rate}">`)}
     ${field('Nota', `<input name="note" type="text" maxlength="80" value="${shift ? esc(shift.note) : ''}" placeholder="facoltativa">`)}
     <p class="hint">Se la fine è prima dell'inizio, il turno termina il giorno dopo.</p>`;
   openSheet(shift ? 'Modifica turno' : 'Nuovo turno', body, { kind: 'shifts', id: shift?.id });
-}
-
-function absenceSheet(absence, day) {
-  const s = state.settings;
-  const type = absence?.type ?? 'ferie';
-  const options = store.ABSENCE_TYPES.map((t) => `<option value="${t}" ${t === type ? 'selected' : ''}>${ABSENCE_LABEL[t]}</option>`).join('');
-  const body = `
-    ${field('Giorno', `<input name="day" type="date" required value="${absence?.date ?? day}">`)}
-    ${field('Tipo', `<select name="type">${options}</select>`)}
-    ${field('Ore', `<input name="hours" type="number" inputmode="decimal" min="0.5" max="24" step="0.5" value="${absence?.hours ?? s.dayHours}">`)}
-    ${field('Retribuita', `<input name="paid" type="checkbox" class="switch" ${absence?.paid ? 'checked' : ''}>`)}
-    ${field('Nota', `<input name="note" type="text" maxlength="80" value="${absence ? esc(absence.note) : ''}" placeholder="facoltativa">`)}`;
-  openSheet(absence ? 'Modifica assenza' : 'Nuova assenza', body, { kind: 'absences', id: absence?.id });
 }
 
 function paymentSheet(payment) {
@@ -179,10 +164,7 @@ function submitSheet(form) {
   if (kind === 'shifts') {
     const start = `${f.day}T${f.start}`;
     const endDay = f.end <= f.start ? addDays(f.day, 1) : f.day;
-    store.saveShift(state, { id, start, end: `${endDay}T${f.end}`, rate: numberOf(f.rate), note: f.note });
-    ui.day = f.day;
-  } else if (kind === 'absences') {
-    store.saveAbsence(state, { id, date: f.day, type: f.type, hours: numberOf(f.hours), paid: f.paid === 'on', note: f.note });
+    store.saveShift(state, { id, start, end: `${endDay}T${f.end}`, note: f.note });
     ui.day = f.day;
   } else {
     store.savePayment(state, { id, date: f.day, amount: numberOf(f.amount), note: f.note });
@@ -215,8 +197,6 @@ const actions = {
   'pick-day': (el) => { ui.day = el.dataset.day; render(); },
   'add-shift': (el) => shiftSheet(null, el.dataset.day),
   'edit-shift': (el) => shiftSheet(state.shifts.find((x) => x.id === el.dataset.id)),
-  'add-absence': (el) => absenceSheet(null, el.dataset.day),
-  'edit-absence': (el) => absenceSheet(state.absences.find((x) => x.id === el.dataset.id)),
   'add-payment': () => paymentSheet(null),
   'edit-payment': (el) => paymentSheet(state.payments.find((x) => x.id === el.dataset.id)),
   'close-sheet': () => sheet.close(),
@@ -241,7 +221,7 @@ const actions = {
   },
   import: () => (native ? $('#file').click() : backupBox('import')),
   wipe: async () => {
-    const msg = 'Cancellare TUTTI i dati dell\'app?\n\nTurni, assenze, pagamenti e impostazioni verranno eliminati. L\'operazione non si può annullare.';
+    const msg = 'Cancellare TUTTI i dati dell\'app?\n\nTurni, pagamenti e impostazioni verranno eliminati. L\'operazione non si può annullare.';
     if (!(await ask(msg, 'Cancella tutto'))) return;
     state = store.emptyState();
     commit();

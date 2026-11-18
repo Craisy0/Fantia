@@ -5,15 +5,13 @@ import {
 } from '../core/time.js';
 import { holidayName } from '../core/holidays.js';
 import {
-  daySummary, weekSummary, monthSummary, rangeSummary, payBalance, vacationBalance, weekdayIndex,
+  daySummary, weekSummary, monthSummary, rangeSummary, payBalance, weekdayIndex,
 } from '../core/calc.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-export const ABSENCE_LABEL = { ferie: 'Ferie', permesso: 'Permesso', malattia: 'Malattia' };
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
-const hoursLabel = (h) => `${String(Math.round(h * 100) / 100).replace('.', ',')} h`;
 
 // ---- Pezzi condivisi -------------------------------------------------------
 
@@ -21,7 +19,6 @@ function shiftRow(item, currency) {
   const { shift } = item;
   const nextDay = dayOf(shift.end) !== dayOf(shift.start) ? ' <small>+1</small>' : '';
   const tags = [
-    item.night >= 1 ? `notte ${fmtDuration(item.night)}` : '',
     shift.note ? esc(shift.note) : '',
   ].filter(Boolean).join(' · ');
   return `<button class="row" data-action="edit-shift" data-id="${shift.id}">
@@ -30,23 +27,14 @@ function shiftRow(item, currency) {
   </button>`;
 }
 
-function absenceRow(a, currency) {
-  const paid = a.paid ? fmtMoney(a.hours * a.rate, currency) : 'non retribuita';
-  return `<button class="row" data-action="edit-absence" data-id="${a.id}">
-    <span class="row-main"><b><i class="dot ${a.type}"></i>${ABSENCE_LABEL[a.type]}</b>${a.note ? `<small>${esc(a.note)}</small>` : ''}</span>
-    <span class="row-side"><b>${hoursLabel(a.hours)}</b><small>${paid}</small></span>
-  </button>`;
-}
-
 function dayList(d, currency, emptyText) {
-  const rows = d.shifts.map((x) => shiftRow(x, currency)).concat(d.absences.map((a) => absenceRow(a, currency)));
+  const rows = d.shifts.map((x) => shiftRow(x, currency));
   return rows.length ? rows.join('') : `<p class="empty">${emptyText}</p>`;
 }
 
 function addButtons(day) {
   return `<div class="btn-row">
     <button class="btn ghost" data-action="add-shift" data-day="${day}">+ Turno</button>
-    <button class="btn ghost" data-action="add-absence" data-day="${day}">+ Assenza</button>
   </div>`;
 }
 
@@ -126,10 +114,9 @@ export function calendarView(state, ui, now) {
       'cell', day === today ? 'today' : '', day === ui.day ? 'selected' : '',
       d.festive ? 'festive' : '', d.netMin >= 1 ? 'worked' : '',
     ].join(' ');
-    const dots = d.absences.map((a) => `<i class="dot ${a.type}"></i>`).join('');
     const hours = d.netMin >= 1 ? (d.netMin / 60).toFixed(1).replace('.0', '').replace('.', ',') : '';
     cells.push(`<button class="${cls}" data-action="pick-day" data-day="${day}">
-      <b>${parseDay(day).getDate()}</b><small>${hours}${dots}</small>
+      <b>${parseDay(day).getDate()}</b><small>${hours}</small>
     </button>`);
   }
   const d = daySummary(state, ui.day);
@@ -138,7 +125,6 @@ export function calendarView(state, ui, now) {
     <section class="card calendar">
       <div class="weekdays">${['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((x) => `<span>${x}</span>`).join('')}</div>
       <div class="grid">${cells.join('')}</div>
-      <p class="legend"><i class="dot ferie"></i>Ferie <i class="dot permesso"></i>Permesso <i class="dot malattia"></i>Malattia</p>
     </section>
     <section class="card">
       <h2>${cap(fmtDay(ui.day))} <span>${fmtDuration(d.netMin)} · ${fmtMoney(d.pay, cur)}</span></h2>
@@ -158,7 +144,6 @@ export function summaryView(state, ui, now) {
   const m = monthSummary(state, ym);
   const y = rangeSummary(state, `${year}-01-01`, `${year}-12-31`);
   const bal = payBalance(state);
-  const vac = vacationBalance(state, year);
   const { from, to } = monthRange(ym);
   const payments = state.payments.filter((p) => p.date >= from && p.date <= to)
     .sort((a, b) => b.date.localeCompare(a.date));
@@ -176,10 +161,6 @@ export function summaryView(state, ui, now) {
       <span class="row-side"><b>${fmtMoney(p.amount, cur)}</b></span>
     </button>`).join('') : '<p class="empty">Nessun pagamento registrato in questo mese.</p>';
 
-  const vacation = s.vacationDaysPerYear > 0
-    ? `${stat('Ferie residue', `${vac.left} g`, vac.left < 0 ? 'neg' : '')}${stat('Ferie godute', `${vac.used} di ${vac.allowance} g`)}`
-    : stat('Ferie godute', `${vac.used} g`);
-
   return `${monthNav(ym)}
     <section class="card">
       <h2>Ore e guadagni</h2>
@@ -188,9 +169,6 @@ export function summaryView(state, ui, now) {
         ${stat('Guadagno', fmtMoney(m.pay, cur), 'wide')}
         ${stat('Giorni lavorati', m.daysWorked)}
         ${stat('Media al giorno', m.daysWorked ? fmtDuration(m.netMin / m.daysWorked) : '–')}
-        ${stat('Ore notturne', fmtDuration(m.nightMin))}
-        ${stat('Ore festive', fmtDuration(m.festiveMin))}
-        ${stat('Assenze retribuite', fmtMoney(m.absencePay, cur))}
       </div>
     </section>
     <section class="card">
@@ -207,15 +185,6 @@ export function summaryView(state, ui, now) {
       <h3>Pagamenti del mese <span>${fmtMoney(m.payments, cur)}</span></h3>
       ${paymentRows}
       <div class="btn-row"><button class="btn ghost" data-action="add-payment">+ Pagamento ricevuto</button></div>
-    </section>
-    <section class="card">
-      <h2>Assenze</h2>
-      <div class="stats">
-        ${stat('Ferie nel mese', `${m.absences.ferie} g`)}
-        ${stat('Malattia nel mese', `${m.absences.malattia} g`)}
-        ${stat('Permessi nel mese', hoursLabel(m.absences.permesso))}
-        ${vacation}
-      </div>
     </section>
     <section class="card">
       <h2>Anno ${year}</h2>
@@ -243,20 +212,10 @@ export function settingsView(state, native) {
       <h2>Paga</h2>
       ${numField('rate', 'Tariffa oraria', `${s.currency}/h`, '0.01')}
       <p class="hint">La nuova tariffa vale per i turni che registri da ora in poi. Quelli già registrati mantengono la loro.</p>
-      ${numField('festivePct', 'Maggiorazione festivi', '%')}
-      <label class="field"><span>Domenica come festivo</span>
-        <input type="checkbox" class="switch" data-setting="sundayFestive" ${s.sundayFestive ? 'checked' : ''}></label>
-      ${numField('nightPct', 'Maggiorazione notturna', '%')}
-      <label class="field"><span>Fascia notturna</span>
-        <span class="input-unit"><input type="time" data-setting="nightStart" value="${s.nightStart}">
-        <em>–</em><input type="time" data-setting="nightEnd" value="${s.nightEnd}"></span></label>
-      <p class="hint">Metti 0 a una maggiorazione per non applicarla. Le maggiorazioni si sommano.</p>
     </section>
     <section class="card">
-      <h2>Obiettivi e assenze</h2>
+      <h2>Obiettivo</h2>
       ${numField('monthlyTargetHours', 'Obiettivo ore mensili', 'h')}
-      ${numField('vacationDaysPerYear', 'Ferie spettanti', 'giorni/anno')}
-      ${numField('dayHours', 'Ore di una giornata di assenza', 'h', '0.5')}
     </section>
     <section class="card">
       <h2>Promemoria</h2>
@@ -274,7 +233,7 @@ export function settingsView(state, native) {
         <button class="btn ghost" data-action="export">Esporta backup</button>
         <button class="btn ghost" data-action="import">Ripristina da file</button>
       </div>
-      <p class="hint">${state.shifts.length} turni · ${state.absences.length} assenze · ${state.payments.length} pagamenti</p>
+      <p class="hint">${state.shifts.length} turni · ${state.payments.length} pagamenti</p>
       <div class="btn-row"><button class="btn danger-ghost" data-action="wipe">Cancella tutti i dati</button></div>
     </section>
     <p class="version">Ore Lavoro 1.0.0</p>`;
