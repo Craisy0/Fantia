@@ -38,6 +38,9 @@ function addButtons(day) {
   </div>`;
 }
 
+/** Intensità del riempimento nel calendario: 1 (poche ore) … 4 (giornata lunga). */
+const level = (min) => (min <= 120 ? 1 : min <= 300 ? 2 : min <= 480 ? 3 : 4);
+
 const stat = (label, value, cls = '') => `<div class="stat ${cls}"><small>${label}</small><b>${value}</b></div>`;
 
 function monthNav(ym) {
@@ -73,7 +76,7 @@ export function todayView(state, now) {
     const label = 'LMMGVSD'[i];
     return `<div class="bar ${day === today ? 'today' : ''}">
       <small>${min >= 1 ? (min / 60).toFixed(1).replace('.', ',').replace(',0', '') : ''}</small>
-      <i style="height:${Math.round((min / max) * 100)}%"></i><span>${label}</span>
+      <div class="track"><i style="height:${Math.round((min / max) * 100)}%"></i></div><span>${label}</span>
     </div>`;
   }).join('');
 
@@ -84,7 +87,6 @@ export function todayView(state, now) {
     <section class="card">
       <h2>Oggi</h2>
       ${dayList(d, cur, 'Nessun turno registrato oggi.')}
-      ${addButtons(today)}
     </section>
     <section class="card">
       <h2>Questa settimana <span>${fmtDuration(week.netMin)} · ${fmtMoney(week.pay, cur)}</span></h2>
@@ -112,7 +114,7 @@ export function calendarView(state, ui, now) {
     const d = daySummary(state, day);
     const cls = [
       'cell', day === today ? 'today' : '', day === ui.day ? 'selected' : '',
-      d.festive ? 'festive' : '', d.netMin >= 1 ? 'worked' : '',
+      d.festive ? 'festive' : '', d.netMin >= 1 ? `worked lv${level(d.netMin)}` : '',
     ].join(' ');
     const hours = d.netMin >= 1 ? (d.netMin / 60).toFixed(1).replace('.0', '').replace('.', ',') : '';
     cells.push(`<button class="${cls}" data-action="pick-day" data-day="${day}">
@@ -223,7 +225,7 @@ export function settingsView(state, native) {
         <input type="checkbox" class="switch" data-setting="reminder.enabled" ${s.reminder.enabled ? 'checked' : ''}></label>
       <label class="field"><span>Orario</span>
         <input type="time" data-setting="reminder.time" value="${s.reminder.time}"></label>
-      <div class="field"><span>Giorni</span><span class="chips">${dayChips}</span></div>
+      <div class="field stack"><span>Giorni</span><span class="chips">${dayChips}</span></div>
       ${native ? '' : '<p class="hint">Le notifiche funzionano solo nell\'app installata sul telefono.</p>'}
     </section>
     <section class="card">

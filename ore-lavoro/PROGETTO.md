@@ -70,6 +70,19 @@ Ogni punto si chiude con una revisione (test o prova a schermo) prima di passare
 | 10 | Compilazione automatica su GitHub | workflow |
 | 11 | Revisione finale | test + prova completa |
 
+## 4b. Linee grafiche
+
+Scelte prese dopo una ricerca su Material 3, linee guida per cruscotti mobili e sistemi di colore aperti
+(Radix Colors):
+
+- Superfici a toni (sfondo, scheda, tessera) invece di ombre e bordi.
+- Una sola scheda colorata per schermata (il totale di oggi): il resto resta neutro.
+- Bersagli di tocco di almeno 48 px; testo almeno 12 px, corpo 16 px.
+- Contrasti controllati da `npm run contrast` (4,5:1 per il testo, 3:1 per bordi e interruttori),
+  perché alcune palette "accessibili" pubblicate hanno coppie sotto soglia.
+- Inter incluso nell'app (funziona offline), cifre allineate in colonna.
+- Calendario con riempimento in 4 livelli in base alle ore.
+
 ## 5. Fuori dal perimetro (per ora)
 
 Sincronizzazione cloud, più datori di lavoro con tariffe diverse, esportazione PDF, iPhone.

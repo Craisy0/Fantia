@@ -4,7 +4,11 @@ import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 
 const assets = readdirSync('dist/assets');
 const read = (re) => readFileSync(`dist/assets/${assets.find((f) => re.test(f))}`, 'utf8');
-const css = read(/^index-.*\.css$/);
+// Il font viene incorporato come data URI: la pagina unica non ha altri file.
+const css = read(/^index-.*\.css$/).replace(/url\(([^)]*?\.woff2)\)/g, (_, path) => {
+  const file = path.replace(/^["']|["']$/g, '').replace(/^\.?\//, '').replace(/^assets\//, '');
+  return `url(data:font/woff2;base64,${readFileSync(`dist/assets/${file}`).toString('base64')})`;
+});
 const js = read(/^index-.*\.js$/).replaceAll('</script', '<\\/script');
 const body = readFileSync('index.html', 'utf8').match(/<body>([\s\S]*?)<script/)[1].trim();
 

@@ -26,6 +26,7 @@ jobs:
           java-version: 21
       - run: npm ci
       - run: npm test
+      - run: npm run contrast
       - run: npm run android
       - name: Compila l'APK
         working-directory: ore-lavoro/android
