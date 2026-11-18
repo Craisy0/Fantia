@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ore Lavoro</string>
+    <string name="title_activity_main">Ore Lavoro</string>
+    <string name="package_name">it.orelavoro.app</string>
+    <string name="custom_url_scheme">it.orelavoro.app</string>
+</resources>

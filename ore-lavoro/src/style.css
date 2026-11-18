@@ -1,0 +1,286 @@
+@import 'open-props/shadows.min.css';
+@import 'open-props/easings.min.css';
+@import './tokens.css';
+
+/* Inter per il testo, Bricolage Grotesque per titoli e numeri. Inclusi nell'app (solo latino): stesso aspetto su ogni telefono, anche offline. */
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url('../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 200 800; font-display: swap;
+  src: url('../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+/*
+ * Idea: il quadrante di un orologio. Indaco = ore, verde acqua = paga (le due cose che l'app misura).
+ * Sfondo chiaro e uniforme. I colori vengono da Radix Colors
+ * (src/tokens.css, generato) e i contrasti si verificano con `npm run contrast`.
+ */
+:root {
+  --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 20px; --fs-xl: 28px; --fs-2xl: 36px;
+  --top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  --hero: linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 62%, var(--hero-c) 100%);
+  --on-hero-muted: rgb(255 255 255 / .92);
+  --tick: rgb(255 255 255 / .45); --tick-strong: rgb(255 255 255 / .85);
+  --shadow-color: 228 60% 30%;            /* ombre di Open Props, tinte di indaco */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --shadow-color: 230 70% 3%; --shadow-strength: 14%; }
+}
+:root[data-theme="dark"] { --shadow-color: 230 70% 3%; --shadow-strength: 14%; }
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; background: var(--bg); -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
+body {
+  margin: 0; min-height: 100%; background: transparent; color: var(--text);
+  font: var(--fs-md)/1.45 var(--font-text);
+  font-feature-settings: 'cv11', 'ss03'; /* "a" a un piano e zero più chiari */
+  overscroll-behavior: none; -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+/* mobile-native: i comandi non si selezionano al tocco prolungato, il testo sì; tocco senza ritardo */
+button, a, [role="button"] { touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { font-family: var(--font-display); }
+small { color: var(--muted); font-size: var(--fs-sm); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#view {
+  max-width: 560px; margin: 0 auto;
+  padding-block: calc(var(--top) + 20px) calc(var(--bottom) + 108px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* Intestazioni */
+.title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 4px; }
+.title h1, .month-nav h1 { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
+.title h1::first-letter, .month-nav h1::first-letter, .card h2::first-letter { text-transform: uppercase; }
+.month-nav { display: flex; align-items: center; justify-content: space-between; }
+.icon { width: 48px; height: 48px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; box-shadow: var(--shadow-1); }
+
+/* Schede: un tono più alto dello sfondo, ombra tinta di indaco */
+.card { background: var(--surface); border-radius: 24px; padding: 20px 16px 16px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: var(--shadow-2);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--line) 80%, transparent), var(--shadow-2); }
+.card h2 { font-size: var(--fs-md); font-weight: 700; letter-spacing: -.01em; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card h3 { font-size: var(--fs-sm); font-weight: 600; display: flex; justify-content: space-between; margin-top: 8px; }
+.card h3 span { font-size: var(--fs-sm); font-weight: 400; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hint { color: var(--muted); font-size: var(--fs-sm); }
+
+/* Scheda principale: l'unico punto audace di ogni schermata. Oggi è un quadrante. */
+.hero { position: relative; overflow: hidden; isolation: isolate; background: var(--hero); color: var(--on-hero); border-radius: 32px;
+  padding: 24px 16px 16px; display: flex; flex-direction: column; align-items: center; gap: 16px;
+  box-shadow: 0 22px 40px -20px hsl(228 75% 32% / .6), var(--shadow-3); }
+.hero::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(110% 70% at 0% 0%, rgb(255 255 255 / .2), transparent 58%); }
+.hero .btn { width: 100%; }
+.status { color: var(--on-hero-muted); font-size: var(--fs-sm); font-weight: 600; }
+.dial { position: relative; width: min(60vw, 224px); aspect-ratio: 1; }
+.dial svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.dial .tick-m { stroke: var(--tick); } .dial .tick-h { stroke: var(--tick-strong); }
+.dial .arc-track { stroke: rgb(255 255 255 / .2); }
+.dial .arc { stroke: #fff; filter: drop-shadow(0 0 6px rgb(255 255 255 / .5)); }
+.dial-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; }
+.dial-c small { color: var(--on-hero-muted); font-weight: 600; }
+.dial-c b { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.dial-c b.long { font-size: var(--fs-xl); }
+.dial-c span { font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.hero.compact { align-items: flex-start; text-align: left; gap: 2px; padding: 24px 20px; }
+.hero.compact .clock { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.hero.compact .earning { font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.hero-ring { position: absolute; z-index: -1; right: -48px; top: -48px; width: 200px; height: 200px; pointer-events: none; }
+.hero-ring .tick-m { stroke: rgb(255 255 255 / .35); } .hero-ring .tick-h { stroke: rgb(255 255 255 / .6); }
+
+/* Pulsanti: almeno 48 px, feedback alla pressione (mobile-native / emil-design-eng) */
+.btn-row { display: flex; gap: 12px; }
+.btn-row .btn { flex: 1; }
+.btn { min-height: 48px; padding: 0 20px; border-radius: 16px; font-weight: 600; transition: transform .1s var(--ease-out-3), opacity .1s; }
+.btn.big { min-height: 56px; font-size: var(--fs-md); border-radius: 20px; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.light { background: #fff; color: var(--hero-c); }
+.btn.ghost { background: var(--accent-soft); color: var(--accent-ink); }
+.btn.danger { background: var(--danger-solid); color: var(--on-danger); }
+.btn.danger-ghost { background: var(--danger-soft); color: var(--danger); }
+.btn.plain { background: transparent; color: var(--muted); }
+.btn-col { display: flex; flex-direction: column; gap: 8px; }
+.btn-col .btn { width: 100%; }
+.btn:active, .icon:active { transform: scale(.97); }
+.row:active, .cell:active { opacity: .7; }
+
+/* Righe */
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 56px; text-align: left; padding: 8px 0; border-top: 1px solid var(--line); }
+.row-main, .row-side { display: flex; flex-direction: column; min-width: 0; }
+.row-main b { font-weight: 600; }
+.row-main small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-side { text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.row-side b { font-weight: 600; }
+
+/* Icone a tessera: indaco per le ore, verde acqua per la paga */
+.ic { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; flex-shrink: 0; }
+.ic.hours { background: var(--accent-soft); color: var(--accent-ink); }
+.ic.money { background: var(--money-soft); color: var(--money-ink); }
+.ic.big { width: 64px; height: 64px; border-radius: 50%; }
+
+/* Statistiche */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat { background: var(--surface-2); border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 12px; min-width: 0; }
+.stat > div { display: flex; flex-direction: column; min-width: 0; }
+.stat b { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pairs { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 0; }
+.pairs.row-2 { flex-direction: row; gap: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pairs.row-2 .pair { flex: 1; }
+.pair { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pair > div { display: flex; flex-direction: column; min-width: 0; }
+.pair b { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pair.big b { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -.02em; }
+.stat.neg b, .pair.neg b { color: var(--danger); } .pair.pos b { color: var(--money); }
+
+/* Barre della settimana: ogni giorno ha la sua guida, il riempimento è l'ora lavorata */
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; height: 132px; }
+.bar { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; height: 100%; }
+.bar small { font-size: var(--fs-xs); height: 16px; font-variant-numeric: tabular-nums; }
+.bar .track { flex: 1; width: 100%; max-width: 32px; background: var(--line); border-radius: 12px; display: flex; align-items: flex-end; overflow: hidden; }
+.bar .track i { width: 100%; background: var(--bar); border-radius: 12px; }
+.bar.today .track i { background: var(--bar-hi); }
+.bar span { font-size: var(--fs-xs); color: var(--muted); }
+.bar.today span { color: var(--accent-ink); font-weight: 700; }
+
+/* Calendario: più ore, riempimento più intenso */
+.weekdays, .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.weekdays span { text-align: center; font-size: var(--fs-xs); color: var(--muted); }
+.cell { position: relative; aspect-ratio: 1 / 1.1; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.cell b { font-weight: 400; font-variant-numeric: tabular-nums; }
+.cell small { font-size: var(--fs-xs); min-height: 15px; font-variant-numeric: tabular-nums; }
+.cell.worked { background: var(--accent-soft); }
+.cell.worked small { color: var(--text); font-weight: 600; }
+.cell.lv1 { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+.cell.lv2 { background: color-mix(in srgb, var(--accent) 26%, var(--surface)); }
+.cell.lv3 { background: color-mix(in srgb, var(--accent) 40%, var(--surface)); }
+.cell.lv4 { background: color-mix(in srgb, var(--accent) 54%, var(--surface)); }
+/* Domeniche e festività: puntino rosso come apice del numero, con anello del colore della scheda */
+.cell.festive::after { content: ''; position: absolute; top: 7px; left: calc(50% + 11px); width: 6px; height: 6px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 2px var(--surface); }
+.cell.today b { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.cell.selected { background: var(--accent); }
+.cell.selected b, .cell.selected small { color: var(--on-accent); }
+
+/* Etichette */
+.chip { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: var(--fs-xs); font-weight: 600; background: var(--surface-2); }
+.chip.festive { background: var(--danger-soft); color: var(--danger); }
+.chips { display: flex; gap: 8px; width: 100%; }
+.chip.toggle { flex: 1; min-width: 0; height: 48px; padding: 0; border-radius: 16px; color: var(--muted); font-weight: 600; }
+.chip.toggle.on { background: var(--accent); color: var(--on-accent); }
+
+/* Campi */
+.field { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; }
+.field > span:first-child { flex: 1; }
+.field.stack { flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: 4px; }
+input[type="number"], input[type="time"], input[type="date"], input[type="text"], select {
+  background: var(--surface-2); border: 1px solid var(--outline); border-radius: 12px; padding: 12px;
+  min-height: 48px; user-select: text; max-width: 100%; font-size: var(--fs-md);
+}
+input[type="number"] { width: 96px; text-align: right; font-variant-numeric: tabular-nums; }
+input[type="text"] { width: 60%; }
+/* Nei moduli i campi hanno tutti la stessa larghezza; la nota occupa la riga intera. */
+dialog .field input:not(.switch), dialog .field select { width: 188px; text-align: left; }
+.field.stack input[type="text"] { width: 100%; }
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.input-unit { display: flex; align-items: center; gap: 8px; }
+.input-unit em { font-style: normal; color: var(--muted); font-size: var(--fs-sm); }
+.switch { appearance: none; width: 52px; height: 32px; border-radius: 16px; background: var(--surface-2); border: 2px solid var(--outline); position: relative; flex-shrink: 0; transition: background .15s, border-color .15s; }
+.switch::after { content: ''; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: var(--outline); transition: transform .15s, background .15s, width .15s, height .15s, top .15s, left .15s; }
+.switch:checked { background: var(--accent); border-color: var(--accent); }
+.switch:checked::after { background: var(--knob); width: 24px; height: 24px; top: 2px; left: 2px; transform: translateX(20px); }
+.version { text-align: center; color: var(--muted); font-size: var(--fs-xs); }
+
+/* Barra in basso: pillola fluttuante; la scheda attiva è piena */
+#tabs {
+  position: fixed; z-index: 5; display: flex; gap: 4px; padding: 6px; max-width: 480px; margin: 0 auto;
+  left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(var(--bottom) + 12px);
+  border-radius: 30px; background: var(--surface); background: color-mix(in srgb, var(--surface) 84%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: var(--shadow-4);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--line) 80%, transparent), var(--shadow-4);
+}
+#tabs button { flex: 1; min-height: 56px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: var(--fs-xs); color: var(--muted); transition: background .15s, color .15s; }
+#tabs button.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+
+/* Modulo a comparsa */
+dialog {
+  border: 0; padding: 0; margin: auto auto 0; width: 100%; max-width: 560px; max-height: 92vh; max-height: 92dvh;
+  background: var(--surface); color: var(--text); border-radius: 28px 28px 0 0; overflow-y: auto; overscroll-behavior: contain;
+}
+dialog[open] { animation: rise .22s var(--ease-out-3); }
+dialog::backdrop { background: rgb(8 10 28 / .55); }
+dialog form { padding: 24px 16px calc(var(--bottom) + 16px); display: flex; flex-direction: column; gap: 8px; }
+dialog h2 { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+dialog .btn-row { margin-top: 12px; }
+.error { color: var(--danger); font-weight: 600; font-size: var(--fs-sm); }
+@keyframes rise { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+
+#toast {
+  position: fixed; left: 16px; right: 16px; bottom: calc(var(--bottom) + 92px); margin: 0 auto; max-width: 420px;
+  background: var(--text); color: var(--bg); padding: 14px 16px; border-radius: 16px; text-align: center;
+  font-size: var(--fs-sm); opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s; z-index: 10;
+}
+#toast.show { opacity: 1; transform: none; }
+
+/* Conferme e backup */
+#confirm { margin: auto; width: calc(100% - 32px); max-width: 420px; border-radius: 28px; background: var(--surface); color: var(--text); border: 0; padding: 0; }
+#confirm::backdrop { background: rgb(8 10 28 / .55); }
+.box { padding: 24px 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+.box h2 { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.02em; }
+.box p { white-space: pre-line; color: var(--muted); }
+.box textarea {
+  width: 100%; background: var(--surface-2); color: var(--text); border: 1px solid var(--outline); border-radius: 12px;
+  padding: 12px; font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; user-select: text; resize: vertical;
+}
+
+/* Stato vuoto */
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px 8px; text-align: center; color: var(--muted); }
+.empty-state .ic { margin-bottom: 8px; }
+.empty-state b { color: var(--text); font-weight: 600; }
+
+/* Ore e guadagno affiancati nelle intestazioni */
+.card h2 .sum, .readout .sum { display: inline-flex; align-items: baseline; gap: 8px; white-space: nowrap; font-family: var(--font-text); }
+.card h2 .sum { font-size: var(--fs-sm); font-weight: 400; }
+.sum b { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.sum em { font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Grafico delle ore del mese: un colore, una scala, riga tratteggiata a 8 ore */
+.mchart-wrap { display: flex; flex-direction: column; gap: 4px; padding-right: 32px; } /* margine per la scritta della riga a 8 ore */
+.mchart { touch-action: pan-y; position: relative; height: 128px; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; align-items: stretch; border-bottom: 1px solid var(--outline); }
+.mchart:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+.mgrid { position: absolute; left: 0; right: -32px; border-top: 1px dashed var(--outline); pointer-events: none; }
+.mgrid em { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 28px; text-align: right; font-style: normal; font-size: var(--fs-xs); color: var(--muted); background: var(--surface); }
+.mcol { position: relative; display: flex; align-items: flex-end; justify-content: center; min-width: 0; border-radius: 6px 6px 0 0; }
+.mcol i { display: block; width: 100%; max-width: 8px; background: var(--bar); border-radius: 4px 4px 0 0; }
+.mcol i.none { height: 0; }
+.mcol.sel { background: var(--surface-2); }
+.mcol.sel i { background: var(--bar-hi); }
+.mticks { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mticks span { justify-self: center; white-space: nowrap; }
+.readout { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 24px; color: var(--muted); font-size: var(--fs-sm); }
+
+/* Anello dell'obiettivo mensile */
+.ring-row { display: flex; align-items: center; gap: 24px; }
+.ringwrap { position: relative; width: 104px; height: 104px; flex-shrink: 0; display: grid; place-items: center; }
+.ringwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ring-track { fill: none; stroke: var(--line); stroke-width: 12; }
+.ring-fill { fill: none; stroke: var(--mark); stroke-width: 12; stroke-linecap: round; }
+.ringwrap b { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Movimento: solo come risposta al cambio di scheda. Il contenuto compare in dissolvenza e l'arco del quadrante si riempie. */
+@keyframes fade { from { opacity: 0; } }
+@keyframes sweep { from { stroke-dasharray: 0 100; } }
+#view.enter > * { animation: fade .18s ease-out both; }
+#view.enter .sweep { animation: sweep .9s var(--ease-out-4) .08s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

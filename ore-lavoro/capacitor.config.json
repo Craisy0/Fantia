@@ -1,0 +1,8 @@
+{
+  "appId": "it.orelavoro.app",
+  "appName": "Ore Lavoro",
+  "webDir": "dist",
+  "plugins": {
+    "LocalNotifications": { "iconColor": "#2F6FED" }
+  }
+}

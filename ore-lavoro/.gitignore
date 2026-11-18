@@ -1,0 +1,4 @@
+node_modules/
+dist/
+*.apk
+tests/e2e/out/
