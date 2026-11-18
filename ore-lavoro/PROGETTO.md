@@ -32,6 +32,8 @@ Regole di calcolo:
 - Ogni turno salva la **tariffa del momento**: cambiare tariffa non riscrive il passato.
 - Paga di un turno = ore × tariffa oraria. Nessuna maggiorazione.
 - Il turno nuovo prende la tariffa delle impostazioni, senza campo nel modulo; modificarlo non la cambia.
+- Cambiando la tariffa, se ci sono turni già registrati con una tariffa diversa l'app chiede se ricalcolare anche quelli
+  (mostrando quanti sono e il guadagno prima e dopo), o applicarla solo ai turni nuovi, o annullare.
 - Domeniche e festività nazionali italiane sono solo segnate in rosso nel calendario.
 - Saldo ore = ore lavorate − obiettivo mensile. Saldo paga = maturato − pagamenti ricevuti.
 

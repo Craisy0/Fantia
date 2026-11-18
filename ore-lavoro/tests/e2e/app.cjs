@@ -116,9 +116,12 @@ async function main(scheme) {
   assert.doesNotMatch(paga, /Maggiorazione|Domenica|Fascia|Straord/);
   assert.equal(await page.locator('[data-setting]').evaluateAll((els) => els.map((e) => e.dataset.setting).sort().join(',')),
     'monthlyTargetHours,rate,reminder.enabled,reminder.time');
-  for (const [k, v] of [['monthlyTargetHours', '20'], ['rate', '12.5']]) {
-    await page.fill(`[data-setting=${k}]`, v); await page.locator(`[data-setting=${k}]`).blur();
-  }
+  await page.fill('[data-setting=monthlyTargetHours]', '20'); await page.locator('[data-setting=monthlyTargetHours]').blur();
+  await page.fill('[data-setting=rate]', '12.5'); await page.locator('[data-setting=rate]').blur();
+  // Con turni già registrati a 10 €/h il cambio di tariffa chiede se ricalcolarli: qui si sceglie "solo i turni nuovi"
+  assert.match(await text('#confirm'), /Applicare la nuova tariffa anche ai turni già registrati/);
+  assert.match(await text('#confirm'), /da 10,00 € a 12,50 €/);
+  await page.click('[data-answer=new]');
   await page.check('[data-setting="reminder.enabled"]');
   await page.click('[data-action=reminder-day][data-day="6"]');
   await page.screenshot({ path: S + '6-impostazioni.png', fullPage: true });
@@ -162,6 +165,32 @@ async function main(scheme) {
   await page.click('dialog [data-action=delete]'); await page.click('[data-answer=yes]');
   assert.equal(await page.locator('.row').count(), 1);
   assert.deepEqual(page.errors, []);
+
+  // Cambio di tariffa: annulla / solo i nuovi / ricalcola i precedenti
+  const simple = JSON.stringify({ version: 1, settings: { rate: 10, currency: '€', monthlyTargetHours: 0, reminder: { enabled: false, time: '18:00', days: [] } },
+    shifts: [{ id: 'a', start: '2026-11-16T08:00', end: '2026-11-16T12:00', rate: 10, note: '' }, { id: 'b', start: '2026-11-17T08:00', end: '2026-11-17T12:00', rate: 10, note: '' }], payments: [] });
+  const p3 = await mk(`if (!localStorage.getItem('ore-lavoro:v1')) localStorage.setItem('ore-lavoro:v1', ${JSON.stringify(simple)});`);
+  const monthPay = async () => { await p3.click('[data-tab=riepilogo]'); return (await p3.innerText('.hero')).replace(/\s+/g, ' '); };
+  const setRate = async (v) => { await p3.click('[data-tab=impostazioni]'); await p3.fill('[data-setting=rate]', v); await p3.locator('[data-setting=rate]').blur(); };
+  assert.match(await monthPay(), /80,00/);                                   // 8 h x 10 €
+  await setRate('15');
+  assert.match(await p3.innerText('#confirm'), /2 turni hanno una tariffa diversa/);
+  assert.match(await p3.innerText('#confirm'), /da 80,00 € a 120,00 €/);
+  await p3.click('[data-answer=no]');                                          // annulla: il campo torna a 10
+  assert.equal(await p3.inputValue('[data-setting=rate]'), '10');
+  assert.match(await monthPay(), /80,00/);
+  await setRate('15'); await p3.click('[data-answer=new]');                  // solo i nuovi: i vecchi restano a 10
+  assert.equal(await p3.inputValue('[data-setting=rate]'), '15');
+  assert.match(await monthPay(), /80,00/);
+  await setRate('20');                                                         // ora i due turni sono ancora a 10
+  assert.match(await p3.innerText('#confirm'), /da 80,00 € a 160,00 €/);
+  await p3.click('[data-answer=all]');                                         // ricalcola tutti a 20 €/h
+  assert.match(await p3.innerText('#toast'), /Tariffa applicata a 2 turni/);
+  assert.match(await monthPay(), /160,00/);
+  await p3.click('[data-tab=impostazioni]');                                   // stessa tariffa di nuovo: nessuna finestra
+  await p3.fill('[data-setting=rate]', '20'); await p3.locator('[data-setting=rate]').blur();
+  assert.equal(await p3.locator('#confirm[open]').count(), 0);
+  assert.deepEqual(p3.errors, []);
 
   // Dati salvati dalle versioni precedenti: turno aperto scartato, assenze e campi vecchi ignorati
   const old = JSON.stringify({ version: 1,

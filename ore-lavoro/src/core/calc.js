@@ -7,6 +7,23 @@ const round2 = (n) => Math.round(n * 100) / 100;
 /** Minuti di un turno. */
 export const shiftMinutes = (shift) => Math.max(0, (parseStamp(shift.end) - parseStamp(shift.start)) / MIN);
 
+/**
+ * Effetto di una nuova tariffa sui turni già registrati: quanti cambierebbero e il guadagno
+ * complessivo di quei turni prima e dopo (con gli stessi arrotondamenti del riepilogo).
+ */
+export function rateImpact(state, rate) {
+  let changed = 0;
+  let before = 0;
+  let after = 0;
+  for (const s of state.shifts) {
+    const hours = shiftMinutes(s) / 60;
+    before += round2(hours * s.rate);
+    after += round2(hours * rate);
+    if (s.rate !== rate) changed += 1;
+  }
+  return { changed, before: round2(before), after: round2(after) };
+}
+
 /** Riepilogo di un giorno: ore per tariffa oraria del turno. */
 export function daySummary(state, day) {
   const shifts = state.shifts.filter((x) => dayOf(x.start) === day)

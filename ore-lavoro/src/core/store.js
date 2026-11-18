@@ -101,6 +101,16 @@ export function saveShift(state, { id = null, start, end, note = '' }) {
   return shift;
 }
 
+/** Applica una tariffa a tutti i turni già registrati; restituisce quanti sono cambiati. */
+export function applyRateToShifts(state, rate) {
+  if (!num(rate)) throw new Error('Tariffa non valida.');
+  let changed = 0;
+  for (const s of state.shifts) {
+    if (s.rate !== rate) { s.rate = rate; changed += 1; }
+  }
+  return changed;
+}
+
 export function savePayment(state, { id = null, date, amount, note = '' }) {
   if (!DAY.test(date)) throw new Error('Inserisci la data.');
   if (!num(amount) || amount <= 0) throw new Error('Importo non valido.');

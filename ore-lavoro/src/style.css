@@ -107,6 +107,9 @@ small { color: var(--muted); font-size: var(--fs-sm); }
 .btn.ghost { background: var(--accent-soft); color: var(--accent-ink); }
 .btn.danger { background: var(--danger-solid); color: var(--on-danger); }
 .btn.danger-ghost { background: var(--danger-soft); color: var(--danger); }
+.btn.plain { background: transparent; color: var(--muted); }
+.btn-col { display: flex; flex-direction: column; gap: 8px; }
+.btn-col .btn { width: 100%; }
 .btn:active, .icon:active { transform: scale(.97); }
 .row:active, .cell:active { opacity: .7; }
 

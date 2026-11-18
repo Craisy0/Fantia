@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fmtDuration, weekStart, monthRange, addMonths, parseStamp, addDays } from '../src/core/time.js';
 import { easter, holidayName, isFestive } from '../src/core/holidays.js';
-import { daySummary, monthSummary, weekSummary, payBalance } from '../src/core/calc.js';
+import { daySummary, monthSummary, weekSummary, payBalance, rateImpact } from '../src/core/calc.js';
 import * as store from '../src/core/store.js';
 import { dateKey } from '../src/core/time.js';
 
@@ -63,6 +63,28 @@ test('la tariffa si fissa alla creazione del turno e non cambia con le impostazi
   // modificare un turno esistente non gli cambia la tariffa
   store.saveShift(st, { id: st.shifts[0].id, start: '2026-11-17T08:00', end: '2026-11-17T11:00' });
   assert.equal(daySummary(st, '2026-11-17').pay, 30);
+});
+
+test('cambio di tariffa: effetto sui turni già registrati e applicazione a tutti', () => {
+  const st = stateWith([
+    { start: '2026-11-17T08:00', end: '2026-11-17T12:00' },   // 4 h
+    { start: '2026-11-18T08:00', end: '2026-11-18T10:00' },   // 2 h
+  ]);
+  assert.deepEqual(rateImpact(st, 10), { changed: 0, before: 60, after: 60 });
+  assert.deepEqual(rateImpact(st, 15), { changed: 2, before: 60, after: 90 });
+  assert.deepEqual(rateImpact(stateWith(), 15), { changed: 0, before: 0, after: 0 });
+
+  st.settings.rate = 15;                                    // i turni nuovi prendono 15, i vecchi restano a 10
+  store.saveShift(st, { start: '2026-11-19T08:00', end: '2026-11-19T09:00' });
+  assert.deepEqual(rateImpact(st, 15), { changed: 2, before: 75, after: 105 });   // tutti e 3 i turni (7 h) a 15 €
+  assert.equal(monthSummary(st, '2026-11').pay, 75);
+
+  assert.equal(store.applyRateToShifts(st, 15), 2);
+  assert.deepEqual(st.shifts.map((s) => s.rate), [15, 15, 15]);
+  assert.equal(monthSummary(st, '2026-11').pay, 105);      // 7 h x 15
+  assert.equal(store.applyRateToShifts(st, 15), 0);        // già tutti a 15
+  assert.throws(() => store.applyRateToShifts(st, -1), /non valida/);
+  assert.throws(() => store.applyRateToShifts(st, NaN), /non valida/);
 });
 
 test('domeniche e festivi non cambiano la paga', () => {

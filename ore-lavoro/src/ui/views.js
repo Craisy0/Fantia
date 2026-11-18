@@ -303,7 +303,7 @@ export function settingsView(state, native) {
     <section class="card">
       <h2>Paga</h2>
       ${numField('rate', 'Tariffa oraria', `${s.currency}/h`, '0.01')}
-      <p class="hint">La nuova tariffa vale per i turni che registri da ora in poi. Quelli già registrati mantengono la loro.</p>
+      <p class="hint">Se la cambi, l'app ti chiede se applicarla anche ai turni già registrati.</p>
     </section>
     <section class="card">
       <h2>Obiettivo</h2>

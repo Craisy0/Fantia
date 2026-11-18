@@ -2,7 +2,8 @@
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import * as store from './core/store.js';
-import { dateKey, dayOf, timeOf, addDays, addMonths, monthKey } from './core/time.js';
+import { rateImpact } from './core/calc.js';
+import { dateKey, dayOf, timeOf, addDays, addMonths, monthKey, fmtMoney } from './core/time.js';
 import { todayView, calendarView, summaryView, settingsView, readoutHtml, chartText, esc, count } from './ui/views.js';
 import { syncReminders, askPermission } from './platform/notifications.js';
 import { exportFile } from './platform/files.js';
@@ -79,6 +80,34 @@ function ask(text, okLabel = 'Conferma', danger = true) {
       if (a) { box.close(); resolve(a.dataset.answer === 'yes'); }
     };
     box.oncancel = () => resolve(false);
+    box.showModal();
+  });
+}
+
+/**
+ * Cambio di tariffa con turni già registrati: chiede se ricalcolare anche quelli.
+ * Risolve 'all' (ricalcola i precedenti), 'new' (solo i turni nuovi) o null (annulla).
+ */
+function chooseRate(impact, from, to) {
+  const cur = state.settings.currency;
+  return new Promise((resolve) => {
+    box.innerHTML = `<div class="box">
+      <h2>Applicare la nuova tariffa anche ai turni già registrati?</h2>
+      <p>Tariffa oraria: da ${fmtMoney(from, cur)} a ${fmtMoney(to, cur)}.
+${count(impact.changed, 'turno ha', 'turni hanno')} una tariffa diversa.
+Guadagno dei turni registrati: da ${fmtMoney(impact.before, cur)} a ${fmtMoney(impact.after, cur)}.</p>
+      <div class="btn-col">
+        <button class="btn primary" data-answer="all">Ricalcola i turni precedenti</button>
+        <button class="btn ghost" data-answer="new">Solo i turni nuovi</button>
+        <button class="btn plain" data-answer="no">Annulla</button>
+      </div></div>`;
+    box.onclick = (e) => {
+      const a = e.target.closest('[data-answer]');
+      if (!a) return;
+      box.close();
+      resolve(a.dataset.answer === 'no' ? null : a.dataset.answer);
+    };
+    box.oncancel = () => resolve(null);
     box.showModal();
   });
 }
@@ -265,6 +294,23 @@ view.addEventListener('change', async (e) => {
   if (key === 'reminder.enabled' && value && native && !(await askPermission())) {
     toast('Permesso notifiche negato: attivalo dalle impostazioni di Android.');
     value = false;
+  }
+  if (key === 'rate' && value !== state.settings.rate) {
+    const impact = rateImpact(state, value);
+    if (impact.changed > 0) {
+      const choice = await chooseRate(impact, state.settings.rate, value);
+      if (!choice) { render(); return; }               // annullato: il campo torna al valore di prima
+      state.settings.rate = value;
+      if (choice === 'all') {
+        const n = store.applyRateToShifts(state, value);
+        commit();
+        toast(`Tariffa applicata a ${count(n, 'turno', 'turni')}`);
+      } else {
+        commit();
+        toast('Tariffa valida dai prossimi turni');
+      }
+      return;
+    }
   }
   if (key.startsWith('reminder.')) state.settings.reminder[key.slice(9)] = value;
   else state.settings[key] = value;
