@@ -72,16 +72,27 @@ Ogni punto si chiude con una revisione (test o prova a schermo) prima di passare
 
 ## 4b. Linee grafiche
 
-Scelte prese dopo una ricerca su Material 3, linee guida per cruscotti mobili e sistemi di colore aperti
-(Radix Colors):
+Scelte prese dopo una ricerca su Material 3, su linee guida per app mobili e su skill di design pubblicate su
+GitHub (la skill `frontend-design` di Anthropic e alcune per app mobili). I repository letti sono piccoli e ho
+letto soprattutto i README: le uso come lista di controllo, non come modello.
 
-- Superfici a toni (sfondo, scheda, tessera) invece di ombre e bordi.
-- Una sola scheda colorata per schermata (il totale di oggi): il resto resta neutro.
-- Bersagli di tocco di almeno 48 px; testo almeno 12 px, corpo 16 px.
-- Contrasti controllati da `npm run contrast` (4,5:1 per il testo, 3:1 per bordi e interruttori),
-  perché alcune palette "accessibili" pubblicate hanno coppie sotto soglia.
-- Inter incluso nell'app (funziona offline), cifre allineate in colonna.
-- Calendario con riempimento in 4 livelli in base alle ore.
+- **Superfici a toni** (sfondo, scheda, tessera) invece di ombre e bordi.
+- **Un solo punto colorato per schermata**: il totale di oggi, il guadagno del mese. Il resto resta neutro.
+- **Scala tipografica ridotta**: 12, 14, 16, 20 e 28 px (56 per il totale), tre pesi (400, 600, 700);
+  spaziature su griglia da 4/8 px. Inter è incluso nell'app, cifre allineate in colonna.
+- **Bersagli di tocco di almeno 48 px**.
+- **Niente etichette in maiuscolo né stringhe unite da puntini**: ore e guadagno sono valori affiancati.
+- **Stati vuoti che dicono cosa fare**, non solo "niente qui".
+- **Contrasti controllati da `npm run contrast`**: 4,5:1 per il testo, 3:1 per bordi dei campi, barre e
+  interruttori. Eseguito anche nella compilazione automatica.
+- **Grafico del mese**: un colore, una scala, riga tratteggiata a 8 ore; si legge il giorno toccando una
+  colonna o scorrendo il dito.
+- **Calendario**: riempimento in 4 livelli in base alle ore; domeniche e festività con un puntino rosso (il
+  rosso sul numero non era leggibile sui riempimenti intensi).
+- **Movimento solo in risposta a un'azione** (apertura dei moduli, pressione dei pulsanti); disattivato se il
+  telefono lo chiede.
+- **Avvio e icona**: avvio a tinta unita come lo sfondo dell'app (chiaro e scuro), senza loghi estranei;
+  icona con un orologio dentro un anello di avanzamento, lo stesso segno dell'obiettivo mensile.
 
 ## 5. Fuori dal perimetro (per ora)
 

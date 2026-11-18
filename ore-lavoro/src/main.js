@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import * as store from './core/store.js';
 import { dateKey, dayOf, timeOf, addDays, addMonths, monthKey } from './core/time.js';
-import { todayView, calendarView, summaryView, settingsView, esc } from './ui/views.js';
+import { todayView, calendarView, summaryView, settingsView, readoutHtml, esc, count } from './ui/views.js';
 import { syncReminders, askPermission } from './platform/notifications.js';
 import { exportFile } from './platform/files.js';
 
@@ -15,7 +15,7 @@ const box = $('#confirm');
 
 let state = store.load(localStorage);
 const today = dateKey(new Date());
-const ui = { tab: 'oggi', month: monthKey(today), day: today };
+const ui = { tab: 'oggi', month: monthKey(today), day: today, chartDay: null };
 
 const TABS = [
   ['oggi', 'Oggi', '<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/>'],
@@ -60,7 +60,9 @@ function toast(text) {
 /** Finestra di conferma dentro la pagina. Risolve true se l'utente conferma. */
 function ask(text, okLabel = 'Conferma', danger = true) {
   return new Promise((resolve) => {
-    box.innerHTML = `<div class="box"><p>${esc(text)}</p><div class="btn-row">
+    // La prima riga è il titolo, il resto è il dettaglio.
+    const [title, ...detail] = text.split('\n\n');
+    box.innerHTML = `<div class="box"><h2>${esc(title)}</h2>${detail.length ? `<p>${esc(detail.join('\n\n'))}</p>` : ''}<div class="btn-row">
       <button class="btn ghost" data-answer="no">Annulla</button>
       <button class="btn ${danger ? 'danger' : 'primary'}" data-answer="yes">${okLabel}</button></div></div>`;
     box.onclick = (e) => {
@@ -76,7 +78,7 @@ function ask(text, okLabel = 'Conferma', danger = true) {
 async function restore(text) {
   try {
     const next = store.importBackup(text);
-    const msg = `Il backup contiene ${next.shifts.length} turni e ${next.payments.length} pagamenti.\n\nSostituire i dati attuali?`;
+    const msg = `Sostituire i dati attuali?\n\nIl backup contiene ${count(next.shifts.length, 'turno', 'turni')} e ${count(next.payments.length, 'pagamento', 'pagamenti')}.`;
     if (!(await ask(msg, 'Sostituisci'))) return;
     state = next;
     commit();
@@ -137,14 +139,14 @@ function openSheet(title, body, { kind, id = '' }) {
   sheet.showModal();
 }
 
-const field = (label, input) => `<label class="field"><span>${label}</span>${input}</label>`;
+const field = (label, input, cls = '') => `<label class="field ${cls}"><span>${label}</span>${input}</label>`;
 
 function shiftSheet(shift, day) {
   const body = `
     ${field('Giorno', `<input name="day" type="date" required value="${shift ? dayOf(shift.start) : day}">`)}
     ${field('Inizio', `<input name="start" type="time" required value="${shift ? timeOf(shift.start) : ''}">`)}
     ${field('Fine', `<input name="end" type="time" required value="${shift ? timeOf(shift.end) : ''}">`)}
-    ${field('Nota', `<input name="note" type="text" maxlength="80" value="${shift ? esc(shift.note) : ''}" placeholder="facoltativa">`)}
+    ${field('Nota', `<input name="note" type="text" maxlength="80" value="${shift ? esc(shift.note) : ''}" placeholder="facoltativa">`, 'stack')}
     <p class="hint">Se la fine è prima dell'inizio, il turno termina il giorno dopo.</p>`;
   openSheet(shift ? 'Modifica turno' : 'Nuovo turno', body, { kind: 'shifts', id: shift?.id });
 }
@@ -153,7 +155,7 @@ function paymentSheet(payment) {
   const body = `
     ${field('Data', `<input name="day" type="date" required value="${payment?.date ?? dateKey(new Date())}">`)}
     ${field(`Importo (${state.settings.currency})`, `<input name="amount" type="number" inputmode="decimal" min="0" step="0.01" required value="${payment?.amount ?? ''}">`)}
-    ${field('Nota', `<input name="note" type="text" maxlength="80" value="${payment ? esc(payment.note) : ''}" placeholder="facoltativa">`)}`;
+    ${field('Nota', `<input name="note" type="text" maxlength="80" value="${payment ? esc(payment.note) : ''}" placeholder="facoltativa">`, 'stack')}`;
   openSheet(payment ? 'Modifica pagamento' : 'Pagamento ricevuto', body, { kind: 'payments', id: payment?.id });
 }
 
@@ -170,14 +172,16 @@ function submitSheet(form) {
     store.savePayment(state, { id, date: f.day, amount: numberOf(f.amount), note: f.note });
   }
   if (ui.tab === 'calendario') ui.month = monthKey(ui.day);
+  return kind;
 }
 
 sheet.addEventListener('submit', (e) => {
   e.preventDefault();
   try {
-    submitSheet(e.target);
+    const kind = submitSheet(e.target);
     sheet.close();
     commit();
+    toast(kind === 'payments' ? 'Pagamento salvato' : 'Turno salvato');
   } catch (err) {
     const box = sheet.querySelector('.error');
     box.textContent = err.message;
@@ -195,6 +199,7 @@ const actions = {
     render();
   },
   'pick-day': (el) => { ui.day = el.dataset.day; render(); },
+  'chart-day': (el) => { ui.chartDay = el.dataset.day; render(); },
   'add-shift': (el) => shiftSheet(null, el.dataset.day),
   'edit-shift': (el) => shiftSheet(state.shifts.find((x) => x.id === el.dataset.id)),
   'add-payment': () => paymentSheet(null),
@@ -206,6 +211,7 @@ const actions = {
     store.remove(state, form.dataset.kind, form.dataset.id);
     sheet.close();
     commit();
+    toast('Eliminato');
   },
   'reminder-day': (el) => {
     const day = Number(el.dataset.day);
@@ -263,6 +269,27 @@ $('#file').addEventListener('change', async (e) => {
   if (!file) return;
   restore(await file.text());
 });
+
+// Grafico del mese: oltre al tocco, si può far scorrere il dito sulle colonne per leggere i giorni.
+let scrubbing = false;
+function colAt(e) {
+  const chart = document.querySelector('.mchart');
+  if (!chart) return null;
+  const cols = chart.querySelectorAll('.mcol');
+  const r = chart.getBoundingClientRect();
+  const i = Math.floor(((e.clientX - r.left) / r.width) * cols.length);
+  return cols[Math.min(cols.length - 1, Math.max(0, i))];
+}
+function pickCol(col) {
+  if (!col || col.dataset.day === ui.chartDay) return;
+  ui.chartDay = col.dataset.day;
+  document.querySelectorAll('.mcol.sel').forEach((x) => x.classList.remove('sel'));
+  col.classList.add('sel');
+  document.getElementById('readout').innerHTML = readoutHtml(state, ui.chartDay);
+}
+view.addEventListener('pointerdown', (e) => { if (e.target.closest('.mchart')) { scrubbing = true; pickCol(colAt(e)); } });
+view.addEventListener('pointermove', (e) => { if (scrubbing) pickCol(colAt(e)); });
+for (const type of ['pointerup', 'pointercancel']) window.addEventListener(type, () => { scrubbing = false; });
 
 // ---- Ciclo di vita ---------------------------------------------------------
 

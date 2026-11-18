@@ -12,24 +12,41 @@ export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+/** "1 turno", "2 turni". */
+export const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const hoursShort = (min) => (min / 60).toFixed(1).replace('.0', '').replace('.', ',');
 
-// ---- Pezzi condivisi -------------------------------------------------------
+// ---- Icone e pezzi condivisi -----------------------------------------------
+
+const svg = (path, size = 24) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor"
+  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+const CHEVRON_L = svg('<path d="M15 6l-6 6 6 6"/>');
+const CHEVRON_R = svg('<path d="M9 6l6 6-6 6"/>');
+
+/** Stato vuoto: un invito a fare qualcosa, non solo "niente qui". */
+function empty(title, hint) {
+  return `<div class="empty-state">
+    ${svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 40)}
+    <b>${title}</b>
+    <small>${hint}</small>
+  </div>`;
+}
+
+/** Ore e guadagno affiancati, senza puntini di mezzo. */
+const sum = (min, money) => `<span class="sum"><b>${fmtDuration(min)}</b><em>${money}</em></span>`;
 
 function shiftRow(item, currency) {
   const { shift } = item;
   const nextDay = dayOf(shift.end) !== dayOf(shift.start) ? ' <small>+1</small>' : '';
-  const tags = [
-    shift.note ? esc(shift.note) : '',
-  ].filter(Boolean).join(' · ');
   return `<button class="row" data-action="edit-shift" data-id="${shift.id}">
-    <span class="row-main"><b>${timeOf(shift.start)} – ${timeOf(shift.end)}${nextDay}</b>${tags ? `<small>${tags}</small>` : ''}</span>
+    <span class="row-main"><b>${timeOf(shift.start)} – ${timeOf(shift.end)}${nextDay}</b>${shift.note ? `<small>${esc(shift.note)}</small>` : ''}</span>
     <span class="row-side"><b>${fmtDuration(item.net)}</b><small>${fmtMoney(item.pay, currency)}</small></span>
   </button>`;
 }
 
-function dayList(d, currency, emptyText) {
+function dayList(d, currency, emptyTitle, emptyHint) {
   const rows = d.shifts.map((x) => shiftRow(x, currency));
-  return rows.length ? rows.join('') : `<p class="empty">${emptyText}</p>`;
+  return rows.length ? rows.join('') : empty(emptyTitle, emptyHint);
 }
 
 function addButtons(day) {
@@ -42,12 +59,13 @@ function addButtons(day) {
 const level = (min) => (min <= 120 ? 1 : min <= 300 ? 2 : min <= 480 ? 3 : 4);
 
 const stat = (label, value, cls = '') => `<div class="stat ${cls}"><small>${label}</small><b>${value}</b></div>`;
+const pair = (label, value, cls = '') => `<div class="pair ${cls}"><small>${label}</small><b>${value}</b></div>`;
 
 function monthNav(ym) {
   return `<header class="month-nav">
-    <button class="icon" data-action="month" data-step="-1" aria-label="Mese precedente">‹</button>
+    <button class="icon" data-action="month" data-step="-1" aria-label="Mese precedente">${CHEVRON_L}</button>
     <h1>${fmtMonth(ym)}</h1>
-    <button class="icon" data-action="month" data-step="1" aria-label="Mese successivo">›</button>
+    <button class="icon" data-action="month" data-step="1" aria-label="Mese successivo">${CHEVRON_R}</button>
   </header>`;
 }
 
@@ -63,7 +81,7 @@ export function todayView(state, now) {
   const festa = holidayName(today);
 
   const punch = `<section class="punch">
-    <p class="status">${d.shifts.length ? 'Ore di oggi' : 'Nessun turno registrato oggi'}</p>
+    <p class="status">Ore di oggi</p>
     <p class="clock ${d.netMin >= 1 ? '' : 'idle'}">${fmtDuration(d.netMin)}</p>
     <p class="earning">${fmtMoney(d.pay, cur)}</p>
     <button class="btn primary big" data-action="add-shift" data-day="${today}">+ Aggiungi turno</button>
@@ -73,10 +91,9 @@ export function todayView(state, now) {
   const bars = Array.from({ length: 7 }, (_, i) => {
     const day = addDays(monday, i);
     const min = daySummary(state, day).netMin;
-    const label = 'LMMGVSD'[i];
     return `<div class="bar ${day === today ? 'today' : ''}">
-      <small>${min >= 1 ? (min / 60).toFixed(1).replace('.', ',').replace(',0', '') : ''}</small>
-      <div class="track"><i style="height:${Math.round((min / max) * 100)}%"></i></div><span>${label}</span>
+      <small>${min >= 1 ? hoursShort(min) : ''}</small>
+      <div class="track"><i style="height:${Math.round((min / max) * 100)}%"></i></div><span>${'LMMGVSD'[i]}</span>
     </div>`;
   }).join('');
 
@@ -85,12 +102,12 @@ export function todayView(state, now) {
     </header>
     ${punch}
     <section class="card">
-      <h2>Oggi</h2>
-      ${dayList(d, cur, 'Nessun turno registrato oggi.')}
+      <h2>Turni di oggi</h2>
+      ${dayList(d, cur, 'Nessun turno oggi', 'Tocca «Aggiungi turno» per registrare le ore.')}
     </section>
     <section class="card">
-      <h2>Questa settimana <span>${fmtDuration(week.netMin)} · ${fmtMoney(week.pay, cur)}</span></h2>
-      <div class="bars">${bars}</div>
+      <h2>Questa settimana ${sum(week.netMin, fmtMoney(week.pay, cur))}</h2>
+      <div class="bars" role="img" aria-label="Ore lavorate in ogni giorno della settimana">${bars}</div>
     </section>
     <section class="card">
       <h2>${cap(fmtMonth(monthKey(today)))}</h2>
@@ -116,9 +133,8 @@ export function calendarView(state, ui, now) {
       'cell', day === today ? 'today' : '', day === ui.day ? 'selected' : '',
       d.festive ? 'festive' : '', d.netMin >= 1 ? `worked lv${level(d.netMin)}` : '',
     ].join(' ');
-    const hours = d.netMin >= 1 ? (d.netMin / 60).toFixed(1).replace('.0', '').replace('.', ',') : '';
     cells.push(`<button class="${cls}" data-action="pick-day" data-day="${day}">
-      <b>${parseDay(day).getDate()}</b><small>${hours}</small>
+      <b>${parseDay(day).getDate()}</b><small>${d.netMin >= 1 ? hoursShort(d.netMin) : ''}</small>
     </button>`);
   }
   const d = daySummary(state, ui.day);
@@ -129,14 +145,52 @@ export function calendarView(state, ui, now) {
       <div class="grid">${cells.join('')}</div>
     </section>
     <section class="card">
-      <h2>${cap(fmtDay(ui.day))} <span>${fmtDuration(d.netMin)} · ${fmtMoney(d.pay, cur)}</span></h2>
+      <h2>${cap(fmtDay(ui.day))} ${d.shifts.length ? sum(d.netMin, fmtMoney(d.pay, cur)) : ''}</h2>
       ${festa ? `<p><span class="chip festive">${festa}</span></p>` : ''}
-      ${dayList(d, cur, 'Nessuna registrazione in questo giorno.')}
+      ${dayList(d, cur, 'Nessun turno in questo giorno', 'Usa «+ Turno» per aggiungerne uno.')}
       ${addButtons(ui.day)}
     </section>`;
 }
 
 // ---- Riepilogo -------------------------------------------------------------
+
+/**
+ * Ore di ogni giorno del mese. Un solo colore e una sola scala; la linea tratteggiata
+ * segna le 8 ore. Toccando una colonna si legge il giorno (al posto dell'hover).
+ */
+/** Riga di lettura del grafico: giorno scelto, ore e guadagno. */
+export function readoutHtml(state, day) {
+  const d = daySummary(state, day);
+  return `<span>${cap(fmtDay(day, { short: true }))}</span> ${sum(d.netMin, fmtMoney(d.pay, state.settings.currency))}`;
+}
+
+function monthChart(state, ym, sel) {
+  const { from, to } = monthRange(ym);
+  const days = [];
+  for (let day = from; day <= to; day = addDays(day, 1)) days.push(daySummary(state, day));
+  const maxMin = Math.max(480, ...days.map((x) => x.netMin));
+  const cols = days.map((x) => `<button class="mcol ${x.day === sel ? 'sel' : ''}" data-action="chart-day" data-day="${x.day}"
+    aria-label="${fmtDay(x.day, { short: true })}: ${fmtDuration(x.netMin)}">
+    <i class="${x.netMin >= 1 ? '' : 'none'}" style="height:${x.netMin >= 1 ? Math.max(3, Math.round((x.netMin / maxMin) * 100)) : 0}%"></i></button>`).join('');
+  const ticks = [1, 8, 15, 22, 29].filter((n) => n <= days.length)
+    .map((n) => `<span style="grid-column:${n}">${n}</span>`).join('');
+  return `<div class="mchart-wrap">
+      <div class="mchart" style="--n:${days.length}">
+        <span class="mgrid" style="bottom:${(480 / maxMin) * 100}%"><em>8 h</em></span>${cols}
+      </div>
+      <div class="mticks" style="--n:${days.length}" aria-hidden="true">${ticks}</div>
+    </div>
+    <p class="readout" id="readout">${readoutHtml(state, sel)}</p>`;
+}
+
+/** Anello dell'obiettivo mensile. */
+function ring(pct) {
+  return `<div class="ringwrap" role="img" aria-label="${pct}% dell'obiettivo mensile">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="ring-track" cx="50" cy="50" r="42" pathLength="100"/>
+      <circle class="ring-fill" cx="50" cy="50" r="42" pathLength="100" stroke-dasharray="${Math.min(100, pct)} 100" transform="rotate(-90 50 50)"/>
+    </svg><b>${pct}%</b></div>`;
+}
 
 export function summaryView(state, ui, now) {
   const s = state.settings;
@@ -147,30 +201,40 @@ export function summaryView(state, ui, now) {
   const y = rangeSummary(state, `${year}-01-01`, `${year}-12-31`);
   const bal = payBalance(state);
   const { from, to } = monthRange(ym);
+  const today = dateKey(now);
   const payments = state.payments.filter((p) => p.date >= from && p.date <= to)
     .sort((a, b) => b.date.localeCompare(a.date));
+  const best = m.days.reduce((a, b) => (b.netMin > (a?.netMin ?? 0) ? b : a), null);
+  const sel = ui.chartDay && ui.chartDay.startsWith(ym) ? ui.chartDay
+    : (today.startsWith(ym) ? today : (best ? best.day : `${ym}-01`));
 
   const hoursBalance = m.hoursBalanceMin === null
-    ? '<p class="hint">Imposta un obiettivo di ore mensili nelle impostazioni per vedere il saldo ore.</p>'
-    : `<div class="stats">
-        ${stat('Obiettivo', fmtDuration(m.targetMin))}
-        ${stat('Saldo ore', `${m.hoursBalanceMin > 0 ? '+' : ''}${fmtDuration(m.hoursBalanceMin)}`, m.hoursBalanceMin < 0 ? 'neg' : 'pos')}
-      </div>
-      <div class="progress"><i style="width:${Math.min(100, Math.round((m.netMin / m.targetMin) * 100))}%"></i></div>`;
+    ? empty('Nessun obiettivo impostato', 'Inserisci le ore mensili in Impostazioni per vedere il saldo.')
+    : `<div class="ring-row">
+        ${ring(Math.round((m.netMin / m.targetMin) * 100))}
+        <div class="pairs">
+          ${pair('Obiettivo', fmtDuration(m.targetMin))}
+          ${pair('Saldo ore', `${m.hoursBalanceMin > 0 ? '+' : ''}${fmtDuration(m.hoursBalanceMin)}`, m.hoursBalanceMin < 0 ? 'neg' : 'pos')}
+        </div>
+      </div>`;
 
   const paymentRows = payments.length ? payments.map((p) => `<button class="row" data-action="edit-payment" data-id="${p.id}">
-      <span class="row-main"><b>${fmtDay(p.date, { short: true })}</b>${p.note ? `<small>${esc(p.note)}</small>` : ''}</span>
+      <span class="row-main"><b>${cap(fmtDay(p.date, { short: true }))}</b>${p.note ? `<small>${esc(p.note)}</small>` : ''}</span>
       <span class="row-side"><b>${fmtMoney(p.amount, cur)}</b></span>
-    </button>`).join('') : '<p class="empty">Nessun pagamento registrato in questo mese.</p>';
+    </button>`).join('') : empty('Nessun pagamento questo mese', 'Registra quanto hai ricevuto per calcolare il saldo.');
 
   return `${monthNav(ym)}
+    <section class="punch">
+      <p class="status">Guadagno del mese</p>
+      <p class="clock">${fmtMoney(m.pay, cur)}</p>
+      <p class="earning">${fmtDuration(m.netMin)} lavorate</p>
+    </section>
     <section class="card">
-      <h2>Ore e guadagni</h2>
-      <div class="stats">
-        ${stat('Ore lavorate', fmtDuration(m.netMin), 'wide')}
-        ${stat('Guadagno', fmtMoney(m.pay, cur), 'wide')}
-        ${stat('Giorni lavorati', m.daysWorked)}
-        ${stat('Media al giorno', m.daysWorked ? fmtDuration(m.netMin / m.daysWorked) : '–')}
+      <h2>Ore al giorno</h2>
+      ${monthChart(state, ym, sel)}
+      <div class="pairs row-2">
+        ${pair('Giorni lavorati', m.daysWorked)}
+        ${pair('Media al giorno', m.daysWorked ? fmtDuration(m.netMin / m.daysWorked) : '–')}
       </div>
     </section>
     <section class="card">
@@ -179,21 +243,17 @@ export function summaryView(state, ui, now) {
     </section>
     <section class="card">
       <h2>Saldo paga</h2>
-      <div class="stats">
-        ${stat('Da incassare', fmtMoney(bal.due, cur), `wide ${bal.due < 0 ? 'neg' : ''}`)}
-        ${stat('Maturato in totale', fmtMoney(bal.earned, cur))}
-        ${stat('Ricevuto in totale', fmtMoney(bal.paid, cur))}
+      ${pair('Da incassare', fmtMoney(bal.due, cur), `big ${bal.due < 0 ? 'neg' : ''}`)}
+      <div class="pairs row-2">
+        ${pair('Maturato in totale', fmtMoney(bal.earned, cur))}
+        ${pair('Ricevuto in totale', fmtMoney(bal.paid, cur))}
       </div>
       <h3>Pagamenti del mese <span>${fmtMoney(m.payments, cur)}</span></h3>
       ${paymentRows}
       <div class="btn-row"><button class="btn ghost" data-action="add-payment">+ Pagamento ricevuto</button></div>
     </section>
     <section class="card">
-      <h2>Anno ${year}</h2>
-      <div class="stats">
-        ${stat('Ore lavorate', fmtDuration(y.netMin))}
-        ${stat('Guadagno', fmtMoney(y.pay, cur))}
-      </div>
+      <h2>Anno ${year} ${sum(y.netMin, fmtMoney(y.pay, cur))}</h2>
     </section>`;
 }
 
@@ -235,7 +295,7 @@ export function settingsView(state, native) {
         <button class="btn ghost" data-action="export">Esporta backup</button>
         <button class="btn ghost" data-action="import">Ripristina da file</button>
       </div>
-      <p class="hint">${state.shifts.length} turni · ${state.payments.length} pagamenti</p>
+      <p class="hint">Salvati: ${count(state.shifts.length, 'turno', 'turni')} e ${count(state.payments.length, 'pagamento', 'pagamenti')}.</p>
       <div class="btn-row"><button class="btn danger-ghost" data-action="wipe">Cancella tutti i dati</button></div>
     </section>
     <p class="version">Ore Lavoro 1.0.0</p>`;

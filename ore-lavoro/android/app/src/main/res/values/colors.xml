@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stesso colore dello sfondo dell'app, così l'avvio non lampeggia. -->
+    <color name="splash_bg">#F3F4F8</color>
+</resources>

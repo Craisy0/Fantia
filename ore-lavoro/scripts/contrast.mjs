@@ -21,8 +21,11 @@ const pairs = [
   ['on-hero', 'hero', 4.5], ['on-hero-muted', 'hero', 4.5],
   ['danger', 'surface', 4.5], ['danger', 'danger-soft', 4.5], ['danger', 'surface-2', 4.5], ['on-danger', 'danger', 4.5],
   ['ok', 'surface-2', 4.5], ['bg', 'text', 4.5],
-  ['outline', 'surface', 3], ['outline', 'surface-2', 3], ['accent', 'surface', 3], ['accent', 'surface-2', 3],
+  ['outline', 'surface', 3],  ['outline', 'surface-2', 3], ['accent', 'surface', 3], ['accent', 'surface-2', 3],
 ];
+// Barre dei grafici: il tono dei giorni passati (--bar = accento 86% su surface-2) contro guida e scheda.
+const bar = (t) => mix(rgb(t.accent), rgb(t["surface-2"]), 0.86);
+const barChecks = [['line', 'guida delle barre'], ['surface', 'scheda']];
 // Giorni del calendario: numero (text) e ore (text) sui quattro livelli di riempimento.
 const levels = [14, 26, 40, 54];
 
@@ -32,10 +35,14 @@ for (const [name, t] of [['chiaro', light], ['scuro', dark]]) {
     const r = ratio(rgb(t[fg]), rgb(t[bg]));
     if (r < min) { bad += 1; console.log(`✗ ${name}: ${fg} su ${bg} = ${r.toFixed(2)} (minimo ${min})`); }
   }
+  for (const [bgName, label] of barChecks) {
+    const r = ratio(bar(t), rgb(t[bgName]));
+    if (r < 3) { bad += 1; console.log(`✗ ${name}: barre su ${label} = ${r.toFixed(2)} (minimo 3)`); }
+  }
   levels.forEach((p, i) => {
     const bg = mix(rgb(t.accent), rgb(t.surface), p / 100);
-    // Il rosso dei festivi si usa solo sul livello 1; dal 2 in su il numero è `text` (vedi style.css).
-    for (const fg of i === 0 ? ['text', 'danger'] : ['text']) {
+    // I festivi si segnano con un puntino rosso con anello `surface`, non con il colore del numero.
+    for (const fg of ['text']) {
       const r = ratio(rgb(t[fg]), bg);
       if (r < 4.5) { bad += 1; console.log(`✗ ${name}: ${fg} su calendario livello ${i + 1} = ${r.toFixed(2)} (minimo 4.5)`); }
     }
