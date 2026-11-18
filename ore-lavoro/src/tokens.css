@@ -1,0 +1,96 @@
+/* GENERATO da scripts/make-tokens.mjs (Radix Colors, MIT). Non modificare a mano. */
+:root {
+  --bg: #edf2fe;
+  --surface: #fdfdfe;
+  --surface-2: #edf2fe;
+  --line: #e1e9ff;
+  --outline: #80838d;
+  --text: #1f2d5c;
+  --muted: #52565e;
+  --accent: #3e63dd;
+  --on-accent: #ffffff;
+  --accent-soft: #e1e9ff;
+  --accent-ink: #3a5bc7;
+  --mark: #3e63dd;
+  --bar: #3e63dd;
+  --bar-hi: #2b428d;
+  --hero-a: #3e63dd;
+  --hero-b: #324da9;
+  --hero-c: #2b428d;
+  --on-hero: #ffffff;
+  --money: #046f61;
+  --money-soft: #e0f8f3;
+  --money-ink: #0d3d38;
+  --danger: #ba3117;
+  --danger-soft: #feebe7;
+  --danger-solid: #d13415;
+  --on-danger: #ffffff;
+  --glow-1: #abbdf9;
+  --glow-2: #83cdc1;
+  --knob: #ffffff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131f;
+    --surface: #161e39;
+    --surface-2: #1b2956;
+    --line: #1d2e62;
+    --outline: #777b84;
+    --text: #d6e1ff;
+    --muted: #c5c8cd;
+    --accent: #3e63dd;
+    --on-accent: #ffffff;
+    --accent-soft: #253974;
+    --accent-ink: #9eb1ff;
+    --mark: #9eb1ff;
+    --bar: #5472e4;
+    --bar-hi: #9eb1ff;
+    --hero-a: #3e63dd;
+    --hero-b: #304ba3;
+    --hero-c: #283d83;
+    --on-hero: #ffffff;
+    --money: #0bd8b6;
+    --money-soft: #023b37;
+    --money-ink: #adf0dd;
+    --danger: #ff977d;
+    --danger-soft: #391714;
+    --danger-solid: #d13415;
+    --on-danger: #ffffff;
+    --glow-1: #3e63dd;
+    --glow-2: #12a594;
+    --knob: #ffffff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131f;
+  --surface: #161e39;
+  --surface-2: #1b2956;
+  --line: #1d2e62;
+  --outline: #777b84;
+  --text: #d6e1ff;
+  --muted: #c5c8cd;
+  --accent: #3e63dd;
+  --on-accent: #ffffff;
+  --accent-soft: #253974;
+  --accent-ink: #9eb1ff;
+  --mark: #9eb1ff;
+  --bar: #5472e4;
+  --bar-hi: #9eb1ff;
+  --hero-a: #3e63dd;
+  --hero-b: #304ba3;
+  --hero-c: #283d83;
+  --on-hero: #ffffff;
+  --money: #0bd8b6;
+  --money-soft: #023b37;
+  --money-ink: #adf0dd;
+  --danger: #ff977d;
+  --danger-soft: #391714;
+  --danger-solid: #d13415;
+  --on-danger: #ffffff;
+  --glow-1: #3e63dd;
+  --glow-2: #12a594;
+  --knob: #ffffff;
+  color-scheme: dark;
+}

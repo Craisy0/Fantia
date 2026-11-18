@@ -3,10 +3,12 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import * as store from './core/store.js';
 import { dateKey, dayOf, timeOf, addDays, addMonths, monthKey } from './core/time.js';
-import { todayView, calendarView, summaryView, settingsView, readoutHtml, esc, count } from './ui/views.js';
+import { todayView, calendarView, summaryView, settingsView, readoutHtml, chartText, esc, count } from './ui/views.js';
 import { syncReminders, askPermission } from './platform/notifications.js';
 import { exportFile } from './platform/files.js';
+import { icon } from './ui/icons.js';
 
+document.documentElement.lang ||= 'it';
 const native = Capacitor.isNativePlatform();
 const $ = (sel) => document.querySelector(sel);
 const view = $('#view');
@@ -18,11 +20,19 @@ const today = dateKey(new Date());
 const ui = { tab: 'oggi', month: monthKey(today), day: today, chartDay: null };
 
 const TABS = [
-  ['oggi', 'Oggi', '<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/>'],
-  ['calendario', 'Calendario', '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'],
-  ['riepilogo', 'Riepilogo', '<path d="M5 20V10M12 20V4M19 20v-7"/>'],
-  ['impostazioni', 'Impostazioni', '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'],
+  ['oggi', 'Oggi', 'clock'],
+  ['calendario', 'Calendario', 'calendar-days'],
+  ['riepilogo', 'Riepilogo', 'chart-column'],
+  ['impostazioni', 'Impostazioni', 'sliders-horizontal'],
 ];
+
+/** Dissolvenza dei contenuti e riempimento del quadrante: solo quando si cambia scheda. */
+let enterTimer;
+function enter() {
+  view.classList.add('enter');
+  clearTimeout(enterTimer);
+  enterTimer = setTimeout(() => view.classList.remove('enter'), 1100);
+}
 
 // ---- Disegno ---------------------------------------------------------------
 
@@ -34,9 +44,8 @@ function render() {
     riepilogo: () => summaryView(state, ui, now),
     impostazioni: () => settingsView(state, native),
   }[ui.tab]();
-  $('#tabs').innerHTML = TABS.map(([id, label, icon]) => `<button class="${id === ui.tab ? 'on' : ''}" data-action="tab" data-tab="${id}">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>${label}
-  </button>`).join('');
+  $('#tabs').innerHTML = TABS.map(([id, label, glyph]) => `<button class="${id === ui.tab ? 'on' : ''}" data-action="tab" data-tab="${id}"
+    ${id === ui.tab ? 'aria-current="page"' : ''}>${icon(glyph, 24)}${label}</button>`).join('');
 }
 
 // Cambio di giorno a schermo acceso: ridisegna una volta al minuto.
@@ -192,14 +201,13 @@ sheet.addEventListener('submit', (e) => {
 // ---- Azioni ----------------------------------------------------------------
 
 const actions = {
-  tab: (el) => { ui.tab = el.dataset.tab; render(); view.scrollTop = 0; window.scrollTo(0, 0); },
+  tab: (el) => { if (el.dataset.tab !== ui.tab) { ui.tab = el.dataset.tab; render(); enter(); } window.scrollTo(0, 0); },
   month: (el) => {
     ui.month = addMonths(ui.month, Number(el.dataset.step));
     ui.day = ui.month === monthKey(dateKey(new Date())) ? dateKey(new Date()) : `${ui.month}-01`;
     render();
   },
   'pick-day': (el) => { ui.day = el.dataset.day; render(); },
-  'chart-day': (el) => { ui.chartDay = el.dataset.day; render(); },
   'add-shift': (el) => shiftSheet(null, el.dataset.day),
   'edit-shift': (el) => shiftSheet(state.shifts.find((x) => x.id === el.dataset.id)),
   'add-payment': () => paymentSheet(null),
@@ -286,9 +294,21 @@ function pickCol(col) {
   document.querySelectorAll('.mcol.sel').forEach((x) => x.classList.remove('sel'));
   col.classList.add('sel');
   document.getElementById('readout').innerHTML = readoutHtml(state, ui.chartDay);
+  const chart = col.closest('.mchart');
+  chart.setAttribute('aria-valuenow', [...chart.children].filter((x) => x.classList.contains('mcol')).indexOf(col) + 1);
+  chart.setAttribute('aria-valuetext', chartText(state, ui.chartDay));
 }
 view.addEventListener('pointerdown', (e) => { if (e.target.closest('.mchart')) { scrubbing = true; pickCol(colAt(e)); } });
 view.addEventListener('pointermove', (e) => { if (scrubbing) pickCol(colAt(e)); });
+view.addEventListener('keydown', (e) => {
+  const chart = e.target.closest?.('.mchart');
+  if (!chart || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+  e.preventDefault();
+  const cols = [...chart.querySelectorAll('.mcol')];
+  const at = Math.max(0, cols.findIndex((x) => x.classList.contains('sel')));
+  const next = { ArrowLeft: at - 1, ArrowRight: at + 1, Home: 0, End: cols.length - 1 }[e.key];
+  pickCol(cols[Math.min(cols.length - 1, Math.max(0, next))]);
+});
 for (const type of ['pointerup', 'pointercancel']) window.addEventListener(type, () => { scrubbing = false; });
 
 // ---- Ciclo di vita ---------------------------------------------------------
@@ -305,4 +325,5 @@ if (native) {
 }
 
 render();
+enter();
 syncReminders(state);

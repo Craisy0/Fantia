@@ -72,27 +72,34 @@ Ogni punto si chiude con una revisione (test o prova a schermo) prima di passare
 
 ## 4b. Linee grafiche
 
-Scelte prese dopo una ricerca su Material 3, su linee guida per app mobili e su skill di design pubblicate su
-GitHub (la skill `frontend-design` di Anthropic e alcune per app mobili). I repository letti sono piccoli e ho
-letto soprattutto i README: le uso come lista di controllo, non come modello.
+**Idea: il quadrante di un orologio.** Indaco = ore, verde acqua = paga (le due cose che l'app misura). Lo
+sfondo si tinge di indaco in alto e di verde acqua in basso; il totale di oggi sta dentro un quadrante, e lo
+stesso segno ritorna nell'anello dell'obiettivo e nell'icona.
 
-- **Superfici a toni** (sfondo, scheda, tessera) invece di ombre e bordi.
-- **Un solo punto colorato per schermata**: il totale di oggi, il guadagno del mese. Il resto resta neutro.
-- **Scala tipografica ridotta**: 12, 14, 16, 20 e 28 px (56 per il totale), tre pesi (400, 600, 700);
-  spaziature su griglia da 4/8 px. Inter è incluso nell'app, cifre allineate in colonna.
-- **Bersagli di tocco di almeno 48 px**.
-- **Niente etichette in maiuscolo né stringhe unite da puntini**: ore e guadagno sono valori affiancati.
-- **Stati vuoti che dicono cosa fare**, non solo "niente qui".
-- **Contrasti controllati da `npm run contrast`**: 4,5:1 per il testo, 3:1 per bordi dei campi, barre e
-  interruttori. Eseguito anche nella compilazione automatica.
-- **Grafico del mese**: un colore, una scala, riga tratteggiata a 8 ore; si legge il giorno toccando una
-  colonna o scorrendo il dito.
-- **Calendario**: riempimento in 4 livelli in base alle ore; domeniche e festività con un puntino rosso (il
-  rosso sul numero non era leggibile sui riempimenti intensi).
-- **Movimento solo in risposta a un'azione** (apertura dei moduli, pressione dei pulsanti); disattivato se il
-  telefono lo chiede.
-- **Avvio e icona**: avvio a tinta unita come lo sfondo dell'app (chiaro e scuro), senza loghi estranei;
-  icona con un orologio dentro un anello di avanzamento, lo stesso segno dell'obiettivo mensile.
+**Strumenti usati** (scelti dopo una ricerca su GitHub; gli strumenti di terzi sono stati letti e controllati
+prima dell'uso):
+- Skill di design installate in `.claude/skills/` (elenco, versioni e licenze in `.claude/skills/SOURCES.md`):
+  `frontend-design` (Anthropic), `ui-ux-pro-max`, e alcune di Emil Kowalski (`mobile-native`, `emil-design-eng`,
+  `break-ui`, ...). Non installate, di proposito: Impeccable e taste-skill (eseguono programmi o hook a ogni modifica).
+- Pacchetti npm: **Radix Colors** (le palette, tradotte in `src/tokens.css` da `npm run tokens`), **Lucide**
+  (icone, `npm run icons`), **Open Props** (ombre e curve di animazione), **Bricolage Grotesque** per titoli e numeri
+  e **Inter** per il testo, **axe-core** + **Playwright** per la prova nel browser (`npm run e2e`).
+
+**Scelte**
+- **Sfondo**: due aloni di colore e una grana leggera contro le bande. Niente sfumature sulle schede.
+- **Scheda principale**: l'unico punto audace di ogni schermata. In Oggi è un quadrante con tacche dei minuti e
+  delle ore e un anello che si riempie fino a 8 ore (l'arco si anima solo quando si cambia scheda).
+- **Superfici a toni** con ombre tinte di indaco; barra in basso fluttuante con la scheda attiva piena.
+- **Scala tipografica ridotta** (12, 14, 16, 20, 28, 36 px) su griglia da 4/8 px, tre pesi; cifre allineate.
+- **Bersagli di tocco di almeno 48 px**; il grafico del mese è un unico cursore (tocco, scorrimento del dito,
+  frecce da tastiera) perché 30 colonne sottili non sono bersagli accettabili.
+- **Niente etichette in maiuscolo né stringhe unite da puntini**; stati vuoti che dicono cosa fare.
+- **Contrasti**: `npm run contrast` (4,5:1 per il testo, 3:1 per elementi grafici, caso peggiore sui fondi sfumati)
+  e axe-core nella prova nel browser. Le scale Radix sono "quasi" a norma: quattro colori sono stati scuriti.
+- **WebView Android**: valori di riserva per `color-mix()` e `dvh`; niente `user-scalable=no`; colore della barra
+  di stato per tema; tocco senza ritardo (indicazioni della skill `mobile-native`).
+- **Avvio e icona**: avvio a tinta unita come lo sfondo dell'app (chiaro e scuro); icona con un orologio dentro un
+  anello di avanzamento.
 
 ## 5. Fuori dal perimetro (per ora)
 

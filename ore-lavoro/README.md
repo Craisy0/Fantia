@@ -21,7 +21,12 @@ restano. Prima di disinstallare l'app, esporta un backup da Impostazioni.
 ```
 npm install
 npm test          # test della logica di calcolo
+npm run contrast  # contrasti dei colori (testo 4,5:1, elementi grafici 3:1)
+npm run e2e       # prova nel browser con schermo da telefono + accessibilità (axe-core); richiede Chromium di Playwright
 npm run dev       # app nel browser
+npm run web       # pagina unica per provare l'app (dist/prova.html)
+npm run tokens    # rigenera src/tokens.css dalle palette Radix Colors
+npm run icons     # rigenera src/ui/icons.js dalle icone Lucide
 npm run android   # build web + copia nel progetto Android
 cd android && ./gradlew assembleRelease   # richiede JDK 21 e Android SDK
 ```

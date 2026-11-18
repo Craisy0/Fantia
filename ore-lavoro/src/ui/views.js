@@ -7,6 +7,7 @@ import { holidayName } from '../core/holidays.js';
 import {
   daySummary, weekSummary, monthSummary, rangeSummary, payBalance, weekdayIndex,
 } from '../core/calc.js';
+import { icon } from './icons.js';
 
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -18,15 +19,13 @@ const hoursShort = (min) => (min / 60).toFixed(1).replace('.0', '').replace('.',
 
 // ---- Icone e pezzi condivisi -----------------------------------------------
 
-const svg = (path, size = 24) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor"
-  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
-const CHEVRON_L = svg('<path d="M15 6l-6 6 6 6"/>');
-const CHEVRON_R = svg('<path d="M9 6l6 6-6 6"/>');
+const CHEVRON_L = icon('chevron-left');
+const CHEVRON_R = icon('chevron-right');
 
 /** Stato vuoto: un invito a fare qualcosa, non solo "niente qui". */
 function empty(title, hint) {
   return `<div class="empty-state">
-    ${svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 40)}
+    <span class="ic big hours">${icon('clock', 28)}</span>
     <b>${title}</b>
     <small>${hint}</small>
   </div>`;
@@ -58,8 +57,9 @@ function addButtons(day) {
 /** Intensità del riempimento nel calendario: 1 (poche ore) … 4 (giornata lunga). */
 const level = (min) => (min <= 120 ? 1 : min <= 300 ? 2 : min <= 480 ? 3 : 4);
 
-const stat = (label, value, cls = '') => `<div class="stat ${cls}"><small>${label}</small><b>${value}</b></div>`;
-const pair = (label, value, cls = '') => `<div class="pair ${cls}"><small>${label}</small><b>${value}</b></div>`;
+const ic = (name, tone) => `<span class="ic ${tone}">${icon(name, 22)}</span>`;
+const stat = (label, value, cls = '', glyph = '') => `<div class="stat ${cls}">${glyph}<div><small>${label}</small><b>${value}</b></div></div>`;
+const pair = (label, value, cls = '', glyph = '') => `<div class="pair ${cls}">${glyph}<div><small>${label}</small><b>${value}</b></div></div>`;
 
 function monthNav(ym) {
   return `<header class="month-nav">
@@ -67,6 +67,23 @@ function monthNav(ym) {
     <h1>${fmtMonth(ym)}</h1>
     <button class="icon" data-action="month" data-step="1" aria-label="Mese successivo">${CHEVRON_R}</button>
   </header>`;
+}
+
+/**
+ * Quadrante: tacche dei minuti e delle ore e un anello che si riempie fino a 8 ore.
+ * L'arco usa pathLength=100, quindi la lunghezza è direttamente la percentuale.
+ */
+const GOAL_MIN = 8 * 60;
+function dialSvg(min) {
+  const pct = Math.min(100, Math.round((min / GOAL_MIN) * 1000) / 10);
+  return `<svg viewBox="0 0 240 240" aria-hidden="true" fill="none">
+    <g transform="rotate(-90 120 120)">
+      <circle class="tick-m" cx="120" cy="120" r="108" stroke-width="7" pathLength="60" stroke-dasharray="0.14 0.86" stroke-dashoffset="0.07"/>
+      <circle class="tick-h" cx="120" cy="120" r="105.5" stroke-width="12" pathLength="12" stroke-dasharray="0.06 0.94" stroke-dashoffset="0.03"/>
+      <circle class="arc-track" cx="120" cy="120" r="87" stroke-width="12"/>
+      <circle class="arc sweep" cx="120" cy="120" r="87" stroke-width="12" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100"/>
+    </g>
+  </svg>`;
 }
 
 // ---- Oggi ------------------------------------------------------------------
@@ -80,11 +97,12 @@ export function todayView(state, now) {
   const month = monthSummary(state, monthKey(today));
   const festa = holidayName(today);
 
-  const punch = `<section class="punch">
-    <p class="status">Ore di oggi</p>
-    <p class="clock ${d.netMin >= 1 ? '' : 'idle'}">${fmtDuration(d.netMin)}</p>
-    <p class="earning">${fmtMoney(d.pay, cur)}</p>
-    <button class="btn primary big" data-action="add-shift" data-day="${today}">+ Aggiungi turno</button>
+  const punch = `<section class="hero">
+    <div class="dial" role="img" aria-label="${fmtDuration(d.netMin)} su 8 ore">
+      ${dialSvg(d.netMin)}
+      <div class="dial-c"><small>Ore di oggi</small><b class="${fmtDuration(d.netMin).length > 6 ? 'long' : ''}">${fmtDuration(d.netMin)}</b><span>${fmtMoney(d.pay, cur)}</span></div>
+    </div>
+    <button class="btn light big" data-action="add-shift" data-day="${today}">+ Aggiungi turno</button>
   </section>`;
 
   const max = Math.max(60, ...Array.from({ length: 7 }, (_, i) => daySummary(state, addDays(monday, i)).netMin));
@@ -112,8 +130,8 @@ export function todayView(state, now) {
     <section class="card">
       <h2>${cap(fmtMonth(monthKey(today)))}</h2>
       <div class="stats">
-        ${stat('Ore', fmtDuration(month.netMin))}
-        ${stat('Guadagno', fmtMoney(month.pay, cur))}
+        ${stat('Ore', fmtDuration(month.netMin), '', ic('clock', 'hours'))}
+        ${stat('Guadagno', fmtMoney(month.pay, cur), '', ic('euro', 'money'))}
       </div>
     </section>`;
 }
@@ -159,6 +177,12 @@ export function calendarView(state, ui, now) {
  * segna le 8 ore. Toccando una colonna si legge il giorno (al posto dell'hover).
  */
 /** Riga di lettura del grafico: giorno scelto, ore e guadagno. */
+/** Testo letto dagli screen reader per il giorno scelto nel grafico. */
+export function chartText(state, day) {
+  const d = daySummary(state, day);
+  return `${fmtDay(day, { short: true })}: ${fmtDuration(d.netMin)}, ${fmtMoney(d.pay, state.settings.currency)}`;
+}
+
 export function readoutHtml(state, day) {
   const d = daySummary(state, day);
   return `<span>${cap(fmtDay(day, { short: true }))}</span> ${sum(d.netMin, fmtMoney(d.pay, state.settings.currency))}`;
@@ -169,13 +193,13 @@ function monthChart(state, ym, sel) {
   const days = [];
   for (let day = from; day <= to; day = addDays(day, 1)) days.push(daySummary(state, day));
   const maxMin = Math.max(480, ...days.map((x) => x.netMin));
-  const cols = days.map((x) => `<button class="mcol ${x.day === sel ? 'sel' : ''}" data-action="chart-day" data-day="${x.day}"
-    aria-label="${fmtDay(x.day, { short: true })}: ${fmtDuration(x.netMin)}">
-    <i class="${x.netMin >= 1 ? '' : 'none'}" style="height:${x.netMin >= 1 ? Math.max(3, Math.round((x.netMin / maxMin) * 100)) : 0}%"></i></button>`).join('');
+  const cols = days.map((x) => `<div class="mcol ${x.day === sel ? 'sel' : ''}" data-day="${x.day}">
+    <i class="${x.netMin >= 1 ? '' : 'none'}" style="height:${x.netMin >= 1 ? Math.max(3, Math.round((x.netMin / maxMin) * 100)) : 0}%"></i></div>`).join('');
   const ticks = [1, 8, 15, 22, 29].filter((n) => n <= days.length)
     .map((n) => `<span style="grid-column:${n}">${n}</span>`).join('');
   return `<div class="mchart-wrap">
-      <div class="mchart" style="--n:${days.length}">
+      <div class="mchart" style="--n:${days.length}" role="slider" tabindex="0" aria-label="Ore di ogni giorno del mese"
+        aria-valuemin="1" aria-valuemax="${days.length}" aria-valuenow="${days.findIndex((x) => x.day === sel) + 1}" aria-valuetext="${chartText(state, sel)}">
         <span class="mgrid" style="bottom:${(480 / maxMin) * 100}%"><em>8 h</em></span>${cols}
       </div>
       <div class="mticks" style="--n:${days.length}" aria-hidden="true">${ticks}</div>
@@ -188,7 +212,7 @@ function ring(pct) {
   return `<div class="ringwrap" role="img" aria-label="${pct}% dell'obiettivo mensile">
     <svg viewBox="0 0 100 100" aria-hidden="true">
       <circle class="ring-track" cx="50" cy="50" r="42" pathLength="100"/>
-      <circle class="ring-fill" cx="50" cy="50" r="42" pathLength="100" stroke-dasharray="${Math.min(100, pct)} 100" transform="rotate(-90 50 50)"/>
+      <circle class="ring-fill sweep" cx="50" cy="50" r="42" pathLength="100" stroke-dasharray="${Math.min(100, pct)} 100" transform="rotate(-90 50 50)"/>
     </svg><b>${pct}%</b></div>`;
 }
 
@@ -224,7 +248,13 @@ export function summaryView(state, ui, now) {
     </button>`).join('') : empty('Nessun pagamento questo mese', 'Registra quanto hai ricevuto per calcolare il saldo.');
 
   return `${monthNav(ym)}
-    <section class="punch">
+    <section class="hero compact">
+      <svg class="hero-ring" viewBox="0 0 240 240" aria-hidden="true" fill="none">
+        <g transform="rotate(-90 120 120)">
+          <circle class="tick-m" cx="120" cy="120" r="108" stroke-width="7" pathLength="60" stroke-dasharray="0.14 0.86" stroke-dashoffset="0.07"/>
+          <circle class="tick-h" cx="120" cy="120" r="105.5" stroke-width="12" pathLength="12" stroke-dasharray="0.06 0.94" stroke-dashoffset="0.03"/>
+        </g>
+      </svg>
       <p class="status">Guadagno del mese</p>
       <p class="clock">${fmtMoney(m.pay, cur)}</p>
       <p class="earning">${fmtDuration(m.netMin)} lavorate</p>
@@ -233,8 +263,8 @@ export function summaryView(state, ui, now) {
       <h2>Ore al giorno</h2>
       ${monthChart(state, ym, sel)}
       <div class="pairs row-2">
-        ${pair('Giorni lavorati', m.daysWorked)}
-        ${pair('Media al giorno', m.daysWorked ? fmtDuration(m.netMin / m.daysWorked) : '–')}
+        ${pair('Giorni lavorati', m.daysWorked, '', ic('calendar-check', 'hours'))}
+        ${pair('Media al giorno', m.daysWorked ? fmtDuration(m.netMin / m.daysWorked) : '–', '', ic('gauge', 'hours'))}
       </div>
     </section>
     <section class="card">
@@ -243,10 +273,10 @@ export function summaryView(state, ui, now) {
     </section>
     <section class="card">
       <h2>Saldo paga</h2>
-      ${pair('Da incassare', fmtMoney(bal.due, cur), `big ${bal.due < 0 ? 'neg' : ''}`)}
+      ${pair('Da incassare', fmtMoney(bal.due, cur), `big ${bal.due < 0 ? 'neg' : ''}`, ic('wallet', 'money'))}
       <div class="pairs row-2">
-        ${pair('Maturato in totale', fmtMoney(bal.earned, cur))}
-        ${pair('Ricevuto in totale', fmtMoney(bal.paid, cur))}
+        ${pair('Maturato in totale', fmtMoney(bal.earned, cur), '', ic('trending-up', 'money'))}
+        ${pair('Ricevuto in totale', fmtMoney(bal.paid, cur), '', ic('banknote', 'money'))}
       </div>
       <h3>Pagamenti del mese <span>${fmtMoney(m.payments, cur)}</span></h3>
       ${paymentRows}
