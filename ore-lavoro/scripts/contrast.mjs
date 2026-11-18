@@ -26,10 +26,6 @@ for (const [name, t] of [['chiaro', light], ['scuro', dark]]) {
     check(`text su ${bg}`, c('text'), c(bg), 4.5);
     check(`muted su ${bg}`, c('muted'), c(bg), 4.5);
   }
-  // Il titolo sta sullo sfondo con l'alone indaco (caso peggiore: alone al 58%)
-  check('text sull\'alone indaco', c('text'), mix(c('glow-1'), c('bg'), 0.58), 4.5);
-  check('muted sull\'alone indaco', c('muted'), mix(c('glow-1'), c('bg'), 0.58), 4.5);
-  check('text sull\'alone verde acqua', c('text'), mix(c('glow-2'), c('bg'), 0.46), 4.5);
   check('toast (bg su text)', c('bg'), c('text'), 4.5);
   // Accento
   check('on-accent su accent', white, c('accent'), 4.5);

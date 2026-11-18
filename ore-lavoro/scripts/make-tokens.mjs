@@ -9,7 +9,7 @@ const hex2 = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const mix = (a, b, t) => `#${hex2(a).map((v, i) => Math.round(v * (1 - t) + hex2(b)[i] * t).toString(16).padStart(2, '0')).join('')}`;
 
 const light = {
-  bg: step('indigo', 3), surface: step('indigo', 1), 'surface-2': step('indigo', 3),
+  bg: '#f3f4f8', surface: step('indigo', 1), 'surface-2': step('indigo', 3), // sfondo: grigio chiarissimo uniforme, come nei primi test
   line: step('indigo', 4), outline: step('slate', 10),
   text: step('indigo', 12), muted: mix(step('slate', 11), step('slate', 12), 0.2),
   accent: step('indigo', 9), 'on-accent': '#ffffff', 'accent-soft': step('indigo', 4), 'accent-ink': step('indigo', 11),
@@ -18,7 +18,6 @@ const light = {
   'on-hero': '#ffffff',
   money: mix(step('teal', 11), step('teal', 12), 0.3), 'money-soft': step('teal', 3), 'money-ink': step('teal', 12),
   danger: mix(step('tomato', 11), step('tomato', 12), 0.2), 'danger-soft': step('tomato', 3), 'danger-solid': step('tomato', 11), 'on-danger': '#ffffff',
-  'glow-1': step('indigo', 7), 'glow-2': step('teal', 7),
   knob: '#ffffff',
 };
 const dark = {
@@ -31,7 +30,6 @@ const dark = {
   'on-hero': '#ffffff',
   money: step('tealDark', 11), 'money-soft': step('tealDark', 4), 'money-ink': step('tealDark', 12),
   danger: step('tomatoDark', 11), 'danger-soft': step('tomatoDark', 3), 'danger-solid': step('tomato', 11), 'on-danger': '#ffffff',
-  'glow-1': step('indigoDark', 9), 'glow-2': step('tealDark', 9),
   knob: '#ffffff',
 };
 const block = (t, pad) => Object.entries(t).map(([k, v]) => `${pad}--${k}: ${v};`).join('\n');

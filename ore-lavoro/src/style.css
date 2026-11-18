@@ -13,8 +13,8 @@
 }
 
 /*
- * Idea: il quadrante di un orologio. Indaco = ore, verde acqua = paga (le due cose che l'app misura);
- * lo sfondo si tinge di indaco in alto e di verde acqua in basso. I colori vengono da Radix Colors
+ * Idea: il quadrante di un orologio. Indaco = ore, verde acqua = paga (le due cose che l'app misura).
+ * Sfondo chiaro e uniforme. I colori vengono da Radix Colors
  * (src/tokens.css, generato) e i contrasti si verificano con `npm run contrast`.
  */
 :root {
@@ -26,13 +26,12 @@
   --hero: linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 62%, var(--hero-c) 100%);
   --on-hero-muted: rgb(255 255 255 / .92);
   --tick: rgb(255 255 255 / .45); --tick-strong: rgb(255 255 255 / .85);
-  --grain: .05; --grain-inv: 0;
   --shadow-color: 228 60% 30%;            /* ombre di Open Props, tinte di indaco */
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --shadow-color: 230 70% 3%; --shadow-strength: 14%; --grain: .07; --grain-inv: 1; }
+  :root:not([data-theme="light"]) { --shadow-color: 230 70% 3%; --shadow-strength: 14%; }
 }
-:root[data-theme="dark"] { --shadow-color: 230 70% 3%; --shadow-strength: 14%; --grain: .07; --grain-inv: 1; }
+:root[data-theme="dark"] { --shadow-color: 230 70% 3%; --shadow-strength: 14%; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { height: 100%; background: var(--bg); -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
@@ -50,15 +49,6 @@ h1, h2, h3, p { margin: 0; }
 h1, h2, h3 { font-family: var(--font-display); }
 small { color: var(--muted); font-size: var(--fs-sm); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* Atmosfera: due aloni (indaco in alto = ore, verde acqua in basso = paga) e una grana leggera contro le bande */
-#atmosphere { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
-  background: var(--bg); /* riserva per WebView senza color-mix() */
-  background:
-    radial-gradient(75% 46% at 6% -4%, color-mix(in srgb, var(--glow-1) 58%, transparent), transparent 72%),
-    radial-gradient(62% 40% at 104% 104%, color-mix(in srgb, var(--glow-2) 46%, transparent), transparent 72%); }
-#atmosphere::after { content: ''; position: absolute; inset: 0; opacity: var(--grain); filter: invert(var(--grain-inv));
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
 #view {
   max-width: 560px; margin: 0 auto;

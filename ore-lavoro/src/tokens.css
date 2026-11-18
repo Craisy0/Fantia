@@ -1,6 +1,6 @@
 /* GENERATO da scripts/make-tokens.mjs (Radix Colors, MIT). Non modificare a mano. */
 :root {
-  --bg: #edf2fe;
+  --bg: #f3f4f8;
   --surface: #fdfdfe;
   --surface-2: #edf2fe;
   --line: #e1e9ff;
@@ -25,8 +25,6 @@
   --danger-soft: #feebe7;
   --danger-solid: #d13415;
   --on-danger: #ffffff;
-  --glow-1: #abbdf9;
-  --glow-2: #83cdc1;
   --knob: #ffffff;
   color-scheme: light;
 }
@@ -57,8 +55,6 @@
     --danger-soft: #391714;
     --danger-solid: #d13415;
     --on-danger: #ffffff;
-    --glow-1: #3e63dd;
-    --glow-2: #12a594;
     --knob: #ffffff;
     color-scheme: dark;
   }
@@ -89,8 +85,6 @@
   --danger-soft: #391714;
   --danger-solid: #d13415;
   --on-danger: #ffffff;
-  --glow-1: #3e63dd;
-  --glow-2: #12a594;
   --knob: #ffffff;
   color-scheme: dark;
 }

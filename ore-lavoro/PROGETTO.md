@@ -72,9 +72,8 @@ Ogni punto si chiude con una revisione (test o prova a schermo) prima di passare
 
 ## 4b. Linee grafiche
 
-**Idea: il quadrante di un orologio.** Indaco = ore, verde acqua = paga (le due cose che l'app misura). Lo
-sfondo si tinge di indaco in alto e di verde acqua in basso; il totale di oggi sta dentro un quadrante, e lo
-stesso segno ritorna nell'anello dell'obiettivo e nell'icona.
+**Idea: il quadrante di un orologio.** Indaco = ore, verde acqua = paga (le due cose che l'app misura). Il
+totale di oggi sta dentro un quadrante, e lo stesso segno ritorna nell'anello dell'obiettivo e nell'icona.
 
 **Strumenti usati** (scelti dopo una ricerca su GitHub; gli strumenti di terzi sono stati letti e controllati
 prima dell'uso):
@@ -86,7 +85,8 @@ prima dell'uso):
   e **Inter** per il testo, **axe-core** + **Playwright** per la prova nel browser (`npm run e2e`).
 
 **Scelte**
-- **Sfondo**: due aloni di colore e una grana leggera contro le bande. Niente sfumature sulle schede.
+- **Sfondo**: grigio chiarissimo uniforme (`#f3f4f8`) con schede bianche, come nei primi test. Provati aloni
+  colorati e grana, poi tolti su richiesta. Niente sfumature sulle schede.
 - **Scheda principale**: l'unico punto audace di ogni schermata. In Oggi è un quadrante con tacche dei minuti e
   delle ore e un anello che si riempie fino a 8 ore (l'arco si anima solo quando si cambia scheda).
 - **Superfici a toni** con ombre tinte di indaco; barra in basso fluttuante con la scheda attiva piena.
